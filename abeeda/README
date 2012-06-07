@@ -1,0 +1,89 @@
+###################################
+# aBeeDa Swarm Evolution Platform #
+#                                 #
+# Authors: Dr. Arend Hintze       #
+#          Randy Olson            #
+#                                 #
+# Michigan State University       #
+###################################
+
+###############
+#  compiling  #
+###############
+
+Enter the command ./build_abeeda
+
+If the console gives an error about permissions, enter:
+
+chmod 755 build_abeeda
+
+then enter the above build command again.
+
+###########
+#  usage  #
+###########
+
+To evolve the swarm, enter the following command:
+
+./abeeda EVOLVE <LOD output file> <genome output file> <make video> <swarm> <predator> <RNG seed>
+
+EXAMPLE: ./abeeda EVOLVE ~/data/abeeda/swarm-predator/run50LOD.txt ~/data/abeeda/swarm-predator/run50genome.txt 0 1 1 50
+
+
+Parameters:
+
+LOD output file: the file to save the LOD data to at the end of the run. beware that if the provided file already exists, it will be overwritten.
+
+genome output file: the file to save the final genome to at the end of the run. beware that if the provided file already exists, it will be overwritten.
+
+make video: 0 (false) or 1 (true) indicating whether or not a video should be made (on the HPCC, enter 0).
+IMPORTANT: if you are going to make a video, run the abeeda monitor first or you will get an error!
+
+swarm: 0 (false) or 1 (true) indicating whether the swarm metric should be incorporated in the swarm fitness.
+
+predator: 0 (false) or 1 (true) indicating whether the predator metric should be incorporated in the swarm fitness.
+
+RNG seed: an integer value to seed the random number generator with. ensure this number is unique to have different results for each run.
+
+
+To display a pre-evolved swarm, enter the following command:
+
+./abeeda DISPLAY <genome file> <swarm> <predator>
+
+EXAMPLE: ./abeeda DISPLAY ~/data/abeeda/swarm-predator/run50genome.txt 1 1
+
+IMPORTANT: this mode is only supported on Mac OSX Lion!
+
+
+Parameters:
+
+genome file: the file that contains the pre-evolved swarm genome.
+
+swarm: 0 (false) or 1 (true) indicating whether the swarm metric should be incorporated in the swarm fitness.
+
+predator: 0 (false) or 1 (true) indicating whether the predator metric should be incorporated in the swarm fitness.
+
+
+############
+#  output  #
+############
+
+genome output: this file will contain all of the values describing the final swarm's Markov Model brain
+
+
+LOD output: this file will contain all of the data on the best LOD at the end of the run.
+
+format: sorted from oldest to newest ancestor.
+
+one line for each update in the swarm simulation
+
+(this is easier to read with no wrap-around)
+
+<update 0>    <fitness at update 0>    <number prey alive at update 0>    <total swarm size> <x position of prey 1 at update 0>    <y position of prey 1 at update 0>    ... <x position of prey m at update 0>    <y position of prey m at update 0>    <x position of predator update 0>    <y position of predator at update 0>
+...
+<update n>    <fitness at update n>    <number prey alive at update n>    <total swarm size> <x position of prey 1 at update n>    <y position of prey 1 at update n>    ... <x position of prey m at update n>    <y position of prey m at update n>    <x position of predator update n>    <y position of predator at update n>
+<update n+1>  <fitness at update n+1>  <number prey alive at update n+1>  <total swarm size> <x position of prey 1 at update n+1>  <y position of prey 1 at update n+1>  ... <x position of prey m at update n+1>  <y position of prey m at update n+1>  <x position of predator update n+1>  <y position of predator at update n+1>
+...
+<update 1999> <fitness at update 1999> <number prey alive at update 1999> <total swarm size> <x position of prey 1 at update 1999> <y position of prey 1 at update 1999> ... <x position of prey m at update 1999> <y position of prey m at update 1999> <x position of predator update 1999> <y position of predator at update 1999>
+
+each LOD entry in the file is separated by an extra newline
