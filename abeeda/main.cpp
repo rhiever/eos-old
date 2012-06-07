@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
    //masterAgent->loadAgent("startOrganism.txt");
 
     masterAgent->saveGenome(genomeFile);
-    masterAgent->saveToDot((char*)"test.dot");
+    //masterAgent->saveToDot((char*)"test.dot");
 	for(i=0;i<agent.size();i++)
     {
 		agent[i]=new tAgent;

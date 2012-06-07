@@ -50,7 +50,6 @@ public:
     ~tGame();
     int selectClosestPrey(float x[], float y[], float a[], bool dead[], float mX, float mY, float mA);
     double calcDistance(float fromX, float fromY, float toX, float toY);
-    double calcDistanceUnbounded(float fromX, float fromY, float toX, float toY);
     double applyBoundary(float positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);

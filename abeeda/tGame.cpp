@@ -67,17 +67,17 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
     agent->setupMegaPhenotype(hiveSize);
     agent->fitness = 0.0;
     
-    for(k=0;k<hiveSize;k++)
+    for(k = 0; k < hiveSize; k++)
     {
-        x[k] = (float)((float)rand()/(float)RAND_MAX*gridX);
-        y[k] = (float)((float)rand()/(float)RAND_MAX*gridY);
-        a[k] = (float)((float)rand()/(float)RAND_MAX*360.0);
+        x[k] = (float)((float)rand() / (float)RAND_MAX * gridX);
+        y[k] = (float)((float)rand() / (float)RAND_MAX * gridY);
+        a[k] = (float)((float)rand() / (float)RAND_MAX * 360.0);
         dead[k] = false;
     }
     
     int targetPrey = rand() % hiveSize;
     
-    for(k=0;k<totalStepsInMaze;k++)
+    for(k = 0; k < totalStepsInMaze; k++)
     {
         if(predator_fitness)
         {
@@ -139,19 +139,24 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
             mY += sin(mA * (cPI / 180.0)) * speed;
 
             // keep position within boundary
-            //mX = applyBoundary(mX);
-            //mY = applyBoundary(mY);
+            mX = applyBoundary(mX);
+            mY = applyBoundary(mY);
 
             //change the 191 to a higher number to make the predator less effective
             //or reduce the 5.0
             if(predator_fitness && (d < killDist) && ((rand()&255)>killChance))
             {
-                j=hiveSize;
-                for(i=0;i<hiveSize;i++)
-                    if(dead[i]) j--;
-                if(j>2)
+                j = hiveSize;
+                for(i = 0; i < hiveSize; i++)
                 {
-		  //dead[targetPrey]=true;
+                    if(dead[i])
+                    {
+                        j--;
+                    }
+                }
+                if(j > 2)
+                {
+                    dead[targetPrey]=true;
                     
                     do
                     {
@@ -159,8 +164,8 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
                     } while (dead[targetPrey]);
                 }
                 
-                //increase the delay to make the predator fly away for longer after it successfully killed a target
-                delay=40.0;
+                // increase the delay to make the predator fly away for longer after it successfully killed a target
+                delay = 40.0;
             }
         }
         
@@ -359,34 +364,38 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
             swarmDensityCount20.push_back(avgWithin20);
             swarmDensityCount30.push_back(avgWithin30);
             swarmDensityCount40.push_back(avgWithin40);
+            
             //log predator and prey angles
             for(i = 0; i < hiveSize; i++)
-                if(!dead[i]){
+            {
+                if(!dead[i])
+                {
                     predatorAngle.push_back((int)(mA/36.0));
                     preyAngle.push_back((int)(a[i]/36.0));
                 }
+            }
 
             // log distances to swarm centroid
             double cX = 0, cY = 0;
             for(i = 0; i < hiveSize; i++)
-	      {
+            {
                 if (!dead[i])
-		  {
+                {
                     cX += x[i];
                     cY += y[i];
-		  }
-	      }
+                }
+            }
             
             cX /= aliveCount;
             cY /= aliveCount;
             
             for(i = 0; i < hiveSize; i++)
-	      {
+            {
                 if (!dead[i])
-		  {
+                {
                     distsToCentroid[i].push_back(calcDistance(x[i], y[i], cX, cY));
-		  }
-	      }
+                }
+            }
             
             /*unsigned int aliveCount = 0;
             for(i = 0; i < hiveSize; i++)
@@ -413,22 +422,26 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
             fprintf(data_file, "\n");*/
         }
         
-        for(i=0;i<hiveSize;i++)
+        for(i = 0; i < hiveSize; i++)
         {
             if (!dead[i])
             {
                 //clear the sensors of agent i
-                for(j=0;j<sensors*2;j++)
-                    agent->states[j+(i*maxNodes)]=0;  
-                //itterate for agent i over all agents j
-                for(j=0;j<hiveSize;j++)
+                for(j = 0; j < sensors * 2; j++)
+                {
+                    agent->states[j+(i*maxNodes)]=0;
+                }
+                
+                //iterate for agent i over all agents j
+                for(j = 0; j < hiveSize; j++)
+                {
                     //ignore i==j because an agent can't see itself
-                    if(i!=j)
+                    if(i != j)
                     {
                         double d = calcDistance(x[i], y[i], x[j], y[j]);
 			
                         //don't bother is an agent is too far, so we compute the distance and call it d
-                        if(d<visionRange)
+                        if(d < visionRange)
                         {
                             double Ux,Uy,Vx,Vy;
                             double angle;
@@ -442,10 +455,13 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
                             //anyway the following line computes the angle between my own and the object I am looking at
                             angle = atan2(((Ux*Vy)-(Uy*Vx)), ((Ux*Vx)+(Uy*Vy)))*180.0/cPI;
                             //here we have to map the angle into the sensor, btw: angle in degree
-                            if(fabs(angle)<90) // you have a 180 degree vision field infront of you
+                            if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
+                            {
                                 agent->states[(int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes)]=1;
+                            }
                         }
                     }
+                }
                 
                 double d = calcDistance(x[i], y[i], mX, mY);
                 //fitness function that rewards closeness and punishes too closeness
@@ -479,7 +495,9 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // you have a 180 degree vision field infront of you
                     if(fabs(angle)<90)
+                    {
                         agent->states[sensors+((int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes))]=1;
+                    }
                 }
             }
         }
@@ -516,10 +534,8 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
                 y[i] += sin(a[i]*(cPI/180.0));
 
                 // keep position within boundary
-                //x[i] = applyBoundary(x[i]);
-                //y[i] = applyBoundary(y[i]);
-                //if (fabs(x[i]) > maxDistFromCenter || fabs(y[i] > maxDistFromCenter))
-                  //  dead[i] = true;
+                x[i] = applyBoundary(x[i]);
+                y[i] = applyBoundary(y[i]);
             }
         }
 
@@ -729,76 +745,36 @@ int tGame::selectClosestPrey(float x[], float y[], float a[], bool dead[], float
         return -1;
 }
 
+// calculates the distance between two points
 double tGame::calcDistance(float fromX, float fromY, float toX, float toY)
 {
-  double dist = calcDistanceUnbounded(fromX, fromY, toX, toY);
-  double transDist = 0.0;
-
-  // calculate transposed distances
-  double dist1 = calcDistanceUnbounded(fromX, fromY, toX + maxDistFromCenter, toY);
-  double dist2 = calcDistanceUnbounded(fromX, fromY, toX - maxDistFromCenter, toY);
-  double dist3 = calcDistanceUnbounded(fromX, fromY, toX, toY + maxDistFromCenter);
-  double dist4 = calcDistanceUnbounded(fromX, fromY, toX, toY - maxDistFromCenter);
-
-  // determine the closest transposed distance
-  if (dist1 < dist2)
-    {
-      if (dist3 < dist4)
-        {
-          transDist = calcDistanceUnbounded(fromX, fromY, toX + maxDistFromCenter, toY + maxDistFromCenter);
-        }
-      else
-        {
-          transDist = calcDistanceUnbounded(fromX, fromY, toX + maxDistFromCenter, toY - maxDistFromCenter);
-        }
-    }
-  else
-    {
-      if (dist3 < dist4)
-        {
-          transDist = calcDistanceUnbounded(fromX, fromY, toX - maxDistFromCenter, toY + maxDistFromCenter);
-        }
-      else
-        {
-          transDist = calcDistanceUnbounded(fromX, fromY, toX - maxDistFromCenter, toY - maxDistFromCenter);
-        }
-    }
-
-  // return the closest distance --> the true distance
-  return min(dist, transDist);
+    float diffX = fromX - toX;
+    float diffY = fromY - toY;
+    
+    return sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 }
 
-double tGame::calcDistanceUnbounded(float fromX, float fromY, float toX, float toY)
-{
-  float diffX = fromX - toX;
-  float diffY = fromY - toY;
-
-  return sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
-}
-
+// maintains a position within the specified boundary
 double tGame::applyBoundary(float positionVal)
 {
-  float val = positionVal;
+    float val = positionVal;
 
-  if (fabs(val) > maxDistFromCenter)
+    if (fabs(val) > maxDistFromCenter)
     {
-      val *= -1;
-
-      float over = ( fabs(val) - maxDistFromCenter ) * 2;
-
-      if (val < 0)
+        if (val < 0)
         {
-          val += over;
+            val = -1.0 * maxDistFromCenter;
         }
-      else
+        else
         {
-          val -= over;
+            val = maxDistFromCenter;
         }
     }
-
-  return val;
+    
+    return val;
 }
 
+// sums a vector of values
 double tGame::sum(vector<double> values)
 {
     double sum = 0.0;
@@ -811,11 +787,13 @@ double tGame::sum(vector<double> values)
     return sum;
 }
 
+// averages a vector of values
 double tGame::average(vector<double> values)
 {
     return sum(values) / (double)values.size();
 }
 
+// computes the variance of a vector of values
 double tGame::variance(vector<double> values)
 {
     double sumSqDist = 0.0;
@@ -829,7 +807,8 @@ double tGame::variance(vector<double> values)
     return sumSqDist /= (double)values.size();
 }
 
-double tGame::mutualInformation(vector<int> A,vector<int>B){
+double tGame::mutualInformation(vector<int> A,vector<int>B)
+{
 	set<int> nrA,nrB;
 	set<int>::iterator aI,bI;
 	map<int,map<int,double> > pXY;
