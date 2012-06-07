@@ -13,12 +13,5 @@
 #define maxNodes 32
 #define definedCue 0
 #define hiveSize 20
-#define totalStepsInMaze 2000
-#define selectNewPreyChance 1
-#define gridX 100.0
-#define gridY 100.0
-#define killDist 5.0
-#define killChance 64
-#define maxDistFromCenter 256
 
 #endif
