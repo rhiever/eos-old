@@ -339,7 +339,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
             {
                 angle=tA;
             }
-            if(angle<tA)
+            else if(angle<tA)
             {
                 angle=-tA;
             }
