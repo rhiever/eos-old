@@ -47,8 +47,6 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
     vector<double> swarmDensityCount40;
     vector<int> predatorAngle,preyAngle;
     vector<double> distsToCentroid[hiveSize];
-    bool swarm_fitness = true;
-    bool predator_fitness = true;
     
     // swarm agent x, y, angles
     double x[hiveSize], y[hiveSize], a[hiveSize];
@@ -82,14 +80,11 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
     {
         // create the report string for the video
         if(report)
-        {            
-            if (predator_fitness)
-            {
-                // report X, Y, angle of predator
-                char text[1000];
-                sprintf(text,"%f,%f,%f,%d,%d,%d=", mX, mY, mA, 255, 0, 0);
-                reportString.append(text);
-            }
+        {
+            // report X, Y, angle of predator
+            char text[1000];
+            sprintf(text,"%f,%f,%f,%d,%d,%d=", mX, mY, mA, 255, 0, 0);
+            reportString.append(text);
             
             // compute center of swarm
             double cX = 0, cY = 0;
@@ -101,13 +96,13 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
             reportString.append(text2);
             
             // report X, Y, angle of all prey
-            for(i=0;i<hiveSize;i++)
+            for(i = 0; i <hiveSize; i++)
             {
                 if (!dead[i])
                 {
                     char text[1000];
                     
-                    if(i == targetPrey && predator_fitness)
+                    if(i == targetPrey)
                     {
                         sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 128, 128, 255);
                     }
@@ -300,88 +295,86 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
         } // end of data gathering
         
         // update predator
-        if(predator_fitness)
+
+        // Predator randomly sometimes chooses new prey
+        if(( (double)( (double)rand() / (double)RAND_MAX ) < selectNewPreyChance ) || (dead[targetPrey]) )
         {
-            // Predator randomly sometimes chooses new prey
-            if(( (double)( (double)rand() / (double)RAND_MAX ) < selectNewPreyChance ) || (dead[targetPrey]) )
+            int newPrey = selectClosestPrey(x, y, a, dead, mX, mY, mA);
+            
+            if (newPrey != -1)
             {
-                int newPrey = selectClosestPrey(x, y, a, dead, mX, mY, mA);
-                
-                if (newPrey != -1)
+                if (targetPrey != newPrey && (double)rand() / (double)RAND_MAX < 0.15)
                 {
-                    if (targetPrey != newPrey && (double)rand() / (double)RAND_MAX < 0.15)
-                    {
-                        delay = 60.0;
-                    }
-                    
-                    targetPrey = newPrey;
-                }
-            }
-            
-            // Update predator movement angle
-            double d = calcDistance(mX, mY, x[targetPrey], y[targetPrey]);
-            double angle = calcAngle(mX, mY, mA, x[targetPrey], y[targetPrey]);
-            
-            //here we have to map the angle into the sensor, btw: angle in degree
-            double speed = 2.5;
-            double tA = 4.0;
-            
-            if (d > 80.0)
-            {
-                tA = 16.0;
-            }
-            else if (d > 10.0)
-            {
-                tA = 8.0;
-            }
-            
-            if(angle>tA)
-            {
-                angle=tA;
-            }
-            else if(angle<tA)
-            {
-                angle=-tA;
-            }
-            if(delay<0.0)
-            {
-                mA-=angle;
-            }
-            
-            delay-=1.0;
-            
-            // Update predator position
-            mX += cos(mA * (cPI / 180.0)) * speed;
-            mY += sin(mA * (cPI / 180.0)) * speed;
-            
-            // keep position within simulation boundary
-            mX = applyBoundary(mX);
-            mY = applyBoundary(mY);
-            
-            if(predator_fitness && (d < killDist) && ((rand() & 255) > killChance))
-            {
-                j = hiveSize;
-                for(i = 0; i < hiveSize; i++)
-                {
-                    if(dead[i])
-                    {
-                        j--;
-                    }
-                }
-                if(j > 2)
-                {
-                    dead[targetPrey] = true;
-                    
-                    do
-                    {
-                        targetPrey = rand() % hiveSize;
-                    } while (dead[targetPrey]);
+                    delay = 60.0;
                 }
                 
-                // increase the delay to make the predator fly away for longer after it successfully killed a target
-                delay = 40.0;
+                targetPrey = newPrey;
             }
-        } // end of predator update
+        }
+        
+        // Update predator movement angle
+        double d = calcDistance(mX, mY, x[targetPrey], y[targetPrey]);
+        double angle = calcAngle(mX, mY, mA, x[targetPrey], y[targetPrey]);
+        
+        //here we have to map the angle into the sensor, btw: angle in degree
+        double speed = 2.5;
+        double tA = 4.0;
+        
+        if (d > 80.0)
+        {
+            tA = 16.0;
+        }
+        else if (d > 10.0)
+        {
+            tA = 8.0;
+        }
+        
+        if(angle>tA)
+        {
+            angle=tA;
+        }
+        else if(angle<tA)
+        {
+            angle=-tA;
+        }
+        if(delay<0.0)
+        {
+            mA-=angle;
+        }
+        
+        delay-=1.0;
+        
+        // Update predator position
+        mX += cos(mA * (cPI / 180.0)) * speed;
+        mY += sin(mA * (cPI / 180.0)) * speed;
+        
+        // keep position within simulation boundary
+        mX = applyBoundary(mX);
+        mY = applyBoundary(mY);
+        
+        if((d < killDist) && ((rand() & 255) > killChance))
+        {
+            j = hiveSize;
+            for(i = 0; i < hiveSize; i++)
+            {
+                if(dead[i])
+                {
+                    j--;
+                }
+            }
+            if(j > 2)
+            {
+                dead[targetPrey] = true;
+                
+                do
+                {
+                    targetPrey = rand() % hiveSize;
+                } while (dead[targetPrey]);
+            }
+            
+            // increase the delay to make the predator fly away for longer after it successfully killed a target
+            delay = 40.0;
+        }
         
         // update the swarm
         for(i = 0; i < hiveSize; i++)
@@ -519,11 +512,8 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                     sD += 1.0;
                 }
                 
-                if(predator_fitness)
-                {
-                    // sum prey's distance from predator
-                    pD += calcDistance(x[i], y[i], mX, mY);
-                }
+                // sum prey's distance from predator
+                pD += calcDistance(x[i], y[i], mX, mY);
             }
         }
         
@@ -535,18 +525,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
     } // end of simulation loop
     
     // compute overall fitness
-    if (swarm_fitness && predator_fitness)
-    {
-        agent->fitness = ( pow(fitnessFromSwarming, 1.0 - p) ) * ( pow(fitnessFromPredation, p) );
-    }
-    else if (predator_fitness)
-    {
-        agent->fitness = fitnessFromPredation;
-    }
-    else if (swarm_fitness)
-    {
-        agent->fitness = fitnessFromSwarming;
-    }
+    agent->fitness = ( pow(fitnessFromSwarming, 1.0 - p) ) * ( pow(fitnessFromPredation, p) );
     
     if(agent->fitness < 0.0)
     {
