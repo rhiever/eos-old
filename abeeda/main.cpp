@@ -108,24 +108,11 @@ int main(int argc, char *argv[])
         return 0;
     }
     
-    /*
-    i=0;
-    do{
-        delete masterAgent;
-        masterAgent=new tAgent;
-        masterAgent->setupRandomAgent(5000);
-//    masterAgent->loadAgent("startGenome.gen");
-        masterAgent->setupMegaPhenotype(hiveSize);
-        game->executeGame(masterAgent, NULL, false,0);
-        i++;
-        cout<<i<<" "<<(int)masterAgent->fitness<<endl;
-    } while(masterAgent->fitness<2);
-     */
-   masterAgent=new tAgent;
-   masterAgent->setupRandomAgent(5000);
+    masterAgent=new tAgent;
+    masterAgent->setupRandomAgent(5000);
     
-   // seeds simulation with a specific start organism
-   //masterAgent->loadAgent("startOrganism.txt");
+    // seeds simulation with a specific start organism
+    //masterAgent->loadAgent("startOrganism.txt");
 
     masterAgent->saveGenome(genomeFile);
     //masterAgent->saveToDot((char*)"test.dot");
@@ -145,8 +132,10 @@ int main(int argc, char *argv[])
 			agent[i]->fitnesses.clear();
 		}
 		maxFitness=0.0;
-		for(i=0;i<agent.size();i++){
-			for(j=0;j<repeats;j++){
+		for(i=0;i<agent.size();i++)
+        {
+			for(j=0;j<repeats;j++)
+            {
                 reportString = game->executeGame(agent[i], NULL, make_video, p);
  				agent[i]->fitnesses.push_back(agent[i]->fitness);
                 if(agent[i]->fitness>maxFitness)
@@ -158,17 +147,22 @@ int main(int argc, char *argv[])
 		}
 		
 		maxFitness=0.0;
-		for(i=0;i<agent.size();i++){
+		for(i=0;i<agent.size();i++)
+        {
 			agent[i]->fitness=agent[i]->fitnesses[0];
 			if(agent[i]->fitness>maxFitness)
+            {
 				maxFitness=agent[i]->fitness;
+            }
 		}
 		cout<<update<<" "<<(double)maxFitness<<endl;
         
         if(make_video)
         {
             if (update == 100)
+            {
                 doBroadcast(bestString);
+            }
             
             //if((update&15)==0)
             if(maxFitness > thresholdMaxFitness)
@@ -199,7 +193,9 @@ int main(int argc, char *argv[])
 			agent[i]->retire();
 			agent[i]->nrPointingAtMe--;
 			if(agent[i]->nrPointingAtMe==0)
+            {
 				delete agent[i];
+            }
 			agent[i]=nextGen[i];
 		}
 		agent=nextGen;

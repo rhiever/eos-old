@@ -126,11 +126,17 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
             }
             
             if(angle>tA)
+            {
                 angle=tA;
+            }
             if(angle<tA)
+            {
                 angle=-tA;
+            }
             if(delay<0.0)
+            {
                 mA-=angle;
+            }
 
             delay-=1.0;
 
@@ -654,32 +660,32 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, float p)
 	vector<double> varsDistToCentroid;
     
 	for (i = 0; i < hiveSize; i++)
-	  {
-	    varsDistToCentroid.push_back(variance(distsToCentroid[i]));
-	  }
+    {
+        varsDistToCentroid.push_back(variance(distsToCentroid[i]));
+    }
     
 	avgVarianceDistToCentroid = average(varsDistToCentroid);
         
-        fprintf(data_file, "%d %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
-                agent->born,                    // update born
-                fitnessFromSwarming,            // W_s
-                fitnessFromPredation,           // W_p
-                agent->fitness,                 // W
-                aliveCount,                     // # alive at end
-                luX, luY,                       // (x1, y1) of bounding box at end
-                rbX, rbY,                       // (x2, y2) of bounding box at end
-                average(bbSizes),               // average bounding box size
-                variance(bbSizes),              // variance in bounding box size
-                average(shortestDists),         // average of avg. shortest distance to other swarm agent
-                sum(sumSqrtDists),              // sum of sqrt of dist from every agent to every other agent over all updates
-                average(swarmDensityCount20),   // average # of agents within 20 units of each other
-                average(swarmDensityCount30),   // average # of agents within 30 units of each other
-                average(swarmDensityCount40),  // average # of agents within 40 units of each other
-                neuronsConnectedToPreyRetina(agent), // #neurons connected to prey part of retina
-                neuronsConnectedToPredatorRetina(agent), // #neurons connected to predator part of retina
-                mutualInformation(predatorAngle, preyAngle), // mutual Information between prey flight angle and predator flight angle
-		avgVarianceDistToCentroid       // avg variance in each swarm agent's distance to the swarm centroid
-                );
+    fprintf(data_file, "%d %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
+            agent->born,                    // update born
+            fitnessFromSwarming,            // W_s
+            fitnessFromPredation,           // W_p
+            agent->fitness,                 // W
+            aliveCount,                     // # alive at end
+            luX, luY,                       // (x1, y1) of bounding box at end
+            rbX, rbY,                       // (x2, y2) of bounding box at end
+            average(bbSizes),               // average bounding box size
+            variance(bbSizes),              // variance in bounding box size
+            average(shortestDists),         // average of avg. shortest distance to other swarm agent
+            sum(sumSqrtDists),              // sum of sqrt of dist from every agent to every other agent over all updates
+            average(swarmDensityCount20),   // average # of agents within 20 units of each other
+            average(swarmDensityCount30),   // average # of agents within 30 units of each other
+            average(swarmDensityCount40),  // average # of agents within 40 units of each other
+            neuronsConnectedToPreyRetina(agent), // #neurons connected to prey part of retina
+            neuronsConnectedToPredatorRetina(agent), // #neurons connected to predator part of retina
+            mutualInformation(predatorAngle, preyAngle), // mutual Information between prey flight angle and predator flight angle
+            avgVarianceDistToCentroid       // avg variance in each swarm agent's distance to the swarm centroid
+            );
     }
     
     return reportString;
