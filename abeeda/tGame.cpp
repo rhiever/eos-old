@@ -444,33 +444,50 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
             {
                 //                          node 31                                             node 32
                 action = ((agent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (agent->states[(maxNodes-2) + (i*maxNodes)]&1);
+                
                 switch(action)
                 {
+                    // do nothing
+                    case 0:
+                        break;
+                        
                     // turn 8 degrees right
                     case 1:
-                        a[i]+=8.0;
-                        while(a[i]>360.0) a[i]-=360.0;
+                        a[i] += 8.0;
+                        
+                        while(a[i] > 360.0)
+                        {
+                            a[i] -= 360.0;
+                        }
+                        
+                        x[i] += cos(a[i] * (cPI / 180.0));
+                        y[i] += sin(a[i] * (cPI / 180.0));
+                        
                         break;
                         
                     // turn 8 degrees left
                     case 2:
-                        a[i]-=8.0;
-                        while(a[i]<0.0) a[i]+=360.0;
+                        a[i] -= 8.0;
+                        while(a[i] < 0.0)
+                        {
+                            a[i] += 360.0;
+                        }
+                        
+                        x[i] += cos(a[i] * (cPI / 180.0));
+                        y[i] += sin(a[i] * (cPI / 180.0));
+                        
                         break;
                         
-                    // go 2x faster
+                    // move straight ahead
                     case 3:
-                        x[i]+=cos(a[i]*(cPI/180.0));
-                        y[i]+=sin(a[i]*(cPI/180.0));
+                        x[i] += cos(a[i] * (cPI / 180.0));
+                        y[i] += sin(a[i] * (cPI / 180.0));
+                        
                         break;
                         
                     default:
                         break;
                 }
-
-                // update prey position
-                x[i] += cos(a[i]*(cPI/180.0));
-                y[i] += sin(a[i]*(cPI/180.0));
 
                 // keep position within boundary
                 x[i] = applyBoundary(x[i]);
