@@ -19,7 +19,7 @@
 #define preyVisionRange 100.0
 #define predatorVisionRange 200.0
 #define preySensors 12
-#define predatorSensors 4
+#define predatorSensors 12
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
@@ -39,8 +39,8 @@ tGame::~tGame()
 string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)
 {
     // LOD data variables
-    unsigned int swarmFitness = 0;
-    unsigned int predatorFitness = 0;
+    double swarmFitness = 0;
+    double predatorFitness = 0;
     
     vector<double> bbSizes;
     vector<double> shortestDists;
@@ -48,7 +48,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     vector<double> swarmDensityCount20;
     vector<double> swarmDensityCount30;
     vector<double> swarmDensityCount40;
-    vector<int> predatorAngle,preyAngle;
+    vector<int> predatorAngle, preyAngle;
     vector<double> distsToCentroid[hiveSize];
     
     // swarm agent x, y, angles
@@ -461,7 +461,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             if (!dead[i])
             {
-                //                                  node 31                                                     node 30
+                //                                  node 31                                                         node 30
                 int action = ((swarmAgent->states[(maxNodes - 1) + (i * maxNodes)] & 1) << 1) + (swarmAgent->states[(maxNodes - 2) + (i * maxNodes)] & 1);
                 
                 switch(action)
@@ -482,6 +482,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         x[i] += cos(a[i] * (cPI / 180.0));
                         y[i] += sin(a[i] * (cPI / 180.0));
                         
+                        swarmFitness += 1.0 / (double)hiveSize;
+                        
                         break;
                         
                     // turn 8 degrees left
@@ -495,12 +497,16 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         x[i] += cos(a[i] * (cPI / 180.0));
                         y[i] += sin(a[i] * (cPI / 180.0));
                         
+                        swarmFitness += 1.0 / (double)hiveSize;
+                        
                         break;
                         
                     // move straight ahead
                     case 3:
                         x[i] += cos(a[i] * (cPI / 180.0));
                         y[i] += sin(a[i] * (cPI / 180.0));
+                        
+                        swarmFitness += 2.0 / (double)hiveSize;
                         
                         break;
                         
@@ -528,8 +534,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     /*       END OF SIMULATION LOOP       */
     
     // compute overall fitness
-    swarmAgent->fitness = (double)swarmFitness;
-    predatorAgent->fitness = (double)predatorFitness;
+    swarmAgent->fitness = swarmFitness;
+    predatorAgent->fitness = predatorFitness;
     
     if(swarmAgent->fitness < 0.0)
     {
@@ -660,8 +666,8 @@ void tGame::calcSwarmCenter(double x[], double y[], bool dead[], double& cX, dou
     cY /= aliveCount;
 }
 
-// maintains a position within the specified boundary
-double tGame::applyBoundary(double positionVal)
+// maintains a position within a preset boundary
+void tGame::applyBoundary(double& positionVal)
 {
     double val = positionVal;
 
@@ -677,7 +683,7 @@ double tGame::applyBoundary(double positionVal)
         }
     }
     
-    return val;
+    positionVal = val;
 }
 
 // sums a vector of values

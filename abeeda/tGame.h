@@ -51,7 +51,7 @@ public:
     double calcDistance(double fromX, double fromY, double toX, double toY);
     double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
     void calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY);
-    double applyBoundary(double positionVal);
+    void applyBoundary(double& positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);
     double variance(vector<double> values);

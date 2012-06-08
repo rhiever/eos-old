@@ -133,13 +133,13 @@ int main(int argc, char *argv[])
     // seed the agents
     delete swarmAgent;
     swarmAgent = new tAgent;
-    //swarmAgent->setupRandomAgent(5000);
-    swarmAgent->loadAgent("startAgent.genome");
+    swarmAgent->setupRandomAgent(5000);
+    //swarmAgent->loadAgent("startAgent.genome");
     
     delete predatorAgent;
     predatorAgent = new tAgent;
-    //predatorAgent->setupRandomAgent(5000);
-    predatorAgent->loadAgent("startAgent.genome");
+    predatorAgent->setupRandomAgent(5000);
+    //predatorAgent->loadAgent("startAgent.genome");
     
     // save start organism to file
     //swarmAgent->saveGenome(swarmGenomeFile);
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     fclose(predatorGenomeFile);
     
     // save LOD
-    vector<tAgent*> saveLOD;
+    /*vector<tAgent*> saveLOD;
     
     tAgent* curAncestor = swarmAgents[0]->ancestor->ancestor;
     
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
         {
             game->executeGame(*it, (*it)->predator, LOD, make_video);
         }
-    }
+    }*/
     
     fclose(LOD);
     

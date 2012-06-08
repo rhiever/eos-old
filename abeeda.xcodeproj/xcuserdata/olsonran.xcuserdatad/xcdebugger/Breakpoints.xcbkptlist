@@ -9,11 +9,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "360871735.954474"
+         timestampString = "360878837.534141"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "251"
-         endingLineNumber = "251"
+         startingLineNumber = "250"
+         endingLineNumber = "250"
          landmarkName = "main(int argc, char *argv[])"
          landmarkType = "7">
       </FileBreakpoint>
@@ -23,13 +23,41 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "360871735.954474"
+         timestampString = "360878837.534141"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "209"
-         endingLineNumber = "209"
+         startingLineNumber = "208"
+         endingLineNumber = "208"
          landmarkName = "main(int argc, char *argv[])"
          landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "aBeeDa/main.cpp"
+         timestampString = "360878837.534141"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "69"
+         endingLineNumber = "69"
+         landmarkName = "main(int argc, char *argv[])"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "aBeeDa/tGame.cpp"
+         timestampString = "360883499.002478"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "650"
+         endingLineNumber = "650"
+         landmarkName = "tGame::calcSwarmCenter(double x[], double y[], bool dead[], double&amp; cX, double&amp; cY)"
+         landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>
