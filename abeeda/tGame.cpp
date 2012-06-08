@@ -19,8 +19,8 @@
 #define sensors 12
 #define totalStepsInMaze 2000
 #define selectNewPreyChance 1
-#define gridX 100.0
-#define gridY 100.0
+#define gridX 256.0
+#define gridY 256.0
 #define killDist 5.0
 #define killChance 0.25
 #define maxDistFromCenter 250
@@ -58,8 +58,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     int numAlive = hiveSize;
     
     // predator initial X, Y, and angle
-    double mX = (double)((double)rand()/(double)RAND_MAX * gridX);
-    double mY = (double)((double)rand()/(double)RAND_MAX * gridY);
+    double mX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
+    double mY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
     double mA = (double)((double)rand()/(double)RAND_MAX * 360.0);
 
     // string containing the information to create a video of the simulation
@@ -75,8 +75,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     for(int k = 0; k < hiveSize; ++k)
     {
-        x[k] = (double)((double)rand() / (double)RAND_MAX * gridX);
-        y[k] = (double)((double)rand() / (double)RAND_MAX * gridY);
+        x[k] = (double)((double)rand() / (double)RAND_MAX * gridX * 2.0) - gridX;
+        y[k] = (double)((double)rand() / (double)RAND_MAX * gridY * 2.0) - gridY;
         a[k] = (double)((double)rand() / (double)RAND_MAX * 360.0);
         dead[k] = false;
     }
