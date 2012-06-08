@@ -430,8 +430,8 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
         {
             if (!dead[i])
             {
-                //                          node 31                                             node 32
-                int action = ((agent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (agent->states[(maxNodes-2) + (i*maxNodes)]&1);
+                //                              node 31                                                     node 30
+                int action = ((agent->states[(maxNodes - 1) + (i * maxNodes)] & 1) << 1) + (agent->states[(maxNodes - 2) + (i * maxNodes)] & 1);
                 
                 switch(action)
                 {
