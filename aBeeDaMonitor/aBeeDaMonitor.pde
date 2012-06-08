@@ -41,8 +41,8 @@ void drawArea(){
        fill(0, 255, 0);
        text("Green - center of swarm", 10, 90);
       
-       fill(128, 128, 255);
-       text("Blue - current target prey", 10, 115);
+       //fill(128, 128, 255);
+       //text("Blue - current target prey", 10, 115);
      }
      
      for(int t=0;t<1;t++)

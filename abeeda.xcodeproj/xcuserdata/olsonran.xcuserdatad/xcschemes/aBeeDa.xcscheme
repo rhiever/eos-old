@@ -48,11 +48,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-d swarm.genome predator.genome -s 56"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.txt swarm.genome predator.genome -s 56"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.txt swarm.genome predator.genome -s 56 -v"

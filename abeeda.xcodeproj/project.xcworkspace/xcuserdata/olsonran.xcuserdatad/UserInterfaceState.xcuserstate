@@ -233,7 +233,7 @@
 		<string>IDEWorkspaceTabControllerDesignAreaSplitView</string>
 		<string>IDEShowUtilities</string>
 		<string>AssistantEditorsLayout</string>
-		<string>main.cpp</string>
+		<string>tGame.cpp</string>
 		<true/>
 		<dict>
 			<key>$class</key>
@@ -280,7 +280,7 @@
 			<array>
 				<dict>
 					<key>CF$UID</key>
-					<integer>27</integer>
+					<integer>16</integer>
 				</dict>
 				<dict>
 					<key>CF$UID</key>
@@ -557,7 +557,7 @@
 				<integer>59</integer>
 			</dict>
 		</dict>
-		<string>main.cpp</string>
+		<string>tGame.cpp</string>
 		<dict>
 			<key>$classes</key>
 			<array>
@@ -618,7 +618,7 @@
 				<integer>68</integer>
 			</dict>
 			<key>NS.string</key>
-			<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/main.cpp</string>
+			<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/tGame.cpp</string>
 		</dict>
 		<dict>
 			<key>$classes</key>
@@ -697,9 +697,9 @@
 		<string>PrimaryDocumentVisibleCharacterRange</string>
 		<string>HideAllIssues</string>
 		<string>PrimaryDocumentSelectedCharacterRange</string>
-		<real>360872311.73380297</real>
-		<string>{3235, 1195}</string>
-		<string>{3583, 0}</string>
+		<real>360872630.33237398</real>
+		<string>{11531, 1597}</string>
+		<string>{11994, 4}</string>
 		<dict>
 			<key>$classes</key>
 			<array>
@@ -709,7 +709,7 @@
 			<key>$classname</key>
 			<string>NSDictionary</string>
 		</dict>
-		<string>main(int argc, char *argv[])</string>
+		<string>tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)</string>
 		<string>Xcode.IDEKit.EditorDocument.SourceCode</string>
 		<dict>
 			<key>$class</key>
@@ -728,7 +728,7 @@
 				<integer>83</integer>
 			</dict>
 		</dict>
-		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/main.cpp</string>
+		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/tGame.cpp</string>
 		<dict>
 			<key>$classes</key>
 			<array>
@@ -762,7 +762,7 @@
 				</dict>
 			</array>
 		</dict>
-		<string>{{0, 0}, {1180, 574}}</string>
+		<string>{{0, 0}, {1180, 707}}</string>
 		<dict>
 			<key>$class</key>
 			<dict>
@@ -2318,7 +2318,7 @@
 				</dict>
 				<dict>
 					<key>CF$UID</key>
-					<integer>242</integer>
+					<integer>241</integer>
 				</dict>
 				<dict>
 					<key>CF$UID</key>
@@ -2567,17 +2567,8 @@
 			<key>NS.relative</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>241</integer>
+				<integer>67</integer>
 			</dict>
-		</dict>
-		<dict>
-			<key>$class</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>68</integer>
-			</dict>
-			<key>NS.string</key>
-			<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/tGame.cpp</string>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -2593,8 +2584,17 @@
 			<key>NS.relative</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>67</integer>
+				<integer>242</integer>
 			</dict>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<dict>
+				<key>CF$UID</key>
+				<integer>68</integer>
+			</dict>
+			<key>NS.string</key>
+			<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/main.cpp</string>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -2919,9 +2919,9 @@
 				</dict>
 			</array>
 		</dict>
-		<real>360872311.73322397</real>
-		<string>{3235, 1195}</string>
-		<string>{3583, 0}</string>
+		<real>360872625.24094403</real>
+		<string>{0, 1511}</string>
+		<string>{3881, 0}</string>
 		<dict>
 			<key>$class</key>
 			<dict>
@@ -3061,9 +3061,9 @@
 				</dict>
 			</array>
 		</dict>
-		<real>360869191.44923502</real>
-		<string>{11749, 1244}</string>
-		<string>{12555, 7}</string>
+		<real>360872630.331882</real>
+		<string>{11531, 1597}</string>
+		<string>{11994, 4}</string>
 		<dict>
 			<key>$class</key>
 			<dict>
@@ -3703,7 +3703,7 @@
 				<integer>341</integer>
 			</dict>
 			<key>NS.time</key>
-			<real>360871774.565099</real>
+			<real>360872495.06737399</real>
 		</dict>
 		<dict>
 			<key>$classes</key>
@@ -3714,7 +3714,7 @@
 			<key>$classname</key>
 			<string>NSDate</string>
 		</dict>
-		<string>Today at 2:09 PM</string>
+		<string>Today at 2:21 PM</string>
 		<integer>234</integer>
 		<dict>
 			<key>$class</key>
@@ -3797,7 +3797,7 @@
 				<integer>347</integer>
 			</dict>
 		</dict>
-		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/abeeda/main.cpp</string>
+		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/tGame.cpp</string>
 		<dict>
 			<key>$class</key>
 			<dict>
@@ -3815,7 +3815,7 @@
 				<integer>349</integer>
 			</dict>
 		</dict>
-		<string>file://localhost/Developer/SDKs/MacOSX10.7.sdk/usr/include/c++/4.2.1/ext/new_allocator.h</string>
+		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/abeeda/main.cpp</string>
 		<dict>
 			<key>$class</key>
 			<dict>
@@ -3833,7 +3833,7 @@
 				<integer>351</integer>
 			</dict>
 		</dict>
-		<string>file://localhost/Users/olsonran/Documents/experiments/abeeda/aBeeDa/tGame.cpp</string>
+		<string>file://localhost/Developer/SDKs/MacOSX10.7.sdk/usr/include/c++/4.2.1/ext/new_allocator.h</string>
 		<dict>
 			<key>$class</key>
 			<dict>

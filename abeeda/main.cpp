@@ -134,12 +134,12 @@ int main(int argc, char *argv[])
     delete swarmAgent;
     swarmAgent = new tAgent;
     //swarmAgent->setupRandomAgent(5000);
-    swarmAgent->loadAgent("startPredator.genome");
+    swarmAgent->loadAgent("startAgent.genome");
     
     delete predatorAgent;
     predatorAgent = new tAgent;
     //predatorAgent->setupRandomAgent(5000);
-    predatorAgent->loadAgent("startPredator.genome");
+    predatorAgent->loadAgent("startAgent.genome");
     
     // save start organism to file
     //swarmAgent->saveGenome(swarmGenomeFile);
