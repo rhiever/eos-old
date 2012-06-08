@@ -143,8 +143,11 @@ int main(int argc, char *argv[])
     swarmAgent->saveGenome(swarmGenomeFile);
     predatorAgent->saveGenome(predatorGenomeFile);
     
+    swarmAgents[0] = swarmAgent;
+    predatorAgents[0] = predatorAgent;
+    
     // make mutated copies of the start genome to fill up the initial population
-	for(int i = 0; i < populationSize; ++i)
+	for(int i = 1; i < populationSize; ++i)
     {
 		swarmAgents[i] = new tAgent;
 		swarmAgents[i]->inherit(swarmAgent, 0.01, 0);
@@ -157,6 +160,7 @@ int main(int argc, char *argv[])
     PANextGen.resize(populationSize);
     
 	swarmAgent->nrPointingAtMe--;
+    
     predatorAgent->nrPointingAtMe--;
     
 	cout << "setup complete" << endl;
