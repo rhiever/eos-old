@@ -130,14 +130,16 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
-    // seed simulation with random genome
+    // seed the agents
     delete swarmAgent;
     swarmAgent = new tAgent;
-    swarmAgent->setupRandomAgent(5000);
+    //swarmAgent->setupRandomAgent(5000);
+    swarmAgent->loadAgent("startPredator.genome");
     
     delete predatorAgent;
     predatorAgent = new tAgent;
-    predatorAgent->setupRandomAgent(5000);
+    //predatorAgent->setupRandomAgent(5000);
+    predatorAgent->loadAgent("startPredator.genome");
     
     // save start organism to file
     //swarmAgent->saveGenome(swarmGenomeFile);
@@ -206,7 +208,7 @@ int main(int argc, char *argv[])
             }
 		}
 		
-		cout << "update " << update << ": swarm [" << (double)swarmMaxFitness << "] :: predator ["<< (double)predatorMaxFitness << "]" << endl;
+		cout << "generation " << update << ": swarm [" << (double)swarmMaxFitness << "] :: predator ["<< (double)predatorMaxFitness << "]" << endl;
         
         // display video of simulation
         if(make_video)
@@ -289,6 +291,9 @@ int main(int argc, char *argv[])
 	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
     predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
     
+    fclose(swarmGenomeFile);
+    fclose(predatorGenomeFile);
+    
     // save LOD
     vector<tAgent*> saveLOD;
     
@@ -314,8 +319,6 @@ int main(int argc, char *argv[])
     }
     
     fclose(LOD);
-    fclose(swarmGenomeFile);
-    fclose(predatorGenomeFile);
     
     return 0;
 }

@@ -5,6 +5,8 @@ abeeda/.DS_Store
 
 work/*.txt
 
-work/*.genome
-
 aBeeDaMonitor/*.mov
+
+work/predator.genome
+
+work/swarm.genome

@@ -303,7 +303,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 double d = calcDistance(mX, mY, x[i], y[i]);
                 
                 // don't bother if an agent is too far
-                if(d < visionRange)
+                if(d < 2.0 * visionRange)
                 {
                     double angle = calcAngle(mX, mY, mA, x[i], y[i]);
                     
