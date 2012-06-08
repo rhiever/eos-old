@@ -212,7 +212,7 @@ unsigned char * tAgent::getStatesPointer(void){
 }
 
 void tAgent::resetBrain(void){
-	for(int i=0;i<maxNodes*hiveSize;i++)
+	for(int i=0;i<maxNodes*swarmSize;i++)
 		states[i]=0;
 #ifdef useANN
 	ANN->resetBrain();
@@ -224,7 +224,7 @@ void tAgent::updateStates(void){
 	for(i=0;i<hmmus.size();i++){
 		hmmus[i]->update(&states[0],&newStates[0]);
     }
-	for(i=0;i<maxNodes*hiveSize;i++){
+	for(i=0;i<maxNodes*swarmSize;i++){
 		states[i]=newStates[i];
 		newStates[i]=0;
 	}

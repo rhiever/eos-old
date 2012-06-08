@@ -36,7 +36,7 @@ public:
 	tAgent *ancestor;
     tAgent *predator;
 	unsigned int nrPointingAtMe;
-	unsigned char states[maxNodes*hiveSize],newStates[maxNodes*hiveSize];
+	unsigned char states[maxNodes*swarmSize],newStates[maxNodes*swarmSize];
 	double fitness,convFitness;
 	vector<double> fitnesses;
 	int food;

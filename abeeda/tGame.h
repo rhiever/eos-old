@@ -19,11 +19,6 @@
 
 using namespace std;
 
-#define xDim 64
-#define yDim 64
-#define startMazes 1
-#define cPI 3.14159265
-
 class tOctuplet{
 public:
     vector<int> data;
