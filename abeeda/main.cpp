@@ -23,7 +23,6 @@ int maxAgent = 100;
 int totalGenerations = 252;//1002;
 bool make_video = false;
 bool display_only = false;
-float p = 0.5;
 
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
@@ -87,13 +86,6 @@ int main(int argc, char *argv[])
             genomeFile = fopen(argv[i], "w");
         }
         
-        // -p [double]: p value
-        else if (strcmp(argv[i], "-p") == 0 && (i + 1) < argc)
-        {
-            ++i;
-            p = atof(argv[i]);
-        }
-        
         // -s [long]: seed
         else if (strcmp(argv[i], "-s") == 0 && (i + 1) < argc)
         {
@@ -123,7 +115,7 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        reportString = game->executeGame(masterAgent, NULL, true, p);
+        reportString = game->executeGame(masterAgent, NULL, true);
         reportString.append("X");
         doBroadcast(reportString);
         exit(0);
@@ -163,7 +155,7 @@ int main(int argc, char *argv[])
         {
 			for(int j = 0; j < repeats; j++)
             {
-                reportString = game->executeGame(agent[i], NULL, make_video, p);
+                reportString = game->executeGame(agent[i], NULL, make_video);
  				agent[i]->fitnesses.push_back(agent[i]->fitness);
                 
                 if(agent[i]->fitness > maxFitness)
@@ -248,7 +240,7 @@ int main(int argc, char *argv[])
     
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
-        game->executeGame(*it, LOD, make_video, p);
+        game->executeGame(*it, LOD, make_video);
     }
     
     fclose(LOD);

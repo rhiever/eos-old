@@ -34,11 +34,11 @@ tGame::~tGame()
 }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
+string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
 {
     // LOD data variables
-    double fitnessFromSwarming = 0.0;
-    double fitnessFromPredation = 0.0;
+    double swarmFitness = 0.0;
+    double predatorFitness = 0.0;
     vector<double> bbSizes;
     vector<double> shortestDists;
     vector<double> sumSqrtDists;
@@ -59,12 +59,11 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
     double mA = (double)((double)rand()/(double)RAND_MAX*360.0);
     
     double delay = 0.0;
-    double sD = 0.0, pD = 0.0;
     string reportString = "";
     
     // set up brain for clone swarm
-    agent->setupMegaPhenotype(hiveSize);
-    agent->fitness = 0.0;
+    swarmAgent->setupMegaPhenotype(hiveSize);
+    swarmAgent->fitness = 0.0;
     
     for(int k = 0; k < hiveSize; k++)
     {
@@ -374,7 +373,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                 //clear the sensors of agent i
                 for(int j = 0; j < sensors * 2; j++)
                 {
-                    agent->states[j + (i * maxNodes)] = 0;
+                    swarmAgent->states[j + (i * maxNodes)] = 0;
                 }
                 
                 //iterate for agent i over all agents j
@@ -394,7 +393,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
                             {
-                                agent->states[(int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes)]=1;
+                                swarmAgent->states[(int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes)]=1;
                             }
                         }
                     }
@@ -411,22 +410,22 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                     // you have a 180 degree vision field infront of you
                     if(fabs(angle) < 90)
                     {
-                        agent->states[sensors+((int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes))]=1;
+                        swarmAgent->states[sensors+((int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes))]=1;
                     }
                 }
             }
         }
         
         // prepare the agent's brains for activation
-        agent->updateStates();
+        swarmAgent->updateStates();
         
         // activate each agent's brain, determine its action for this update, and update its position and angle
         for(int i = 0; i < hiveSize; i++)
         {
             if (!dead[i])
             {
-                //                          node 31                                             node 32
-                int action = ((agent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (agent->states[(maxNodes-2) + (i*maxNodes)]&1);
+                //                                  node 31                                                     node 32
+                int action = ((swarmAgent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (swarmAgent->states[(maxNodes-2) + (i*maxNodes)]&1);
                 
                 switch(action)
                 {
@@ -479,47 +478,29 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
         } // end of swarm update
 
         // determine swarm fitness for this update
-        sD = 0.0;
-        pD = 0.0;
-        
-        // compute center of swarm
-        double cX = 0.0, cY = 0.0;
-        calcSwarmCenter(x, y, dead, cX, cY);
+        int swarmAlive = 0;
         
         for(int i = 0; i < hiveSize; i++)
         {
             if (!dead[i])
             {
-                // sum prey's distance from center of swarm
-                double distToCenter = calcDistance(x[i], y[i], cX, cY);
-                
-                if (distToCenter > 20.0)
-                {
-                    sD += 1.0 / distToCenter;
-                }
-                else if (distToCenter > 10.0)
-                {
-                    sD += 1.0;
-                }
-                
-                // sum prey's distance from predator
-                pD += calcDistance(x[i], y[i], mX, mY);
+                ++swarmAlive;
             }
         }
         
         // closer to center of swarm = better
-        fitnessFromSwarming += sD;
+        swarmFitness += swarmAlive;
         
-        fitnessFromPredation += pD;
+        predatorFitness += hiveSize - swarmAlive;
         
     } // end of simulation loop
     
     // compute overall fitness
-    agent->fitness = ( pow(fitnessFromSwarming, 1.0 - p) ) * ( pow(fitnessFromPredation, p) );
+    swarmAgent->fitness = swarmFitness;
     
-    if(agent->fitness < 0.0)
+    if(swarmAgent->fitness < 0.0)
     {
-        agent->fitness = 0.0;
+        swarmAgent->fitness = 0.0;
     }
     
     // output to data file, if provided
@@ -578,10 +559,10 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
         avgVarianceDistToCentroid = average(varsDistToCentroid);
             
         fprintf(data_file, "%d %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
-                agent->born,                    // update born
-                fitnessFromSwarming,            // W_s
-                fitnessFromPredation,           // W_p
-                agent->fitness,                 // W
+                swarmAgent->born,               // update born
+                swarmFitness,                   // swarm fitness
+                predatorFitness,                // predator fitness
+                swarmAgent->fitness,            // W
                 aliveCount,                     // # alive at end
                 luX, luY,                       // (x1, y1) of bounding box at end
                 rbX, rbY,                       // (x2, y2) of bounding box at end
@@ -591,9 +572,9 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                 sum(sumSqrtDists),              // sum of sqrt of dist from every agent to every other agent over all updates
                 average(swarmDensityCount20),   // average # of agents within 20 units of each other
                 average(swarmDensityCount30),   // average # of agents within 30 units of each other
-                average(swarmDensityCount40),  // average # of agents within 40 units of each other
-                neuronsConnectedToPreyRetina(agent), // #neurons connected to prey part of retina
-                neuronsConnectedToPredatorRetina(agent), // #neurons connected to predator part of retina
+                average(swarmDensityCount40),   // average # of agents within 40 units of each other
+                neuronsConnectedToPreyRetina(swarmAgent), // #neurons connected to prey part of retina
+                neuronsConnectedToPredatorRetina(swarmAgent), // #neurons connected to predator part of retina
                 mutualInformation(predatorAngle, preyAngle), // mutual Information between prey flight angle and predator flight angle
                 avgVarianceDistToCentroid       // avg variance in each swarm agent's distance to the swarm centroid
                 );

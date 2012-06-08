@@ -45,7 +45,7 @@ class tGame{
 public:
     tExperiment theExperiment;
     void loadExperiment(char *filename);
-    string executeGame(tAgent* agent, FILE *data_file, bool report, double p);
+    string executeGame(tAgent* swarmAgent, FILE *data_file, bool report);
     tGame();
     ~tGame();
     int selectClosestPrey(double x[], double y[], double a[], bool dead[], double mX, double mY, double mA);
