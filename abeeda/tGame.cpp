@@ -394,7 +394,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
                             {
-                                agent->states[(int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes)]=1;
+                                agent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
                             }
                         }
                     }
@@ -411,7 +411,12 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
                     // you have a 180 degree vision field infront of you
                     if(fabs(angle) < 90)
                     {
-                        agent->states[sensors+((int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes))]=1;
+                        if ((int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) > 11)
+                        {
+                            cout << "error" << endl;
+                        }
+                        
+                        agent->states[sensors + (int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
                     }
                 }
             }
