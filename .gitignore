@@ -3,12 +3,6 @@ abeeda/.DS_Store
 
 .DS_Store
 
-work/*
-
-abeeda.xcodeproj/project.xcworkspace/xcuserdata/olsonran.xcuserdatad/UserInterfaceState.xcuserstate
-
-abeeda.xcodeproj/xcuserdata/olsonran.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
-
-abeeda.xcodeproj/xcuserdata/olsonran.xcuserdatad/xcschemes/Copy of aBeeDa.xcscheme
+work/*.txt
 
 aBeeDaMonitor/*.mov

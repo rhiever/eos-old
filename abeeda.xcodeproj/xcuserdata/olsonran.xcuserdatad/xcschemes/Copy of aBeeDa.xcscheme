@@ -34,7 +34,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.GDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/olsonran/Desktop/aBeeDa/work"
+      customWorkingDirectory = "/Users/olsonran/Documents/experiments/abeeda/work"
       buildConfiguration = "Release">
       <BuildableProductRunnable>
          <BuildableReference
@@ -47,7 +47,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-d startOrganism.genome -p 0.00"
+            argument = "-d startOrganism.txt -p 0.50"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
