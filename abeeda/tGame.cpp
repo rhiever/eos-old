@@ -376,8 +376,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         }
         
         // keep position within simulation boundary
-        mX = applyBoundary(mX);
-        mY = applyBoundary(mY);
+        applyBoundary(mX);
+        applyBoundary(mY);
         
         // determine if the predator made a kill
         if (numAlive > 2)
@@ -515,8 +515,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 }
 
                 // keep position within boundary
-                x[i] = applyBoundary(x[i]);
-                y[i] = applyBoundary(y[i]);
+                applyBoundary(x[i]);
+                applyBoundary(y[i]);
             }
         }
         /*       END OF SWARM UPDATE       */
