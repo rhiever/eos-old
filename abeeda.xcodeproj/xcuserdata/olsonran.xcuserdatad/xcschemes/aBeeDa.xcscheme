@@ -16,7 +16,7 @@
                BlueprintIdentifier = "8464C10D14683D7F00BDA7EB"
                BuildableName = "aBeeDa"
                BlueprintName = "aBeeDa"
-               ReferencedContainer = "container:aBeeDa.xcodeproj">
+               ReferencedContainer = "container:abeeda.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -42,20 +42,20 @@
             BlueprintIdentifier = "8464C10D14683D7F00BDA7EB"
             BuildableName = "aBeeDa"
             BlueprintName = "aBeeDa"
-            ReferencedContainer = "container:aBeeDa.xcodeproj">
+            ReferencedContainer = "container:abeeda.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "DISPLAY /Users/olsonran/Desktop/aBeeDa/work /Users/olsonran/Desktop/aBeeDa/work/outdata.txt 0.00"
+            argument = "-d startOrganism.genome -p 0.00"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "EVOLVE lod.txt gen.txt 0 56 0.0"
+            argument = "-e lod.txt gen.txt -s 56 -p 0.0"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "EVOLVE lod.txt gen.txt 1 56 0.0"
+            argument = "-e lod.txt gen.txt -s 56 -p 0.0 -v"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -73,7 +73,7 @@
             BlueprintIdentifier = "8464C10D14683D7F00BDA7EB"
             BuildableName = "aBeeDa"
             BlueprintName = "aBeeDa"
-            ReferencedContainer = "container:aBeeDa.xcodeproj">
+            ReferencedContainer = "container:abeeda.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
