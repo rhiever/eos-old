@@ -39,8 +39,8 @@ tGame::~tGame()
 string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)
 {
     // LOD data variables
-    unsigned int swarmFitness = 0.0;
-    unsigned int predatorFitness = 0.0;
+    unsigned int swarmFitness = 0;
+    unsigned int predatorFitness = 0;
     
     vector<double> bbSizes;
     vector<double> shortestDists;
@@ -342,6 +342,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 mX += cos(mA * (cPI / 180.0));
                 mY += sin(mA * (cPI / 180.0));
                 
+                predatorFitness += 1;
+                
                 break;
                 
             // turn 8 degrees left
@@ -356,12 +358,16 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 mX += cos(mA * (cPI / 180.0));
                 mY += sin(mA * (cPI / 180.0));
                 
+                predatorFitness += 1;
+                
                 break;
                 
             // move straight ahead
             case 3:
                 mX += cos(mA * (cPI / 180.0)) * 2.0;
                 mY += sin(mA * (cPI / 180.0)) * 2.0;
+                
+                predatorFitness += 2;
                 
                 break;
                 
