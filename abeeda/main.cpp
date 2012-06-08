@@ -21,7 +21,7 @@ int update = 0;
 int repeats = 1;
 int maxAgent = 100;
 int totalGenerations = 252;//1002;
-bool make_video = true;
+bool make_video = false;
 bool display_only = false;
 float p = 0.5;
 
@@ -60,37 +60,60 @@ int main(int argc, char *argv[])
     FILE *LOD;
     FILE *genomeFile;
     
-    if(strcmp(argv[1], "EVOLVE") == 0)
+    agent.resize(maxAgent);
+	game = new tGame;
+	masterAgent = new tAgent;
+    
+    // time-based seed by default. can change with command-line parameter.
+    srand((unsigned int)time(NULL));
+    
+    for (int i = 1; i < argc; ++i)
     {
-        LOD = fopen(argv[2],"w");
-        genomeFile = fopen(argv[3],"w");
-       
-        if(atoi(argv[4]) == 1)
+        // -d [filename]: display
+        if (strcmp(argv[i], "-d") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            masterAgent->loadAgent(argv[i]);
+            
+            display_only = make_video = true;
+        }
+        
+        // -e [filename] [filename]: evolve
+        else if (strcmp(argv[i], "-e") == 0 && (i + 2) < argc)
+        {
+            ++i;
+            LOD = fopen(argv[i], "w");
+            ++i;
+            genomeFile = fopen(argv[i], "w");
+        }
+        
+        // -p [double]: p value
+        else if (strcmp(argv[i], "-p") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            p = atof(argv[i]);
+        }
+        
+        // -s [long]: seed
+        else if (strcmp(argv[i], "-s") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            srand(atoi(argv[i]));
+        }
+        
+        // -g [long]: generations
+        else if (strcmp(argv[i], "-g") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            totalGenerations = atoi(argv[i]);
+        }
+        
+        // -v: make video
+        else if (strcmp(argv[i], "-v") == 0)
         {
             make_video = true;
         }
-        else
-        {
-            make_video = false;
-        }
-        
-        //srand(time(NULL));
-        srand(atoi(argv[5]));
-        
-        p = atof(argv[6]);
     }
-    else
-    {
-        srand(time(NULL));
-        display_only = true;
-        make_video = true;
-        
-        p = atof(argv[3]);
-    }
-    
-	agent.resize(maxAgent);
-	game=new tGame;
-	masterAgent=new tAgent;
     
     if(make_video)
     {
@@ -100,27 +123,28 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        masterAgent->loadAgent(argv[2]);
-        reportString=game->executeGame(masterAgent, NULL, true, p);
+        reportString = game->executeGame(masterAgent, NULL, true, p);
         reportString.append("X");
         doBroadcast(reportString);
-        return 0;
+        exit(0);
     }
     
-    masterAgent=new tAgent;
+    masterAgent = new tAgent;
     masterAgent->setupRandomAgent(5000);
     
     // seeds simulation with a specific start organism
     //masterAgent->loadAgent("startOrganism.txt");
 
+    // save start organism to file
     masterAgent->saveGenome(genomeFile);
     //masterAgent->saveToDot((char*)"test.dot");
     
 	for(int i = 0; i < agent.size(); i++)
     {
 		agent[i]=new tAgent;
-		agent[i]->inherit(masterAgent,0.01,0);
+		agent[i]->inherit(masterAgent, 0.01, 0);
 	}
+    
 	nextGen.resize(agent.size());
 	masterAgent->nrPointingAtMe--;
 	cout<<"setup complete"<<endl;
@@ -159,16 +183,10 @@ int main(int argc, char *argv[])
 				maxFitness=agent[i]->fitness;
             }
 		}
-		cout<<update<<" "<<(double)maxFitness<<endl;
+		cout << "update " << update << ": " << (double)maxFitness << endl;
         
         if(make_video)
         {
-            if (update == 100)
-            {
-                doBroadcast(bestString);
-            }
-            
-            //if((update&15)==0)
             if(maxFitness > thresholdMaxFitness)
             {
                 thresholdMaxFitness = maxFitness;
@@ -192,7 +210,7 @@ int main(int argc, char *argv[])
 			do
             {
                 j = rand() % (int)agent.size();
-            } while((j==i) || (randDouble>(agent[j]->fitness/maxFitness)));
+            } while((j == i) || (randDouble > (agent[j]->fitness / maxFitness)));
             
 			d->inherit(agent[j], perSiteMutationRate, update);
 			nextGen[i] = d;
@@ -202,13 +220,14 @@ int main(int argc, char *argv[])
         {
 			agent[i]->retire();
 			agent[i]->nrPointingAtMe--;
-			if(agent[i]->nrPointingAtMe==0)
+			if(agent[i]->nrPointingAtMe == 0)
             {
 				delete agent[i];
             }
-			agent[i]=nextGen[i];
+			agent[i] = nextGen[i];
 		}
-		agent=nextGen;
+        
+		agent = nextGen;
 		update++;
 	}
 	
@@ -216,8 +235,7 @@ int main(int argc, char *argv[])
 	agent[0]->ancestor->ancestor->saveGenome(genomeFile);
     
     // save LOD
-    vector<tAgent*>saveLOD;
-    vector<tAgent*>::iterator it;
+    vector<tAgent*> saveLOD;
     
     tAgent* curAncestor = agent[0]->ancestor->ancestor;
     
@@ -228,7 +246,7 @@ int main(int argc, char *argv[])
         curAncestor = curAncestor->ancestor;
     }
     
-    for (it = saveLOD.begin(); it < saveLOD.end(); it++)
+    for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
         game->executeGame(*it, LOD, make_video, p);
     }
