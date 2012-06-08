@@ -60,8 +60,9 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
     
     double delay = 0.0;
     double sD = 0.0, pD = 0.0;
-    int action = 0;
     string reportString = "";
+    
+    // set up brain for clone swarm
     agent->setupMegaPhenotype(hiveSize);
     agent->fitness = 0.0;
     
@@ -86,7 +87,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
             reportString.append(text);
             
             // compute center of swarm
-            double cX = 0, cY = 0;
+            double cX = 0.0, cY = 0.0;
             calcSwarmCenter(x, y, dead, cX, cY);
             
             // report X, Y of center of swarm
@@ -425,7 +426,7 @@ string tGame::executeGame(tAgent* agent, FILE *data_file, bool report, double p)
             if (!dead[i])
             {
                 //                          node 31                                             node 32
-                action = ((agent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (agent->states[(maxNodes-2) + (i*maxNodes)]&1);
+                int action = ((agent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (agent->states[(maxNodes-2) + (i*maxNodes)]&1);
                 
                 switch(action)
                 {
@@ -692,9 +693,11 @@ double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX
 }
 
 // calculates the center of the swarm and stores it in (cX, cY)
-void calcSwarmCenter(double x[], double y[], bool dead[], double &cX, double &cY)
+void tGame::calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY)
 {
     double aliveCount = 0.0;
+    cX = 0.0;
+    cY = 0.0;
     
     for(int i = 0; i < hiveSize; i++)
     {

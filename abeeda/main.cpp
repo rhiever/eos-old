@@ -16,11 +16,11 @@
 using namespace std;
 
 //double replacementRate=0.1;
-double perSiteMutationRate=0.005;
-int update=0;
-int repeats=1;
-int maxAgent=100;
-int totalGenerations=252;//1002;
+double perSiteMutationRate = 0.005;
+int update = 0;
+int repeats = 1;
+int maxAgent = 100;
+int totalGenerations = 252;//1002;
 bool make_video = true;
 bool display_only = false;
 float p = 0.5;
@@ -35,9 +35,9 @@ float p = 0.5;
 #define ECHO_PORT          (2002)
 #define MAX_LINE           (100000)
 
-#define BUFLEN 512
-#define NPACK 10
-#define PORT 9930
+#define BUFLEN  512
+#define NPACK   10
+#define PORT    9930
 
 int       list_s;                /*  listening socket          */
 int       conn_s;                /*  connection socket         */
@@ -54,9 +54,8 @@ int main(int argc, char *argv[])
 	vector<tAgent*>agent;
 	vector<tAgent*>nextGen;
 	tAgent *masterAgent;
-	int i,j;
 	tGame *game;
-	double maxFitness, thresholdMaxFitness = 0.0;
+	double maxFitness = 0.0, thresholdMaxFitness = 0.0;
     string reportString, bestString;
     FILE *LOD;
     FILE *genomeFile;
@@ -116,7 +115,8 @@ int main(int argc, char *argv[])
 
     masterAgent->saveGenome(genomeFile);
     //masterAgent->saveToDot((char*)"test.dot");
-	for(i=0;i<agent.size();i++)
+    
+	for(int i = 0; i < agent.size(); i++)
     {
 		agent[i]=new tAgent;
 		agent[i]->inherit(masterAgent,0.01,0);
@@ -124,21 +124,25 @@ int main(int argc, char *argv[])
 	nextGen.resize(agent.size());
 	masterAgent->nrPointingAtMe--;
 	cout<<"setup complete"<<endl;
-	while(update<totalGenerations)
+    
+	while(update < totalGenerations)
     {
-		for(i=0;i<agent.size();i++)
+		for(int i = 0; i < agent.size(); i++)
         {
 			agent[i]->fitness=0.0;
 			agent[i]->fitnesses.clear();
 		}
-		maxFitness=0.0;
-		for(i=0;i<agent.size();i++)
+        
+		maxFitness = 0.0;
+        
+		for(int i = 0; i < agent.size(); i++)
         {
-			for(j=0;j<repeats;j++)
+			for(int j = 0; j < repeats; j++)
             {
                 reportString = game->executeGame(agent[i], NULL, make_video, p);
  				agent[i]->fitnesses.push_back(agent[i]->fitness);
-                if(agent[i]->fitness>maxFitness)
+                
+                if(agent[i]->fitness > maxFitness)
                 {
                     bestString=reportString;
                     maxFitness=agent[i]->fitness;
@@ -146,8 +150,8 @@ int main(int argc, char *argv[])
 			}
 		}
 		
-		maxFitness=0.0;
-		for(i=0;i<agent.size();i++)
+		maxFitness = 0.0;
+		for(int i = 0; i < agent.size(); i++)
         {
 			agent[i]->fitness=agent[i]->fitnesses[0];
 			if(agent[i]->fitness>maxFitness)
@@ -180,15 +184,21 @@ int main(int argc, char *argv[])
             }
         }
         
-		for(i=0;i<agent.size();i++)
+		for(int i = 0; i < agent.size(); i++)
 		{
-			tAgent *d;
-			d=new tAgent;
-			do{ j=rand()%(int)agent.size(); } while((j==i)||(randDouble>(agent[j]->fitness/maxFitness)));
-			d->inherit(agent[j],perSiteMutationRate,update);
-			nextGen[i]=d;
+			tAgent *d = new tAgent;
+            int j = 0;
+            
+			do
+            {
+                j = rand() % (int)agent.size();
+            } while((j==i) || (randDouble>(agent[j]->fitness/maxFitness)));
+            
+			d->inherit(agent[j], perSiteMutationRate, update);
+			nextGen[i] = d;
 		}
-		for(i=0;i<agent.size();i++)
+        
+		for(int i = 0; i < agent.size(); i++)
         {
 			agent[i]->retire();
 			agent[i]->nrPointingAtMe--;
@@ -235,7 +245,6 @@ void setupBroadcast(void)
 	if ( (list_s = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
     {
 		fprintf(stderr, "ECHOSERV: Error creating listening socket.\n");
-		//exit(EXIT_FAILURE);
     }
 	/*  Set all bytes in socket address structure to
 	 zero, and fill in the relevant data members   */
@@ -248,12 +257,10 @@ void setupBroadcast(void)
     if ( bind(list_s, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0 )
     {
 		fprintf(stderr, "ECHOSERV: Error calling bind()\n");
-		//exit(EXIT_FAILURE);
     }
     if ( listen(list_s, LISTENQ) < 0 )
     {
 		fprintf(stderr, "ECHOSERV: Error calling listen()\n");
-		//exit(EXIT_FAILURE);
     }
 }
 
@@ -262,13 +269,11 @@ void doBroadcast(string data)
     if ( (conn_s = accept(list_s, NULL, NULL) ) < 0 )
     {
         fprintf(stderr, "ECHOSERV: Error calling accept()\n");
-	//exit(EXIT_FAILURE);
     }
     Writeline(conn_s, data.c_str(), data.length());
     
     if ( close(conn_s) < 0 )
     {
         fprintf(stderr, "ECHOSERV: Error calling close()\n");
-	//exit(EXIT_FAILURE);
     }
 }

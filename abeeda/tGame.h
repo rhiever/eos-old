@@ -51,7 +51,7 @@ public:
     int selectClosestPrey(double x[], double y[], double a[], bool dead[], double mX, double mY, double mA);
     double calcDistance(double fromX, double fromY, double toX, double toY);
     double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
-    void calcSwarmCenter(double x[], double y[], bool dead[], double &cX, double &cY);
+    void calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY);
     double applyBoundary(double positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);
