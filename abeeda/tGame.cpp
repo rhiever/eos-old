@@ -22,7 +22,7 @@
 #define gridX 100.0
 #define gridY 100.0
 #define killDist 5.0
-#define killChance 0.50
+#define killChance 0.25
 #define maxDistFromCenter 256
 
 tGame::tGame()
@@ -53,6 +53,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     double x[hiveSize], y[hiveSize], a[hiveSize];
     // swarm alive status
     bool dead[hiveSize];
+    
+    // counter of how many swarm agents are still alive
+    int numAlive = hiveSize;
     
     // predator initial X, Y, and angle
     double mX = (double)((double)rand()/(double)RAND_MAX * gridX);
@@ -299,7 +302,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 double d = calcDistance(mX, mY, x[i], y[i]);
                 
-                // don't bother if an agent is too far or dead
+                // don't bother if an agent is too far
                 if(d < visionRange)
                 {
                     double angle = calcAngle(mX, mY, mA, x[i], y[i]);
@@ -321,11 +324,11 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         switch(action)
         {
-                // do nothing
+            // do nothing
             case 0:
                 break;
                 
-                // turn 8 degrees right
+            // turn 8 degrees right
             case 1:
                 mA += 8.0;
                 
@@ -339,7 +342,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 break;
                 
-                // turn 8 degrees left
+            // turn 8 degrees left
             case 2:
                 mA -= 8.0;
                 
@@ -353,7 +356,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 break;
                 
-                // move straight ahead
+            // move straight ahead
             case 3:
                 mX += cos(mA * (cPI / 180.0)) * 2.0;
                 mY += sin(mA * (cPI / 180.0)) * 2.0;
@@ -369,27 +372,20 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         mY = applyBoundary(mY);
         
         // determine if the predator made a kill
-        for(int i = 0; i < hiveSize; ++i)
+        if (numAlive > 2)
         {
-            if (!dead[i])
+            bool killed = false;
+            
+            for(int i = 0; i < hiveSize && !killed; ++i)
             {
-                double d = calcDistance(mX, mY, x[i], y[i]);
-                
-                if ((d < killDist) && (randDouble > killChance))
+                if (!dead[i])
                 {
-                    int numAlive = hiveSize;
+                    double d = calcDistance(mX, mY, x[i], y[i]);
                     
-                    for (int i = 0; i < hiveSize; ++i)
+                    if ((d < killDist) && (randDouble > killChance))
                     {
-                        if (dead[i])
-                        {
-                            --numAlive;
-                        }
-                    }
-                    
-                    if (numAlive > 2)
-                    {
-                        dead[i] = true;
+                        dead[i] = killed = true;
+                        --numAlive;
                     }
                 }
             }
