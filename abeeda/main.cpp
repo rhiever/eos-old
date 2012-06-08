@@ -11,8 +11,6 @@
 #include "tAgent.h"
 #include "tGame.h"
 
-#define randDouble ((double)rand()/(double)RAND_MAX)
-
 using namespace std;
 
 //double replacementRate=0.1;
@@ -52,7 +50,8 @@ int main(int argc, char *argv[])
 {
 	vector<tAgent*>agent;
 	vector<tAgent*>nextGen;
-	tAgent *masterAgent;
+	tAgent *swarmAgent;
+    tAgent *predatorAgent;
 	tGame *game;
 	double maxFitness = 0.0, thresholdMaxFitness = 0.0;
     string reportString, bestString;
@@ -61,7 +60,8 @@ int main(int argc, char *argv[])
     
     agent.resize(maxAgent);
 	game = new tGame;
-	masterAgent = new tAgent;
+	swarmAgent = new tAgent;
+    predatorAgent = new tAgent;
     
     // time-based seed by default. can change with command-line parameter.
     srand((unsigned int)time(NULL));
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         if (strcmp(argv[i], "-d") == 0 && (i + 1) < argc)
         {
             ++i;
-            masterAgent->loadAgent(argv[i]);
+            swarmAgent->loadAgent(argv[i]);
             
             display_only = make_video = true;
         }
@@ -115,30 +115,30 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        reportString = game->executeGame(masterAgent, NULL, true);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
         reportString.append("X");
         doBroadcast(reportString);
         exit(0);
     }
     
-    masterAgent = new tAgent;
-    masterAgent->setupRandomAgent(5000);
+    swarmAgent = new tAgent;
+    swarmAgent->setupRandomAgent(5000);
     
     // seeds simulation with a specific start organism
-    //masterAgent->loadAgent("startOrganism.txt");
+    //swarmAgent->loadAgent("startOrganism.txt");
 
     // save start organism to file
-    masterAgent->saveGenome(genomeFile);
-    //masterAgent->saveToDot((char*)"test.dot");
+    swarmAgent->saveGenome(genomeFile);
+    //swarmAgent->saveToDot((char*)"test.dot");
     
 	for(int i = 0; i < agent.size(); i++)
     {
 		agent[i]=new tAgent;
-		agent[i]->inherit(masterAgent, 0.01, 0);
+		agent[i]->inherit(swarmAgent, 0.01, 0);
 	}
     
 	nextGen.resize(agent.size());
-	masterAgent->nrPointingAtMe--;
+	swarmAgent->nrPointingAtMe--;
 	cout<<"setup complete"<<endl;
     
 	while(update < totalGenerations)
@@ -155,7 +155,8 @@ int main(int argc, char *argv[])
         {
 			for(int j = 0; j < repeats; j++)
             {
-                reportString = game->executeGame(agent[i], NULL, make_video);
+                // TODO: replace predatorAgent with correct predator agent brain
+                reportString = game->executeGame(agent[i], predatorAgent, NULL, make_video);
  				agent[i]->fitnesses.push_back(agent[i]->fitness);
                 
                 if(agent[i]->fitness > maxFitness)
@@ -240,7 +241,8 @@ int main(int argc, char *argv[])
     
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
-        game->executeGame(*it, LOD, make_video);
+        // TODO: replace predatorAgent with correct predator agent brain
+        game->executeGame(*it, predatorAgent, LOD, make_video);
     }
     
     fclose(LOD);

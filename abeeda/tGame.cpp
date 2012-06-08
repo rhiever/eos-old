@@ -22,7 +22,7 @@
 #define gridX 100.0
 #define gridY 100.0
 #define killDist 5.0
-#define killChance 64
+#define killChance 0.50
 #define maxDistFromCenter 256
 
 tGame::tGame()
@@ -34,11 +34,12 @@ tGame::~tGame()
 }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)
 {
     // LOD data variables
-    double swarmFitness = 0.0;
-    double predatorFitness = 0.0;
+    unsigned int swarmFitness = 0.0;
+    unsigned int predatorFitness = 0.0;
+    
     vector<double> bbSizes;
     vector<double> shortestDists;
     vector<double> sumSqrtDists;
@@ -54,18 +55,22 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
     bool dead[hiveSize];
     
     // predator initial X, Y, and angle
-    double mX = (double)((double)rand()/(double)RAND_MAX*gridX);
-    double mY = (double)((double)rand()/(double)RAND_MAX*gridY);
-    double mA = (double)((double)rand()/(double)RAND_MAX*360.0);
-    
-    double delay = 0.0;
+    double mX = (double)((double)rand()/(double)RAND_MAX * gridX);
+    double mY = (double)((double)rand()/(double)RAND_MAX * gridY);
+    double mA = (double)((double)rand()/(double)RAND_MAX * 360.0);
+
+    // string containing the information to create a video of the simulation
     string reportString = "";
     
     // set up brain for clone swarm
     swarmAgent->setupMegaPhenotype(hiveSize);
     swarmAgent->fitness = 0.0;
     
-    for(int k = 0; k < hiveSize; k++)
+    // set up predator brain
+    predatorAgent->setupPhenotype();
+    predatorAgent->fitness = 0.0;
+    
+    for(int k = 0; k < hiveSize; ++k)
     {
         x[k] = (double)((double)rand() / (double)RAND_MAX * gridX);
         y[k] = (double)((double)rand() / (double)RAND_MAX * gridY);
@@ -73,11 +78,12 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
         dead[k] = false;
     }
     
-    int targetPrey = rand() % hiveSize;
+    /*       BEGINNING OF SIMULATION LOOP       */
     
-    for(int k = 0; k < totalStepsInMaze; k++)
+    for(int step = 0; step < totalStepsInMaze; ++step)
     {
-        // create the report string for the video
+        
+        /*       CREATE THE REPORT STRING FOR THE VIDEO       */
         if(report)
         {
             // report X, Y, angle of predator
@@ -95,28 +101,24 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             reportString.append(text2);
             
             // report X, Y, angle of all prey
-            for(int i = 0; i <hiveSize; i++)
+            for(int i = 0; i <hiveSize; ++i)
             {
                 if (!dead[i])
                 {
                     char text[1000];
                     
-                    if(i == targetPrey)
-                    {
-                        sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 128, 128, 255);
-                    }
-                    else
-                    {
-                        sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 255, 255, 255);
-                    }
+                    sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 255, 255, 255);
+                    
                     reportString.append(text);
                 }
             }
             reportString.append("N");
             
-        } // end of report string creation
+        }
+        /*       END OF REPORT STRING CREATION       */
         
-        // save data for the LOD file, if provided
+        
+        /*       SAVE DATA FOR THE LOD FILE       */
         if(data_file != NULL)
         {
             // calculate bounding box size for this update
@@ -125,7 +127,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             double luX = DBL_MAX, luY = DBL_MAX;
             double rbX = -DBL_MAX, rbY = -DBL_MAX;
             
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if (!dead[i])
                 {
@@ -155,12 +157,11 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             //                L = dist (rbX, rbY) to (rbX, luY); W = dist (luX, luY) to (rbX, luY)
             bbSizes.push_back( calcDistance(rbX, rbY, rbX, luY) * calcDistance(luX, luY, rbX, luY) );
             
-            
             // calculate mean of shortest distance to other swarm agents
             double aliveCount = 0.0;
             double meanShortestDist = 0.0;
             
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if (!dead[i])
                 {
@@ -169,7 +170,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
                     // find closest agent to agent i
                     double shortestDist = DBL_MAX;
                     
-                    for(int j = 0; j < hiveSize; j++)
+                    for(int j = 0; j < hiveSize; ++j)
                     {
                         if (!dead[j] && i != j)
                         {
@@ -192,15 +193,14 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             // store mean shortest dist for this update
             shortestDists.push_back(meanShortestDist);
             
-            
             // calculate sum of sqrt distances between every alive agent
             double sumSqrtDist = 0.0;
             
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if (!dead[i])
                 {
-                    for(int j = i; j < hiveSize; j++)
+                    for(int j = i; j < hiveSize; ++j)
                     {
                         if (!dead[j] && i != j)
                         {
@@ -217,15 +217,14 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             // store sum of sqrt distances
             sumSqrtDists.push_back(sumSqrtDist);
             
-            
             // calculate swarm density counts: avg. agents within 20, 30, and 40 units of each other
             double avgWithin20 = 0.0, avgWithin30 = 0.0, avgWithin40 = 0.0;
             
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if (!dead[i])
                 {
-                    for(int j = 0; j < hiveSize; j++)
+                    for(int j = 0; j < hiveSize; ++j)
                     {
                         if (!dead[j] && i != j)
                         {
@@ -260,7 +259,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             swarmDensityCount40.push_back(avgWithin40);
             
             // log predator and prey angles
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if(!dead[i])
                 {
@@ -273,7 +272,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
             double cX = 0.0, cY = 0.0;
             calcSwarmCenter(x, y, dead, cX, cY);
             
-            for(int i = 0; i < hiveSize; i++)
+            for(int i = 0; i < hiveSize; ++i)
             {
                 if (!dead[i])
                 {
@@ -281,104 +280,138 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
                 }
             }
             
-        } // end of data gathering
+        }
+        /*       END OF DATA GATHERING       */
         
-        // update predator
-
-        // Predator randomly sometimes chooses new prey
-        if(( (double)( (double)rand() / (double)RAND_MAX ) < selectNewPreyChance ) || (dead[targetPrey]) )
+        
+        /*       UPDATE PREDATOR       */
+        
+        // clear the predator sensors
+        for(int i = 0; i < sensors; ++i)
         {
-            int newPrey = selectClosestPrey(x, y, a, dead, mX, mY, mA);
-            
-            if (newPrey != -1)
+            predatorAgent->states[i] = 0;
+        }
+        
+        // update the predator sensors
+        for(int i = 0; i < hiveSize; ++i)
+        {
+            if (!dead[i])
             {
-                if (targetPrey != newPrey && (double)rand() / (double)RAND_MAX < 0.15)
-                {
-                    delay = 60.0;
-                }
+                double d = calcDistance(mX, mY, x[i], y[i]);
                 
-                targetPrey = newPrey;
+                // don't bother if an agent is too far or dead
+                if(d < visionRange)
+                {
+                    double angle = calcAngle(mX, mY, mA, x[i], y[i]);
+                    
+                    // here we have to map the angle into the sensor, btw: angle in degrees
+                    if(fabs(angle) < 90) // you have a 180 degree vision field in front of you
+                    {
+                        predatorAgent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0))] = 1;
+                    }
+                }
             }
         }
         
-        // Update predator movement angle
-        double d = calcDistance(mX, mY, x[targetPrey], y[targetPrey]);
-        double angle = calcAngle(mX, mY, mA, x[targetPrey], y[targetPrey]);
+        // activate the predator agent's brain
+        predatorAgent->updateStates();
         
-        //here we have to map the angle into the sensor, btw: angle in degree
-        double speed = 2.5;
-        double tA = 4.0;
+        //                                      node 31                                              node 30
+        int action = ((predatorAgent->states[(maxNodes - 1)] & 1) << 1) + (predatorAgent->states[(maxNodes - 2)] & 1);
         
-        if (d > 80.0)
+        switch(action)
         {
-            tA = 16.0;
+                // do nothing
+            case 0:
+                break;
+                
+                // turn 8 degrees right
+            case 1:
+                mA += 8.0;
+                
+                while(mA > 360.0)
+                {
+                    mA -= 360.0;
+                }
+                
+                mX += cos(mA * (cPI / 180.0));
+                mY += sin(mA * (cPI / 180.0));
+                
+                break;
+                
+                // turn 8 degrees left
+            case 2:
+                mA -= 8.0;
+                
+                while(mA < 0.0)
+                {
+                    mA += 360.0;
+                }
+                
+                mX += cos(mA * (cPI / 180.0));
+                mY += sin(mA * (cPI / 180.0));
+                
+                break;
+                
+                // move straight ahead
+            case 3:
+                mX += cos(mA * (cPI / 180.0)) * 2.0;
+                mY += sin(mA * (cPI / 180.0)) * 2.0;
+                
+                break;
+                
+            default:
+                break;
         }
-        else if (d > 10.0)
-        {
-            tA = 8.0;
-        }
-        
-        if(angle>tA)
-        {
-            angle=tA;
-        }
-        else if(angle<tA)
-        {
-            angle=-tA;
-        }
-        if(delay<0.0)
-        {
-            mA-=angle;
-        }
-        
-        delay-=1.0;
-        
-        // Update predator position
-        mX += cos(mA * (cPI / 180.0)) * speed;
-        mY += sin(mA * (cPI / 180.0)) * speed;
         
         // keep position within simulation boundary
         mX = applyBoundary(mX);
         mY = applyBoundary(mY);
         
-        if((d < killDist) && ((rand() & 255) > killChance))
+        // determine if the predator made a kill
+        for(int i = 0; i < hiveSize; ++i)
         {
-            int j = hiveSize;
-            for(int i = 0; i < hiveSize; i++)
+            if (!dead[i])
             {
-                if(dead[i])
+                double d = calcDistance(mX, mY, x[i], y[i]);
+                
+                if ((d < killDist) && (randDouble > killChance))
                 {
-                    j--;
+                    int numAlive = hiveSize;
+                    
+                    for (int i = 0; i < hiveSize; ++i)
+                    {
+                        if (dead[i])
+                        {
+                            --numAlive;
+                        }
+                    }
+                    
+                    if (numAlive > 2)
+                    {
+                        dead[i] = true;
+                    }
                 }
             }
-            if(j > 2)
-            {
-                dead[targetPrey] = true;
-                
-                do
-                {
-                    targetPrey = rand() % hiveSize;
-                } while (dead[targetPrey]);
-            }
-            
-            // increase the delay to make the predator fly away for longer after it successfully killed a target
-            delay = 40.0;
         }
         
-        // update the swarm
-        for(int i = 0; i < hiveSize; i++)
+        /*       END OF PREDATOR UPDATE       */
+        
+        
+        /*       UPDATE SWARM       */
+        for(int i = 0; i < hiveSize; ++i)
         {
             if (!dead[i])
             {
                 //clear the sensors of agent i
-                for(int j = 0; j < sensors * 2; j++)
+                for(int j = 0; j < sensors * 2; ++j)
                 {
                     swarmAgent->states[j + (i * maxNodes)] = 0;
                 }
                 
                 //iterate for agent i over all agents j
                 // indicate the presence of other visible agents in agent i's retina
-                for(int j = 0; j < hiveSize; j++)
+                for(int j = 0; j < hiveSize; ++j)
                 {
                     //ignore i==j because an agent can't see itself
                     if(i != j && !dead[j])
@@ -393,7 +426,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
                             {
-                                swarmAgent->states[(int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes)]=1;
+                                swarmAgent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
                             }
                         }
                     }
@@ -410,22 +443,22 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
                     // you have a 180 degree vision field infront of you
                     if(fabs(angle) < 90)
                     {
-                        swarmAgent->states[sensors+((int)(angle/90.0+((double)sensors/2.0))+(i*maxNodes))]=1;
+                        swarmAgent->states[sensors + (int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
                     }
                 }
             }
         }
         
-        // prepare the agent's brains for activation
+        // activate the swarm agent's brains
         swarmAgent->updateStates();
         
-        // activate each agent's brain, determine its action for this update, and update its position and angle
-        for(int i = 0; i < hiveSize; i++)
+        // activate each swarm agent's brain, determine its action for this update, and update its position and angle
+        for(int i = 0; i < hiveSize; ++i)
         {
             if (!dead[i])
             {
-                //                                  node 31                                                     node 32
-                int action = ((swarmAgent->states[(maxNodes-1) + (i*maxNodes)]&1)<<1) + (swarmAgent->states[(maxNodes-2) + (i*maxNodes)]&1);
+                //                                  node 31                                                     node 30
+                int action = ((swarmAgent->states[(maxNodes - 1) + (i * maxNodes)] & 1) << 1) + (swarmAgent->states[(maxNodes - 2) + (i * maxNodes)] & 1);
                 
                 switch(action)
                 {
@@ -475,12 +508,14 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
                 x[i] = applyBoundary(x[i]);
                 y[i] = applyBoundary(y[i]);
             }
-        } // end of swarm update
+        }
+        /*       END OF SWARM UPDATE       */
 
-        // determine swarm fitness for this update
-        int swarmAlive = 0;
         
-        for(int i = 0; i < hiveSize; i++)
+        /*       DETERMINE FITNESSES FOR THIS UPDATE       */
+        unsigned int swarmAlive = 0;
+        
+        for(int i = 0; i < hiveSize; ++i)
         {
             if (!dead[i])
             {
@@ -493,10 +528,13 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
         
         predatorFitness += hiveSize - swarmAlive;
         
-    } // end of simulation loop
+        /*       END OF FITNESS CALCULATIONS       */
+        
+    }
+    /*       END OF SIMULATION LOOP       */
     
-    // compute overall fitness
-    swarmAgent->fitness = swarmFitness;
+    // compute overall swarm fitness
+    swarmAgent->fitness = (double)swarmFitness;
     
     if(swarmAgent->fitness < 0.0)
     {
@@ -509,7 +547,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
         // count # agents alive at end of simulation
         int aliveCount = 0;
 
-        for(int i = 0; i < hiveSize; i++)
+        for(int i = 0; i < hiveSize; ++i)
         {
             if (!dead[i])
             {
@@ -521,7 +559,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
         double luX = DBL_MAX, luY = DBL_MAX;
         double rbX = -DBL_MAX, rbY = -DBL_MAX;
         
-        for(int i = 0; i < hiveSize; i++)
+        for(int i = 0; i < hiveSize; ++i)
         {
             if (!dead[i])
             {
@@ -551,7 +589,7 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
         double avgVarianceDistToCentroid = 0.0;
         vector<double> varsDistToCentroid;
         
-        for (int i = 0; i < hiveSize; i++)
+        for (int i = 0; i < hiveSize; ++i)
         {
             varsDistToCentroid.push_back(variance(distsToCentroid[i]));
         }
@@ -583,66 +621,6 @@ string tGame::executeGame(tAgent* swarmAgent, FILE *data_file, bool report)
     return reportString;
 }
 
-// selects a prey for the predator to pursue
-int tGame::selectClosestPrey(double x[], double y[], double a[], bool dead[], double mX, double mY, double mA)
-{
-    vector<int> possibleTargets;
-    
-    for (int i = 0; i < hiveSize; i++)
-    {
-        if (!dead[i])
-        {
-          double curPreyDist = calcDistance(mX, mY, x[i], y[i]);
-          
-          double Ux,Uy,Vx,Vy;
-          double angle;
-          //ann kathete divided by hypothenuse
-          Ux=(x[i]-mX)/curPreyDist;
-          //gegenkathete divided by hypothenuse
-          Uy=(y[i]-mY)/curPreyDist;
-          //I forgot what the line below does...
-          Vx=cos(mA*(cPI/180.0));
-          Vy=sin(mA*(cPI/180.0));
-          //anyway the following line computes the angle between my own and the object I am looking at
-          angle = atan2(((Ux*Vy)-(Uy*Vx)), ((Ux*Vx)+(Uy*Vy)))*180.0/cPI;
-              
-          if ( fabs(angle) < 20 && curPreyDist > 0 && ( (double)rand() / (double)RAND_MAX ) < (1.0 / curPreyDist) )
-          {
-              possibleTargets.push_back(i);
-              //targetPrey = i;
-              //targetPreyDist = curPreyDist;
-          }
-        }
-    }
-    
-    if (possibleTargets.size() > 0)
-    {
-        /*int newTarget = -1;
-        double sum = 0.0;
-        
-        for (int i = 0; i < possibleTargets.size(); i++)
-        {
-            sum += (1.0 / calcDistance(mX, mY, possibleTargets[i], possibleTargets[i]));
-        }
-        
-        double sumChoice = ((double)rand() / (double)RAND_MAX) * sum;
-        
-        for(int i = 0; sumChoice > 0; i++)
-        {
-            sumChoice -= (1.0 / calcDistance(mX, mY, possibleTargets[i], possibleTargets[i]));
-            
-            if (sumChoice <= 0)
-                newTarget = i;
-        }
-        
-        return newTarget;*/
-        return possibleTargets[rand() % possibleTargets.size()];
-    }
-    else
-    {
-        return -1;
-    }
-}
 
 // calculates the distance between two points
 double tGame::calcDistance(double fromX, double fromY, double toX, double toY)
@@ -680,7 +658,7 @@ void tGame::calcSwarmCenter(double x[], double y[], bool dead[], double& cX, dou
     cX = 0.0;
     cY = 0.0;
     
-    for(int i = 0; i < hiveSize; i++)
+    for(int i = 0; i < hiveSize; ++i)
     {
         if (!dead[i])
         {
@@ -719,7 +697,7 @@ double tGame::sum(vector<double> values)
 {
     double sum = 0.0;
     
-    for (int i = 0; i < values.size(); i++)
+    for (int i = 0; i < values.size(); ++i)
     {
         sum += values[i];
     }
@@ -739,7 +717,7 @@ double tGame::variance(vector<double> values)
     double sumSqDist = 0.0;
     double mean = average(values);
     
-    for (int i = 0; i < values.size(); i++)
+    for (int i = 0; i < values.size(); ++i)
     {
         sumSqDist += pow( values[i] - mean, 2.0 );
     }
