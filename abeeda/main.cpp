@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
         // display video of simulation
         if(make_video)
         {
-            if(update & 31)
+            if((update & 31) == 0)
             {
                 doBroadcast(bestString);
             }
