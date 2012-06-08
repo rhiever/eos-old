@@ -308,7 +308,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     double angle = calcAngle(mX, mY, mA, x[i], y[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
-                    if(fabs(angle) < 90) // you have a 180 degree vision field in front of you
+                    if(fabs(angle) < 45) // predator a 90 degree vision field in front of it
                     {
                         predatorAgent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0))] = 1;
                     }
@@ -529,28 +529,23 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     }
     /*       END OF SIMULATION LOOP       */
     
-    // compute overall swarm fitness
+    // compute overall fitness
     swarmAgent->fitness = (double)swarmFitness;
+    predatorAgent->fitness = (double)predatorFitness;
     
     if(swarmAgent->fitness < 0.0)
     {
         swarmAgent->fitness = 0.0;
     }
     
+    if(predatorAgent->fitness < 0.0)
+    {
+        predatorAgent->fitness = 0.0;
+    }
+    
     // output to data file, if provided
     if (data_file != NULL)
     {
-        // count # agents alive at end of simulation
-        int aliveCount = 0;
-
-        for(int i = 0; i < hiveSize; ++i)
-        {
-            if (!dead[i])
-            {
-                aliveCount += 1;
-            }
-        }
-        
         // find final bounding box coordinates
         double luX = DBL_MAX, luY = DBL_MAX;
         double rbX = -DBL_MAX, rbY = -DBL_MAX;
@@ -592,12 +587,11 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         avgVarianceDistToCentroid = average(varsDistToCentroid);
             
-        fprintf(data_file, "%d %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
+        fprintf(data_file, "%d %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
                 swarmAgent->born,               // update born
-                swarmFitness,                   // swarm fitness
-                predatorFitness,                // predator fitness
-                swarmAgent->fitness,            // W
-                aliveCount,                     // # alive at end
+                swarmAgent->fitness,            // swarm fitness
+                predatorAgent->fitness,         // predator fitness
+                numAlive,                       // # alive at end
                 luX, luY,                       // (x1, y1) of bounding box at end
                 rbX, rbY,                       // (x2, y2) of bounding box at end
                 average(bbSizes),               // average bounding box size

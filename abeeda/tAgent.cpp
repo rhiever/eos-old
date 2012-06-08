@@ -14,8 +14,10 @@
 tAgent::tAgent(){
 	int i;
 	nrPointingAtMe=1;
-	ancestor=NULL;
-	for(i=0;i<maxNodes;i++){
+	ancestor = NULL;
+    predator = NULL;
+	for(i=0;i<maxNodes;i++)
+    {
 		states[i]=0;
 		newStates[i]=0;
 	}
@@ -35,11 +37,19 @@ tAgent::tAgent(){
 
 tAgent::~tAgent(){
 	for(int i=0;i<hmmus.size();i++)
+    {
 		delete hmmus[i];
-	if(ancestor!=NULL){
+    }
+    
+    delete predator;
+    
+	if(ancestor!=NULL)
+    {
 		ancestor->nrPointingAtMe--;
 		if(ancestor->nrPointingAtMe==0)
+        {
 			delete ancestor;
+        }
 	}
 #ifdef useANN
 	delete ANN;
@@ -159,8 +169,6 @@ void tAgent::setupPhenotype(void){
 		}
          */
 	}
-    cout<<"indeed"<<endl;
-    //exit(0);
 }
 void tAgent::setupMegaPhenotype(int howMany){
 	int i,j;

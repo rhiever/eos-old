@@ -13,12 +13,10 @@
 
 using namespace std;
 
-//double replacementRate=0.1;
+//double replacementRate = 0.1;
 double perSiteMutationRate = 0.005;
-int update = 0;
-int repeats = 1;
-int maxAgent = 100;
-int totalGenerations = 252;//1002;
+int populationSize = 100;
+int totalGenerations = 252;
 bool make_video = false;
 bool display_only = false;
 
@@ -48,17 +46,23 @@ void doBroadcast(string data);
 
 int main(int argc, char *argv[])
 {
-	vector<tAgent*>agent;
-	vector<tAgent*>nextGen;
+	vector<tAgent*> swarmAgents;
+	vector<tAgent*> SANextGen;
+    vector<tAgent*> predatorAgents;
+	vector<tAgent*> PANextGen;
 	tAgent *swarmAgent;
     tAgent *predatorAgent;
 	tGame *game;
-	double maxFitness = 0.0, thresholdMaxFitness = 0.0;
-    string reportString, bestString;
+	double swarmMaxFitness = 0.0;
+    double predatorMaxFitness = 0.0;
+    string reportString = "", bestString = "";
     FILE *LOD;
-    FILE *genomeFile;
+    FILE *swarmGenomeFile;
+    FILE *predatorGenomeFile;
     
-    agent.resize(maxAgent);
+    // initial object setup
+    swarmAgents.resize(populationSize);
+    predatorAgents.resize(populationSize);
 	game = new tGame;
 	swarmAgent = new tAgent;
     predatorAgent = new tAgent;
@@ -68,32 +72,37 @@ int main(int argc, char *argv[])
     
     for (int i = 1; i < argc; ++i)
     {
-        // -d [filename]: display
+        // -d [filename] [filename]: display
         if (strcmp(argv[i], "-d") == 0 && (i + 1) < argc)
         {
             ++i;
             swarmAgent->loadAgent(argv[i]);
             
+            ++i;
+            predatorAgent->loadAgent(argv[i]);
+            
             display_only = make_video = true;
         }
         
-        // -e [filename] [filename]: evolve
+        // -e [filename] [filename] [filename]: evolve
         else if (strcmp(argv[i], "-e") == 0 && (i + 2) < argc)
         {
             ++i;
             LOD = fopen(argv[i], "w");
             ++i;
-            genomeFile = fopen(argv[i], "w");
+            swarmGenomeFile = fopen(argv[i], "w");
+            ++i;
+            predatorGenomeFile = fopen(argv[i], "w");
         }
         
-        // -s [long]: seed
+        // -s [int]: seed
         else if (strcmp(argv[i], "-s") == 0 && (i + 1) < argc)
         {
             ++i;
             srand(atoi(argv[i]));
         }
         
-        // -g [long]: generations
+        // -g [int]: generations
         else if (strcmp(argv[i], "-g") == 0 && (i + 1) < argc)
         {
             ++i;
@@ -121,71 +130,88 @@ int main(int argc, char *argv[])
         exit(0);
     }
     
+    // seed simulation with random genome
+    delete swarmAgent;
     swarmAgent = new tAgent;
     swarmAgent->setupRandomAgent(5000);
     
-    // seeds simulation with a specific start organism
-    //swarmAgent->loadAgent("startOrganism.txt");
-
+    delete predatorAgent;
+    predatorAgent = new tAgent;
+    predatorAgent->setupRandomAgent(5000);
+    
     // save start organism to file
-    swarmAgent->saveGenome(genomeFile);
-    //swarmAgent->saveToDot((char*)"test.dot");
+    swarmAgent->saveGenome(swarmGenomeFile);
+    predatorAgent->saveGenome(predatorGenomeFile);
     
-	for(int i = 0; i < agent.size(); i++)
+    // make mutated copies of the start genome to fill up the initial population
+	for(int i = 0; i < populationSize; ++i)
     {
-		agent[i]=new tAgent;
-		agent[i]->inherit(swarmAgent, 0.01, 0);
-	}
+		swarmAgents[i] = new tAgent;
+		swarmAgents[i]->inherit(swarmAgent, 0.01, 0);
+        
+        predatorAgents[i] = new tAgent;
+		predatorAgents[i]->inherit(predatorAgent, 0.01, 0);
+    }
     
-	nextGen.resize(agent.size());
+	SANextGen.resize(populationSize);
+    PANextGen.resize(populationSize);
+    
 	swarmAgent->nrPointingAtMe--;
-	cout<<"setup complete"<<endl;
+    predatorAgent->nrPointingAtMe--;
     
-	while(update < totalGenerations)
+	cout << "setup complete" << endl;
+    
+    // main loop
+	for (int update = 0; update < totalGenerations; ++update)
     {
-		for(int i = 0; i < agent.size(); i++)
+        // reset fitnesses
+		for(int i = 0; i < populationSize; ++i)
         {
-			agent[i]->fitness=0.0;
-			agent[i]->fitnesses.clear();
+			swarmAgents[i]->fitness = 0.0;
+			//swarmAgents[i]->fitnesses.clear();
 		}
         
-		maxFitness = 0.0;
-        
-		for(int i = 0; i < agent.size(); i++)
+        for(int i = 0; i < populationSize; ++i)
         {
-			for(int j = 0; j < repeats; j++)
-            {
-                // TODO: replace predatorAgent with correct predator agent brain
-                reportString = game->executeGame(agent[i], predatorAgent, NULL, make_video);
- 				agent[i]->fitnesses.push_back(agent[i]->fitness);
-                
-                if(agent[i]->fitness > maxFitness)
-                {
-                    bestString=reportString;
-                    maxFitness=agent[i]->fitness;
-                }
-			}
+			predatorAgents[i]->fitness = 0.0;
+			//predatorAgents[i]->fitnesses.clear();
 		}
-		
-		maxFitness = 0.0;
-		for(int i = 0; i < agent.size(); i++)
+        
+        // determine fitness of population
+		swarmMaxFitness = 0.0;
+        predatorMaxFitness = 0.0;
+        
+		for(int i = 0; i < populationSize; ++i)
         {
-			agent[i]->fitness=agent[i]->fitnesses[0];
-			if(agent[i]->fitness>maxFitness)
+            reportString = game->executeGame(swarmAgents[i], predatorAgents[i], NULL, make_video);
+            
+            // store the swarm agent's corresponding predator agent
+            swarmAgents[i]->predator = new tAgent;
+            swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
+            
+            //swarmAgents[i]->fitnesses.push_back(swarmAgents[i]->fitness);
+            //predatorAgents[i]->fitnesses.push_back(predatorAgents[i]->fitness);
+            
+            if(swarmAgents[i]->fitness > swarmMaxFitness)
             {
-				maxFitness=agent[i]->fitness;
+                // show simulation with best-performing swarm agents, since more interested in swarming behavior
+                bestString = reportString;
+                swarmMaxFitness = swarmAgents[i]->fitness;
+            }
+            
+            if(predatorAgents[i]->fitness > predatorMaxFitness)
+            {
+                predatorMaxFitness = predatorAgents[i]->fitness;
             }
 		}
-		cout << "update " << update << ": " << (double)maxFitness << endl;
+		
+		cout << "update " << update << ": swarm [" << (double)swarmMaxFitness << "] :: predator ["<< (double)predatorMaxFitness << "]" << endl;
         
+        // display video of simulation
         if(make_video)
         {
-            if(maxFitness > thresholdMaxFitness)
+            if(update & 31)
             {
-                thresholdMaxFitness = maxFitness;
-                
-                cout << "new threshold: " << thresholdMaxFitness << endl;
-                
                 doBroadcast(bestString);
             }
             else if (update == totalGenerations - 1)
@@ -195,42 +221,77 @@ int main(int argc, char *argv[])
             }
         }
         
-		for(int i = 0; i < agent.size(); i++)
+        // construct swarm agent population for the next generation
+		for(int i = 0; i < populationSize; ++i)
 		{
 			tAgent *d = new tAgent;
             int j = 0;
             
 			do
             {
-                j = rand() % (int)agent.size();
-            } while((j == i) || (randDouble > (agent[j]->fitness / maxFitness)));
+                j = rand() % populationSize;
+            } while((j == i) || (randDouble > (swarmAgents[j]->fitness / swarmMaxFitness)));
             
-			d->inherit(agent[j], perSiteMutationRate, update);
-			nextGen[i] = d;
+			d->inherit(swarmAgents[j], perSiteMutationRate, update);
+			SANextGen[i] = d;
 		}
         
-		for(int i = 0; i < agent.size(); i++)
-        {
-			agent[i]->retire();
-			agent[i]->nrPointingAtMe--;
-			if(agent[i]->nrPointingAtMe == 0)
+        // construct predator agent population for the next generation
+        for(int i = 0; i < populationSize; ++i)
+		{
+			tAgent *d = new tAgent;
+            int j = 0;
+            
+			do
             {
-				delete agent[i];
-            }
-			agent[i] = nextGen[i];
+                j = rand() % populationSize;
+            } while((j == i) || (randDouble > (predatorAgents[j]->fitness / predatorMaxFitness)));
+            
+			d->inherit(predatorAgents[j], perSiteMutationRate, update);
+			PANextGen[i] = d;
 		}
         
-		agent = nextGen;
-		update++;
+        // shuffle the populations so there is a small chance of the same predator/prey combo in the next generation
+        random_shuffle(SANextGen.begin(), SANextGen.end());
+        random_shuffle(PANextGen.begin(), PANextGen.end());
+        
+        // retire and replace the swarm agents from the previous generation
+		for(int i = 0; i < populationSize; ++i)
+        {
+			swarmAgents[i]->retire();
+			swarmAgents[i]->nrPointingAtMe--;
+			if(swarmAgents[i]->nrPointingAtMe == 0)
+            {
+				delete swarmAgents[i];
+            }
+			swarmAgents[i] = SANextGen[i];
+		}
+        
+		swarmAgents = SANextGen;
+        
+        // retire and replace the predator agents from the previous generation
+		for(int i = 0; i < populationSize; ++i)
+        {
+			predatorAgents[i]->retire();
+			predatorAgents[i]->nrPointingAtMe--;
+			if(predatorAgents[i]->nrPointingAtMe == 0)
+            {
+				delete predatorAgents[i];
+            }
+			predatorAgents[i] = PANextGen[i];
+		}
+        
+		predatorAgents = PANextGen;
 	}
 	
     // save the genome file of the lmrca
-	agent[0]->ancestor->ancestor->saveGenome(genomeFile);
+	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
+    predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
     
     // save LOD
     vector<tAgent*> saveLOD;
     
-    tAgent* curAncestor = agent[0]->ancestor->ancestor;
+    tAgent* curAncestor = swarmAgents[0]->ancestor->ancestor;
     
     while (curAncestor != NULL)
     {
@@ -241,12 +302,12 @@ int main(int argc, char *argv[])
     
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
-        // TODO: replace predatorAgent with correct predator agent brain
-        game->executeGame(*it, predatorAgent, LOD, make_video);
+        game->executeGame(*it, (*it)->predator, LOD, make_video);
     }
     
     fclose(LOD);
-    fclose(genomeFile);
+    fclose(swarmGenomeFile);
+    fclose(predatorGenomeFile);
     
     return 0;
 }

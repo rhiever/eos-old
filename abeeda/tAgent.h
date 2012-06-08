@@ -16,8 +16,7 @@
 
 using namespace std;
 
-static int masterID=0;
-
+static int masterID = 0;
 
 class tDot{
 public:
@@ -35,6 +34,7 @@ public:
 #endif
 	
 	tAgent *ancestor;
+    tAgent *predator;
 	unsigned int nrPointingAtMe;
 	unsigned char states[maxNodes*hiveSize],newStates[maxNodes*hiveSize];
 	double fitness,convFitness;

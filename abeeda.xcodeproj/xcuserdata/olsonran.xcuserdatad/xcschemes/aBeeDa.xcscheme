@@ -47,15 +47,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-d startOrganism.genome -p 0.00"
+            argument = "-d startOrganism.genome startOrganism.genome -s 56"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.txt gen.txt -s 56 -p 0.0"
+            argument = "-e lod.txt swarm.genome predator.genome -s 56"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.txt gen.txt -s 56 -p 0.0 -v"
+            argument = "-e lod.txt swarm.genome predator.genome -s 56 -v"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
