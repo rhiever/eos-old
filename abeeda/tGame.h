@@ -43,7 +43,7 @@ public:
     string executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report);
     tGame();
     ~tGame();
-    double calcDistance(double fromX, double fromY, double toX, double toY);
+    double calcDistanceSquared(double fromX, double fromY, double toX, double toY);
     double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
     void calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY);
     void applyBoundary(double& positionVal);

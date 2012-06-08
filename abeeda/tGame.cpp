@@ -16,14 +16,14 @@
 #define cPI 3.14159265
 
 // simulation-specific constants
-#define preyVisionRange 100.0
-#define predatorVisionRange 200.0
+#define preyVisionRange 100.0 * 100.0
+#define predatorVisionRange 200.0 * 200.0
 #define preySensors 12
 #define predatorSensors 12
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
-#define killDist 5.0
+#define killDist 5.0 * 5.0
 #define killChance 0.25
 #define boundaryDist 250
 
@@ -44,7 +44,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     vector<double> bbSizes;
     vector<double> shortestDists;
-    vector<double> sumSqrtDists;
     vector<double> swarmDensityCount20;
     vector<double> swarmDensityCount30;
     vector<double> swarmDensityCount40;
@@ -160,7 +159,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             
             // area = L x W
             //                L = dist (rbX, rbY) to (rbX, luY); W = dist (luX, luY) to (rbX, luY)
-            bbSizes.push_back( calcDistance(rbX, rbY, rbX, luY) * calcDistance(luX, luY, rbX, luY) );
+            bbSizes.push_back( calcDistanceSquared(rbX, rbY, rbX, luY) * calcDistanceSquared(luX, luY, rbX, luY) );
             
             // calculate mean of shortest distance to other swarm agents
             double aliveCount = 0.0;
@@ -179,7 +178,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     {
                         if (!dead[j] && i != j)
                         {
-                            double dist = calcDistance(x[i], y[i], x[j], y[j]);
+                            double dist = calcDistanceSquared(x[i], y[i], x[j], y[j]);
                             if (dist < shortestDist)
                             {
                                 shortestDist = dist;
@@ -198,30 +197,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             // store mean shortest dist for this update
             shortestDists.push_back(meanShortestDist);
             
-            // calculate sum of sqrt distances between every alive agent
-            double sumSqrtDist = 0.0;
-            
-            for(int i = 0; i < swarmSize; ++i)
-            {
-                if (!dead[i])
-                {
-                    for(int j = i; j < swarmSize; ++j)
-                    {
-                        if (!dead[j] && i != j)
-                        {
-                            // sum the sqrt of the dist between every alive agent
-                            sumSqrtDist += sqrt( calcDistance(x[i], y[i], x[j], y[j]) );
-                        }
-                    }
-                }
-            }
-            
-            // average dists over # agents alive
-            sumSqrtDist /= aliveCount;
-            
-            // store sum of sqrt distances
-            sumSqrtDists.push_back(sumSqrtDist);
-            
             // calculate swarm density counts: avg. agents within 20, 30, and 40 units of each other
             double avgWithin20 = 0.0, avgWithin30 = 0.0, avgWithin40 = 0.0;
             
@@ -233,20 +208,20 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     {
                         if (!dead[j] && i != j)
                         {
-                            double dist = calcDistance(x[i], y[i], x[j], y[j]);
+                            double dist = calcDistanceSquared(x[i], y[i], x[j], y[j]);
                             
-                            if (dist <= 40.0)
+                            if (dist <= 40.0 * 40.0)
                             {
                                 avgWithin40 += 1.0;
                                 avgWithin30 += 1.0;
                                 avgWithin20 += 1.0;
                             }
-                            else if (dist <= 30.0)
+                            else if (dist <= 30.0 * 30.0)
                             {
                                 avgWithin30 += 1.0;
                                 avgWithin20 += 1.0;
                             }
-                            else if (dist <= 20.0)
+                            else if (dist <= 20.0 * 20.0)
                             {
                                 avgWithin20 += 1.0;
                             }
@@ -281,7 +256,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 if (!dead[i])
                 {
-                    distsToCentroid[i].push_back(calcDistance(x[i], y[i], cX, cY));
+                    distsToCentroid[i].push_back(calcDistanceSquared(x[i], y[i], cX, cY));
                 }
             }
             
@@ -302,7 +277,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             if (!dead[i])
             {
-                double d = calcDistance(mX, mY, x[i], y[i]);
+                double d = calcDistanceSquared(mX, mY, x[i], y[i]);
                 
                 // don't bother if an agent is too far
                 if(d < predatorVisionRange)
@@ -388,7 +363,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 if (!dead[i])
                 {
-                    double d = calcDistance(mX, mY, x[i], y[i]);
+                    double d = calcDistanceSquared(mX, mY, x[i], y[i]);
                     
                     if ((d < killDist) && (randDouble > killChance))
                     {
@@ -420,7 +395,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     //ignore i==j because an agent can't see itself
                     if(i != j && !dead[j])
                     {
-                        double d = calcDistance(x[i], y[i], x[j], y[j]);
+                        double d = calcDistanceSquared(x[i], y[i], x[j], y[j]);
 			
                         //don't bother if an agent is too far
                         if(d < preyVisionRange)
@@ -437,7 +412,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 }
                 
                 // indicate the presence of the predator in agent i's retina
-                double d = calcDistance(x[i], y[i], mX, mY);
+                double d = calcDistanceSquared(x[i], y[i], mX, mY);
                 
                 if (d < preyVisionRange)
                 {
@@ -534,7 +509,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             
             for (int j = 0; j < swarmSize; ++j)
             {
-                if (i != j && calcDistance(x[i], y[i], x[j], y[j]) < 40)
+                if (i != j && calcDistanceSquared(x[i], y[i], x[j], y[j]) < 40.0 * 40.0)
                 {
                     ++nearbyCount;
                 }
@@ -609,7 +584,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         avgVarianceDistToCentroid = average(varsDistToCentroid);
             
-        fprintf(data_file, "%d %f %f %d %f %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
+        fprintf(data_file, "%d %f %f %d %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
                 swarmAgent->born,               // update born
                 swarmAgent->fitness,            // swarm fitness
                 predatorAgent->fitness,         // predator fitness
@@ -619,7 +594,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 average(bbSizes),               // average bounding box size
                 variance(bbSizes),              // variance in bounding box size
                 average(shortestDists),         // average of avg. shortest distance to other swarm agent
-                sum(sumSqrtDists),              // sum of sqrt of dist from every agent to every other agent over all updates
                 average(swarmDensityCount20),   // average # of agents within 20 units of each other
                 average(swarmDensityCount30),   // average # of agents within 30 units of each other
                 average(swarmDensityCount40),   // average # of agents within 40 units of each other
@@ -634,19 +608,19 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
 }
 
 
-// calculates the distance between two points
-double tGame::calcDistance(double fromX, double fromY, double toX, double toY)
+// calculates the distance^2 between two points
+double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double toY)
 {
     double diffX = fromX - toX;
     double diffY = fromY - toY;
     
-    return sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+    return ( diffX * diffX ) + ( diffY * diffY );
 }
 
 // calculates the angle between two objects
 double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)
 {
-    double d = calcDistance(fromX, fromY, toX, toY);
+    double d = sqrt( calcDistanceSquared(fromX, fromY, toX, toY) );
     double Ux, Uy, Vx, Vy;
     
     //ann kathete divided by hypothenuse
@@ -743,7 +717,7 @@ double tGame::mutualInformation(vector<int> A,vector<int>B)
 	set<int>::iterator aI,bI;
 	map<int,map<int,double> > pXY;
 	map<int,double> pX,pY;
-	int i,j;
+	int i;
 	double c=1.0/(double)A.size();
 	double I=0.0;
 	for(i=0;i<A.size();i++){
@@ -788,7 +762,7 @@ double tGame::ei(vector<int> A,vector<int> B,int theMask){
 	set<int>::iterator aI,bI;
 	map<int,map<int,double> > pXY;
 	map<int,double> pX,pY;
-	int i,j;
+	int i;
 	double c=1.0/(double)A.size();
 	double I=0.0;
 	for(i=0;i<A.size();i++){
@@ -812,6 +786,7 @@ double tGame::ei(vector<int> A,vector<int> B,int theMask){
 				I+=pXY[*aI][*bI]*log2(pXY[*aI][*bI]/(pY[*bI]));
 	return -I;
 }
+
 double tGame::computeAtomicPhi(vector<int>A,int states){
 	int i;
 	double P,EIsystem;
@@ -830,8 +805,6 @@ double tGame::computeAtomicPhi(vector<int>A,int states){
 //	cout<<-EIsystem+P<<" "<<EIsystem<<" "<<P<<" "<<T0.size()<<" "<<T1.size()<<endl;
 	return -EIsystem+P;
 }
-
-
 
 double tGame::computeR(vector<vector<int> > table,int howFarBack){
 	double Iwh,Iws,Ish,Hh,Hs,Hw,Hhws,delta,R;
@@ -883,6 +856,7 @@ double tGame::nonPredictiveI(vector<int>A){
 	}
 	return entropy(I)-mutualInformation(S, I);
 }
+
 double tGame::predictNextInput(vector<int>A){
 	vector<int> S,I;
 	S.clear(); I.clear();
@@ -911,6 +885,7 @@ int tGame::neuronsConnectedToPreyRetina(tAgent *agent){
     delete A;
     return c;
 }
+
 int tGame::neuronsConnectedToPredatorRetina(tAgent* agent){
     tAgent *A=new tAgent;
     int i,j,c=0;
@@ -924,7 +899,6 @@ int tGame::neuronsConnectedToPredatorRetina(tAgent* agent){
     return c;
     
 }
-
 
 //** tOctuplet implementation
 void tOctuplet::loadOctuplet(FILE *f){
@@ -1013,7 +987,3 @@ int tExperiment::selves(void){
     return (int) selfSequences.size();
     
 }
-
-
-
-
