@@ -509,20 +509,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
 
         
         /*       DETERMINE FITNESSES FOR THIS UPDATE       */
-        unsigned int swarmAlive = 0;
         
-        for(int i = 0; i < hiveSize; ++i)
-        {
-            if (!dead[i])
-            {
-                ++swarmAlive;
-            }
-        }
+        swarmFitness += numAlive;
         
-        // closer to center of swarm = better
-        swarmFitness += swarmAlive;
-        
-        predatorFitness += hiveSize - swarmAlive;
+        predatorFitness += hiveSize - numAlive;
         
         /*       END OF FITNESS CALCULATIONS       */
         
