@@ -23,7 +23,7 @@
 #define gridY 100.0
 #define killDist 5.0
 #define killChance 0.25
-#define maxDistFromCenter 256
+#define maxDistFromCenter 250
 
 tGame::tGame()
 {

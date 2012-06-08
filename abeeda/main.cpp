@@ -173,11 +173,8 @@ int main(int argc, char *argv[])
         {
 			swarmAgents[i]->fitness = 0.0;
 			//swarmAgents[i]->fitnesses.clear();
-		}
-        
-        for(int i = 0; i < populationSize; ++i)
-        {
-			predatorAgents[i]->fitness = 0.0;
+            
+            predatorAgents[i]->fitness = 0.0;
 			//predatorAgents[i]->fitnesses.clear();
 		}
         
@@ -306,7 +303,14 @@ int main(int argc, char *argv[])
     
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
-        game->executeGame(*it, (*it)->predator, LOD, make_video);
+        if ((*it)->predator == NULL)
+        {
+            cout << "NULL predator at " << (*it)->born << endl;
+        }
+        else
+        {
+            game->executeGame(*it, (*it)->predator, LOD, make_video);
+        }
     }
     
     fclose(LOD);
