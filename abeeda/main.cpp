@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
     predatorAgent->setupRandomAgent(5000);
     
     // save start organism to file
-    swarmAgent->saveGenome(swarmGenomeFile);
-    predatorAgent->saveGenome(predatorGenomeFile);
+    //swarmAgent->saveGenome(swarmGenomeFile);
+    //predatorAgent->saveGenome(predatorGenomeFile);
     
     swarmAgents[0] = swarmAgent;
     predatorAgents[0] = predatorAgent;
