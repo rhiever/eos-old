@@ -15,15 +15,17 @@
 
 #define cPI 3.14159265
 
-#define visionRange 100.0
-#define sensors 12
-#define totalStepsInMaze 2000
-#define selectNewPreyChance 1
+// simulation-specific constants
+#define preyVisionRange 100.0
+#define predatorVisionRange 200.0
+#define preySensors 12
+#define predatorSensors 4
+#define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
 #define killDist 5.0
 #define killChance 0.25
-#define maxDistFromCenter 250
+#define boundaryDist 250
 
 tGame::tGame()
 {
@@ -83,7 +85,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     /*       BEGINNING OF SIMULATION LOOP       */
     
-    for(int step = 0; step < totalStepsInMaze; ++step)
+    for(int step = 0; step < totalStepsInSimulation; ++step)
     {
         
         /*       CREATE THE REPORT STRING FOR THE VIDEO       */
@@ -290,7 +292,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         /*       UPDATE PREDATOR       */
         
         // clear the predator sensors
-        for(int i = 0; i < sensors; ++i)
+        for(int i = 0; i < predatorSensors; ++i)
         {
             predatorAgent->states[i] = 0;
         }
@@ -303,14 +305,14 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 double d = calcDistance(mX, mY, x[i], y[i]);
                 
                 // don't bother if an agent is too far
-                if(d < 2.0 * visionRange)
+                if(d < predatorVisionRange)
                 {
                     double angle = calcAngle(mX, mY, mA, x[i], y[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
-                    if(fabs(angle) < 45) // predator a 90 degree vision field in front of it
+                    if(fabs(angle) < 45) // predator has a 90 degree vision field in front of it
                     {
-                        predatorAgent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0))] = 1;
+                        predatorAgent->states[(int)(angle / (90.0 / ((double)predatorSensors / 2.0)) + ((double)predatorSensors / 2.0))] = 1;
                     }
                 }
             }
@@ -400,7 +402,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             if (!dead[i])
             {
                 //clear the sensors of agent i
-                for(int j = 0; j < sensors * 2; ++j)
+                for(int j = 0; j < preySensors * 2; ++j)
                 {
                     swarmAgent->states[j + (i * maxNodes)] = 0;
                 }
@@ -415,14 +417,14 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         double d = calcDistance(x[i], y[i], x[j], y[j]);
 			
                         //don't bother if an agent is too far
-                        if(d < visionRange)
+                        if(d < preyVisionRange)
                         {
                             double angle = calcAngle(x[i], y[i], a[i], x[j], y[j]);
                             
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
                             {
-                                swarmAgent->states[(int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
+                                swarmAgent->states[(int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
                             }
                         }
                     }
@@ -431,7 +433,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 // indicate the presence of the predator in agent i's retina
                 double d = calcDistance(x[i], y[i], mX, mY);
                 
-                if (d < visionRange)
+                if (d < preyVisionRange)
                 {
                     double angle = calcAngle(x[i], y[i], a[i], mX, mY);
 
@@ -439,7 +441,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     // you have a 180 degree vision field infront of you
                     if(fabs(angle) < 90)
                     {
-                        swarmAgent->states[sensors + (int)(angle / (90.0 / ((double)sensors / 2.0)) + ((double)sensors / 2.0)) + (i * maxNodes)] = 1;
+                        swarmAgent->states[preySensors + (int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
                     }
                 }
             }
@@ -657,15 +659,15 @@ double tGame::applyBoundary(double positionVal)
 {
     double val = positionVal;
 
-    if (fabs(val) > maxDistFromCenter)
+    if (fabs(val) > boundaryDist)
     {
         if (val < 0)
         {
-            val = -1.0 * maxDistFromCenter;
+            val = -1.0 * boundaryDist;
         }
         else
         {
-            val = maxDistFromCenter;
+            val = boundaryDist;
         }
     }
     
@@ -874,7 +876,7 @@ int tGame::neuronsConnectedToPreyRetina(tAgent *agent){
     A->setupPhenotype();
     for(i=0;i<A->hmmus.size();i++)
         for(j=0;j<A->hmmus[i]->ins.size();j++)
-        if(A->hmmus[i]->ins[j]<sensors)
+        if(A->hmmus[i]->ins[j]<preySensors)
             c++;
     delete A;
     return c;
@@ -886,7 +888,7 @@ int tGame::neuronsConnectedToPredatorRetina(tAgent* agent){
     A->setupPhenotype();
     for(i=0;i<A->hmmus.size();i++)
         for(j=0;j<A->hmmus[i]->ins.size();j++)
-            if((A->hmmus[i]->ins[j]<(sensors*2))&&(A->hmmus[i]->ins[j]>=sensors))
+            if((A->hmmus[i]->ins[j]<(preySensors*2))&&(A->hmmus[i]->ins[j]>=preySensors))
                 c++;
     delete A;
     return c;
