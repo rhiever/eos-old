@@ -7,6 +7,8 @@
 # Michigan State University       #
 ###################################
 
+This version has a hand-coded predator.
+
 !!! The information below is out of date !!!
 
 ###############
