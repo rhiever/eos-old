@@ -111,7 +111,18 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 {
                     char text[1000];
                     
-                    sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 255, 255, 255);
+                    double angle = calcAngle(mX, mY, mA, x[i], y[i]);
+                    double dist = calcDistanceSquared(mX, mY, x[i], y[i]);
+                    
+                    // here we have to map the angle into the sensor, btw: angle in degrees
+                    if(fabs(angle) < 45 && dist < predatorVisionRange) // predator has a 90 degree vision field in front of it
+                    {
+                        sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 30, 144, 255);
+                    }
+                    else
+                    {
+                        sprintf(text,"%f,%f,%f,%d,%d,%d=", x[i], y[i], a[i], 255, 255, 255);
+                    }
                     
                     reportString.append(text);
                 }
