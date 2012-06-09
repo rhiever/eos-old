@@ -111,8 +111,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 {
                     char text[1000];
                     
-                    double angle = calcAngle(mX, mY, mA, x[i], y[i]);
                     double dist = calcDistanceSquared(mX, mY, x[i], y[i]);
+                    double angle = calcAngle(mX, mY, mA, x[i], y[i], sqrt(dist));
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45 && dist < predatorVisionRange) // predator has a 90 degree vision field in front of it
@@ -293,7 +293,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 // don't bother if an agent is too far
                 if(d < predatorVisionRange)
                 {
-                    double angle = calcAngle(mX, mY, mA, x[i], y[i]);
+                    double angle = calcAngle(mX, mY, mA, x[i], y[i], sqrt(d));
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45) // predator has a 90 degree vision field in front of it
@@ -411,7 +411,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         //don't bother if an agent is too far
                         if(d < preyVisionRange)
                         {
-                            double angle = calcAngle(x[i], y[i], a[i], x[j], y[j]);
+                            double angle = calcAngle(x[i], y[i], a[i], x[j], y[j], sqrt(d));
                             
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
@@ -427,7 +427,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 if (d < preyVisionRange)
                 {
-                    double angle = calcAngle(x[i], y[i], a[i], mX, mY);
+                    double angle = calcAngle(x[i], y[i], a[i], mX, mY, sqrt(d));
 
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // you have a 180 degree vision field infront of you
@@ -631,10 +631,19 @@ double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double
 }
 
 // calculates the angle between two objects
-double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)
+double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY, double dist)
 {
-    double d = sqrt( calcDistanceSquared(fromX, fromY, toX, toY) );
+    double d = 0.0;
     double Ux, Uy, Vx, Vy;
+    
+    if (dist == 0.0)
+    {
+        d = sqrt( calcDistanceSquared(fromX, fromY, toX, toY) );
+    }
+    else
+    {
+        d = dist;
+    }
     
     //ann kathete divided by hypothenuse
     Ux = (toX - fromX) / d;

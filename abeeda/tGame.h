@@ -44,7 +44,7 @@ public:
     tGame();
     ~tGame();
     double calcDistanceSquared(double fromX, double fromY, double toX, double toY);
-    double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
+    double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY, double dist = 0.0);
     void calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY);
     void applyBoundary(double& positionVal);
     double sum(vector<double> values);
