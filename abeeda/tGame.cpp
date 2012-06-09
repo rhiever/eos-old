@@ -499,27 +499,29 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         /*       DETERMINE FITNESSES FOR THIS UPDATE       */
         
-        swarmFitness += numAlive;
-        
         predatorFitness += swarmSize - numAlive;
+        
+        vector<double> nearbyCounts;
         
         for (int i = 0; i < swarmSize; ++i)
         {
-            int nearbyCount = 0;
-            
-            for (int j = 0; j < swarmSize; ++j)
+            if (!dead[i])
             {
-                if (i != j && calcDistanceSquared(x[i], y[i], x[j], y[j]) < 40.0 * 40.0)
+                int nearbyCount = 1;
+                
+                for (int j = 0; j < swarmSize; ++j)
                 {
-                    ++nearbyCount;
+                    if (!dead[j] && i != j && calcDistanceSquared(x[i], y[i], x[j], y[j]) < 50.0 * 50.0)
+                    {
+                        ++nearbyCount;
+                    }
                 }
-            }
-            
-            if (nearbyCount >= 0.5 * (double)numAlive)
-            {
-                swarmFitness += 1.0 / swarmSize;
+                
+                nearbyCounts.push_back((double)nearbyCount);
             }
         }
+        
+        swarmFitness += numAlive * (average(nearbyCounts) / (double)numAlive);
         
         /*       END OF FITNESS CALCULATIONS       */
         

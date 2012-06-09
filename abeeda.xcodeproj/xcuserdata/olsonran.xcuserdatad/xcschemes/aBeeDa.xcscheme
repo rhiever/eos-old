@@ -51,7 +51,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.txt swarm.genome predator.genome"
+            argument = "-e lod.txt swarm.genome predator.genome -g 50"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
