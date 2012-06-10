@@ -219,16 +219,19 @@ void tAgent::resetBrain(void){
 #endif
 }
 
-void tAgent::updateStates(void){
+void tAgent::updateStates(void)
+{
 	int i;
-	for(i=0;i<hmmus.size();i++){
+	for(i=0;i<hmmus.size();i++)
+    {
 		hmmus[i]->update(&states[0],&newStates[0]);
     }
-	for(i=0;i<maxNodes*swarmSize;i++){
+	for(i=0;i<maxNodes*swarmSize;i++)
+    {
 		states[i]=newStates[i];
 		newStates[i]=0;
 	}
-	totalSteps++;
+	++totalSteps;
 }
 
 void tAgent::showBrain(void){

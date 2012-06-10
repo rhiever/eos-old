@@ -113,51 +113,78 @@ void tHMMU::setupQuick(vector<unsigned char> &genome, int start){
 	
 }
 
-void tHMMU::update(unsigned char *states,unsigned char *newStates){
+void tHMMU::update(unsigned char *states, unsigned char *newStates)
+{
 	int I=0;
 	int i,j,r;
-	unsigned char mod;
 #ifdef feedbackON
-	if((nrPos!=0)&&(states[posFBNode]==1)){
-		for(i=0;i<chosenInPos.size();i++){
+    unsigned char mod;
+    
+	if((nrPos!=0)&&(states[posFBNode]==1))
+    {
+		for(i=0;i<chosenInPos.size();i++)
+        {
 			mod=(unsigned char)(rand()%(int)posLevelOfFB[i]);
-			if((hmm[chosenInPos[i]][chosenOutPos[i]]+mod)<255){
+			if((hmm[chosenInPos[i]][chosenOutPos[i]]+mod)<255)
+            {
 				hmm[chosenInPos[i]][chosenOutPos[i]]+=mod;
 				sums[chosenInPos[i]]+=mod;
 			}
 		}
 	}
-	if((nrNeg!=0)&&(states[negFBNode]==1)){
-		for(i=0;i<chosenInNeg.size();i++){
+	if((nrNeg!=0)&&(states[negFBNode]==1))
+    {
+		for(i=0;i<chosenInNeg.size();i++)
+        {
 			mod=(unsigned char)(rand()%(int)negLevelOfFB[i]);
-			if((hmm[chosenInNeg[i]][chosenOutNeg[i]]-mod)>0){
+			if((hmm[chosenInNeg[i]][chosenOutNeg[i]]-mod)>0)
+            {
 				hmm[chosenInNeg[i]][chosenOutNeg[i]]-=mod;
 				sums[chosenInNeg[i]]-=mod;
 			}
 		}
 	}
 #endif
+    
 	for(i=0;i<ins.size();i++)
+    {
 		I=(I<<1)+((states[ins[i]])&1);
+    }
+    
 	r=1+(rand()%(sums[I]-1));
 	j=0;
-//	cout<<I<<" "<<(int)hmm.size()<<" "<<(int)hmm[0].size()<<endl;
-	while(r>hmm[I][j]){
+    //	cout<<I<<" "<<(int)hmm.size()<<" "<<(int)hmm[0].size()<<endl;
+	while(r>hmm[I][j])
+    {
 		r-=hmm[I][j];
 		j++;
 	}
+    
 	for(i=0;i<outs.size();i++)
+    {
 		newStates[outs[i]]|=(j>>i)&1;
-		//newStates[outs[i]]=(j>>i)&1;
+    }
 #ifdef feedbackON
 	chosenInPos.push_back(I);
 	chosenInNeg.push_back(I);
 	chosenOutPos.push_back(j);
 	chosenOutNeg.push_back(j);
-	while(chosenInPos.size()>nrPos) chosenInPos.pop_front();
-	while(chosenOutPos.size()>nrPos) chosenOutPos.pop_front();
-	while(chosenInNeg.size()>nrNeg) chosenInNeg.pop_front();
-	while(chosenOutNeg.size()>nrNeg) chosenOutNeg.pop_front();
+	while(chosenInPos.size()>nrPos)
+    {
+        chosenInPos.pop_front();
+    }
+	while(chosenOutPos.size()>nrPos)
+    {
+        chosenOutPos.pop_front();
+    }
+	while(chosenInNeg.size()>nrNeg)
+    {
+        chosenInNeg.pop_front();
+    }
+	while(chosenOutNeg.size()>nrNeg)
+    {
+        chosenOutNeg.pop_front();
+    }
 #endif
 }
 
