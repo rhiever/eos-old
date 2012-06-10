@@ -30,7 +30,7 @@ void tHMMU::setup(vector<unsigned char> &genome, int start){
 	int i,j,k;
 	ins.clear();
 	outs.clear();
-	k=(start+2)%genome.size();
+	k=(start+2)%(int)genome.size();
 
 	_xDim=1+(genome[(k++)%genome.size()]&3);
 	_yDim=1+(genome[(k++)%genome.size()]&3);
@@ -74,7 +74,7 @@ void tHMMU::setupQuick(vector<unsigned char> &genome, int start){
 	int i,j,k;
 	ins.clear();
 	outs.clear();
-	k=(start+2)%genome.size();
+	k=(start+2)%(int)genome.size();
 	
 	_xDim=1+(genome[(k++)%genome.size()]&3);
 	_yDim=1+(genome[(k++)%genome.size()]&3);

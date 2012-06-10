@@ -101,7 +101,7 @@ void tAgent::ampUpStartCodons(void){
 		genome[i]=rand()&255;
 	for(i=0;i<4;i++)
 	{
-		j=rand()%(genome.size()-100);
+		j=rand()%((int)genome.size()-100);
 		genome[j]=42;
 		genome[j+1]=(255-42);
 		for(int k=2;k<20;k++)
@@ -110,9 +110,9 @@ void tAgent::ampUpStartCodons(void){
 }
 
 void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
-	int nucleotides=from->genome.size();
+	int nucleotides=(int)from->genome.size();
 	int i,s,o,w;
-	double localMutationRate=4.0/from->genome.size();
+	//double localMutationRate=4.0/from->genome.size();
 	vector<unsigned char> buffer;
 	born=theTime;
 	ancestor=from;
@@ -128,8 +128,8 @@ void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
 	if((((double)rand()/(double)RAND_MAX)<0.05)&&(genome.size()<20000)){
 		//duplication
 		w=15+rand()&511;
-		s=rand()%(genome.size()-w);
-		o=rand()%genome.size();
+		s=rand()%((int)genome.size()-w);
+		o=rand()%(int)genome.size();
 		buffer.clear();
 		buffer.insert(buffer.begin(),genome.begin()+s,genome.begin()+s+w);
 		genome.insert(genome.begin()+o,buffer.begin(),buffer.end());
@@ -137,7 +137,7 @@ void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
 	if((((double)rand()/(double)RAND_MAX)<0.02)&&(genome.size()>1000)){
 		//deletion
 		w=15+rand()&511;
-		s=rand()%(genome.size()-w);
+		s=rand()%((int)genome.size()-w);
 		genome.erase(genome.begin()+s,genome.begin()+s+w);
 	}
 	//setupPhenotype();
@@ -242,8 +242,8 @@ void tAgent::showBrain(void){
 }
 
 void tAgent::initialize(int x, int y, int d){
-	int i,j;
-	unsigned char dummy;
+	//int i,j;
+	//unsigned char dummy;
 	xPos=x;
 	yPos=y;
 	direction=d;
@@ -276,7 +276,7 @@ void tAgent::saveFromLMRCAtoNULL(FILE *statsFile,FILE *genomeFile){
 	if(ancestor!=NULL)
 		ancestor->saveFromLMRCAtoNULL(statsFile,genomeFile);
 	if(!saved){ 
-		fprintf(statsFile,"%i	%i	%i	%f	%i	%f	%i	%i\n",ID,born,genome.size(),fitness,bestSteps,(float)totalSteps/(float)nrOfOffspring,correct,incorrect);
+		fprintf(statsFile,"%i	%i	%i	%f	%i	%f	%i	%i\n",ID,born,(int)genome.size(),fitness,bestSteps,(float)totalSteps/(float)nrOfOffspring,correct,incorrect);
 		fprintf(genomeFile,"%i	",ID);
 		for(int i=0;i<genome.size();i++)
 			fprintf(genomeFile,"	%i",genome[i]);
