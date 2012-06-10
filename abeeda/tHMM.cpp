@@ -146,23 +146,23 @@ void tHMMU::update(unsigned char *states, unsigned char *newStates)
 	}
 #endif
     
-	for(i=0;i<ins.size();i++)
+	for(vector<int>::iterator it = ins.begin(), end = ins.end(); it != end; ++it)
     {
-		I=(I<<1)+((states[ins[i]])&1);
+		I=(I<<1)+((states[*it])&1);
     }
     
 	r=1+(rand()%(sums[I]-1));
 	j=0;
     //	cout<<I<<" "<<(int)hmm.size()<<" "<<(int)hmm[0].size()<<endl;
-	while(r>hmm[I][j])
+	while(r > hmm[I][j])
     {
-		r-=hmm[I][j];
-		j++;
+		r -= hmm[I][j];
+		++j;
 	}
     
-	for(i=0;i<outs.size();i++)
+	for(i = 0; i < outs.size(); ++i)
     {
-		newStates[outs[i]]|=(j>>i)&1;
+		newStates[outs[i]] |= (j >> i) & 1;
     }
 #ifdef feedbackON
 	chosenInPos.push_back(I);
