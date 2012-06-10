@@ -3,7 +3,7 @@
  *  HMMBrain
  *
  *  Created by Arend on 9/23/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
+ *  Copyright 2010 __predYCompanyName__. All rights reserved.
  *
  */
 
@@ -58,10 +58,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // counter of how many swarm agents are still alive
     int numAlive = swarmSize;
     
-    // predator initial X, Y, and angle
-    double mX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
-    double mY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
-    double mA = (double)((double)rand()/(double)RAND_MAX * 360.0);
+    // predator X, Y, and angle
+    double predX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
+    double predY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
+    double predA = (double)((double)rand()/(double)RAND_MAX * 360.0);
 
     // string containing the information to create a video of the simulation
     string reportString = "";
@@ -92,7 +92,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             // report X, Y, angle of predator
             char text[1000];
-            sprintf(text,"%f,%f,%f,%d,%d,%d=", mX, mY, mA, 255, 0, 0);
+            sprintf(text,"%f,%f,%f,%d,%d,%d=", predX, predY, predA, 255, 0, 0);
             reportString.append(text);
             
             // compute center of swarm
@@ -111,8 +111,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 {
                     char text[1000];
                     
-                    double dist = calcDistanceSquared(mX, mY, x[i], y[i]);
-                    double angle = calcAngle(mX, mY, mA, x[i], y[i], dist);
+                    double dist = calcDistanceSquared(predX, predY, x[i], y[i]);
+                    double angle = calcAngle(predX, predY, predA, x[i], y[i], dist);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45 && dist < predatorVisionRange) // predator has a 90 degree vision field in front of it
@@ -254,7 +254,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 if(!dead[i])
                 {
-                    predatorAngle.push_back((int)(mA/36.0));
+                    predatorAngle.push_back((int)(predA/36.0));
                     preyAngle.push_back((int)(a[i]/36.0));
                 }
             }
@@ -288,12 +288,12 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             if (!dead[i])
             {
-                double d = calcDistanceSquared(mX, mY, x[i], y[i]);
+                double d = calcDistanceSquared(predX, predY, x[i], y[i]);
                 
                 // don't bother if an agent is too far
                 if(d < predatorVisionRange)
                 {
-                    double angle = calcAngle(mX, mY, mA, x[i], y[i], d);
+                    double angle = calcAngle(predX, predY, predA, x[i], y[i], d);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45) // predator has a 90 degree vision field in front of it
@@ -318,15 +318,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
             // turn 8 degrees right
             case 1:
-                mA += 8.0;
+                predA += 8.0;
                 
-                while(mA > 360.0)
+                while(predA > 360.0)
                 {
-                    mA -= 360.0;
+                    predA -= 360.0;
                 }
                 
-                mX += cos(mA * (cPI / 180.0));
-                mY += sin(mA * (cPI / 180.0));
+                predX += cos(predA * (cPI / 180.0));
+                predY += sin(predA * (cPI / 180.0));
                 
                 predatorFitness += 1;
                 
@@ -334,15 +334,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
             // turn 8 degrees left
             case 2:
-                mA -= 8.0;
+                predA -= 8.0;
                 
-                while(mA < 0.0)
+                while(predA < 0.0)
                 {
-                    mA += 360.0;
+                    predA += 360.0;
                 }
                 
-                mX += cos(mA * (cPI / 180.0));
-                mY += sin(mA * (cPI / 180.0));
+                predX += cos(predA * (cPI / 180.0));
+                predY += sin(predA * (cPI / 180.0));
                 
                 predatorFitness += 1;
                 
@@ -350,8 +350,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
             // move straight ahead
             case 3:
-                mX += cos(mA * (cPI / 180.0)) * 2.0;
-                mY += sin(mA * (cPI / 180.0)) * 2.0;
+                predX += cos(predA * (cPI / 180.0)) * 2.0;
+                predY += sin(predA * (cPI / 180.0)) * 2.0;
                 
                 predatorFitness += 2;
                 
@@ -362,8 +362,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         }
         
         // keep position within simulation boundary
-        applyBoundary(mX);
-        applyBoundary(mY);
+        applyBoundary(predX);
+        applyBoundary(predY);
         
         // determine if the predator made a kill
         if (numAlive > 2)
@@ -374,7 +374,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 if (!dead[i])
                 {
-                    double d = calcDistanceSquared(mX, mY, x[i], y[i]);
+                    double d = calcDistanceSquared(predX, predY, x[i], y[i]);
                     
                     if ((d < killDist) && (randDouble > killChance))
                     {
@@ -423,11 +423,11 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 }
                 
                 // indicate the presence of the predator in agent i's retina
-                double d = calcDistanceSquared(x[i], y[i], mX, mY);
+                double d = calcDistanceSquared(x[i], y[i], predX, predY);
                 
                 if (d < preyVisionRange)
                 {
-                    double angle = calcAngle(x[i], y[i], a[i], mX, mY, d);
+                    double angle = calcAngle(x[i], y[i], a[i], predX, predY, d);
 
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // you have a 180 degree vision field infront of you
@@ -622,23 +622,23 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
 
 
 // calculates the distance^2 between two points
-double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double toY)
+double tGame::calcDistanceSquared(double fropredX, double fropredY, double toX, double toY)
 {
-    double diffX = fromX - toX;
-    double diffY = fromY - toY;
+    double diffX = fropredX - toX;
+    double diffY = fropredY - toY;
     
     return ( diffX * diffX ) + ( diffY * diffY );
 }
 
 // calculates the angle between two objects
-double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY, double dist)
+double tGame::calcAngle(double fropredX, double fropredY, double fromAngle, double toX, double toY, double dist)
 {
     double d = 0.0;
     double Ux, Uy, Vx, Vy;
     
     if (dist == 0.0)
     {
-        d = sqrt( calcDistanceSquared(fromX, fromY, toX, toY) );
+        d = sqrt( calcDistanceSquared(fropredX, fropredY, toX, toY) );
     }
     else
     {
@@ -646,16 +646,16 @@ double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX
     }
     
     //ann kathete divided by hypothenuse
-    Ux = (toX - fromX) / d;
+    Ux = (toX - fropredX) / d;
     
     //gegenkathete divided by hypothenuse
-    Uy = (toY - fromY) / d;
+    Uy = (toY - fropredY) / d;
     
     //I forgot what the line below does...
     Vx = cos(fromAngle * (cPI / 180.0));
     Vy = sin(fromAngle * (cPI / 180.0));
     
-    //anyway the following line computes the angle between my own and the object I am looking at
+    //anyway the following line computes the angle between predY own and the object I am looking at
     return atan2(((Ux * Vy) - (Uy * Vx)), ((Ux * Vx) + (Uy * Vy))) * 180.0 / cPI;
 }
 
