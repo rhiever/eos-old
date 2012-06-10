@@ -45,7 +45,13 @@ public:
     ~tGame();
     double calcDistanceSquared(double fromX, double fromY, double toX, double toY);
     double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY, double dist = 0.0);
-    void calcSwarmCenter(double x[], double y[], bool dead[], double& cX, double& cY);
+    void calcSwarmCenter(double preyX[], double preyY[], bool preyDead[], double& preyCenterX, double& preyCenterY);
+    void recalcPredDistTable(double preyX[], double preyY[], bool preyDead[],
+                             double predX, double predY,
+                             double predDists[swarmSize], double preyDists[swarmSize][swarmSize]);
+    void recalcPredAndPreyDistTable(double preyX[], double preyY[], bool preyDead[],
+                                    double predX, double predY,
+                                    double predDists[swarmSize], double preyDists[swarmSize][swarmSize]);
     void applyBoundary(double& positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);
