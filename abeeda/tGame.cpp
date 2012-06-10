@@ -25,7 +25,7 @@
 #define gridY 256.0
 #define killDist 5.0 * 5.0
 #define killChance 0.25
-#define boundaryDist 250
+#define boundaryDist 250.0
 
 tGame::tGame()
 {
@@ -39,8 +39,8 @@ tGame::~tGame()
 string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)
 {
     // LOD data variables
-    double swarmFitness = 0;
-    double predatorFitness = 0;
+    double swarmFitness = 0.0;
+    double predatorFitness = 0.0;
     
     vector<double> bbSizes;
     vector<double> shortestDists;
@@ -705,9 +705,9 @@ double tGame::sum(vector<double> values)
 {
     double sum = 0.0;
     
-    for (int i = 0; i < values.size(); ++i)
+    for (vector<double>::iterator i = values.begin(); i != values.end(); ++i)
     {
-        sum += values[i];
+        sum += *i;
     }
     
     return sum;
@@ -725,9 +725,9 @@ double tGame::variance(vector<double> values)
     double sumSqDist = 0.0;
     double mean = average(values);
     
-    for (int i = 0; i < values.size(); ++i)
+    for (vector<double>::iterator i = values.begin(); i != values.end(); ++i)
     {
-        sumSqDist += pow( values[i] - mean, 2.0 );
+        sumSqDist += pow( *i - mean, 2.0 );
     }
     
     return sumSqDist /= (double)values.size();
