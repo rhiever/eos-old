@@ -80,10 +80,19 @@ void drawArea(){
             else{
               strokeWeight(5.0);
               //if(j==0)
-                stroke(color(R[j],G[j],B[j]));
+              stroke(color(R[j],G[j],B[j]));
               //else
               //  stroke(color(R,G,B));
               line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*3)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*3)));
+              
+              if(R[j] == 255 && G[j] == 0 && B[j] == 0)
+              {
+                strokeWeight(1.0);
+                fill(0);
+                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*200)));
+                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*200)));
+                curve((int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*100)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*100)),(int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*200)), (int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*200)),(int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*100)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*100)));
+              }
             }
         }
 //        fill(color(0,255,0));
