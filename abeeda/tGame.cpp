@@ -27,7 +27,6 @@
 #define killChance 1.0
 #define boundaryDist 250.0
 
-// precalculated cos and sin lookup tables for the game
 // precalculated lookup tables for the game
 double cosLookup[360];
 double sinLookup[360];
