@@ -12,7 +12,6 @@
 
 #define randDouble ((double)rand() / (double)RAND_MAX)
 #define maxNodes 32
-#define definedCue 0
 #define swarmSize 20
 
 #endif

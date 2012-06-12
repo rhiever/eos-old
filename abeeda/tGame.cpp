@@ -338,7 +338,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             case 1:
                 predA += 8.0;
                 
-                while(predA > 360.0)
+                while(predA >= 360.0)
                 {
                     predA -= 360.0;
                 }
@@ -383,6 +383,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         applyBoundary(predX);
         applyBoundary(predY);
         
+        // recalculate the predator distances lookup table since the predator has moved
+        recalcPredDistTable(preyX, preyY, preyDead, predX, predY, predDists);
+        
         // determine if the predator made a kill
         if (numAlive > 2)
         {
@@ -394,7 +397,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 {
                     double d = predDists[i];
                     
-                    if ((d < killDist) && (randDouble > killChance))
+                    if ((d < killDist) && (randDouble < killChance))
                     {
                         preyDead[i] = killed = true;
                         --numAlive;
@@ -402,9 +405,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 }
             }
         }
-        
-        // recalculate the predator distances lookup table since the predator has moved
-        recalcPredDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
         
         /*       END OF PREDATOR UPDATE       */
         
@@ -481,7 +481,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     case 1:
                         preyA[i] += 8.0;
                         
-                        while(preyA[i] > 360.0)
+                        while(preyA[i] >= 360.0)
                         {
                             preyA[i] -= 360.0;
                         }
@@ -708,13 +708,13 @@ void tGame::calcSwarmCenter(double preyX[], double preyY[], bool preyDead[], dou
 // recalculates only the predator distance lookup table
 void tGame::recalcPredDistTable(double preyX[], double preyY[], bool preyDead[],
                                 double predX, double predY,
-                                double predDists[swarmSize], double preyDists[swarmSize][swarmSize])
+                                double predDists[swarmSize])
 {
     for (int i = 0; i < swarmSize; ++i)
     {
         if (!preyDead[i])
         {
-            predDists[i] = calcDistanceSquared(predX, predY, preyX[i], preyX[i]);
+            predDists[i] = calcDistanceSquared(predX, predY, preyX[i], preyY[i]);
         }
     }
 }
@@ -728,13 +728,16 @@ void tGame::recalcPredAndPreyDistTable(double preyX[], double preyY[], bool prey
     {
         if (!preyDead[i])
         {
-            predDists[i] = calcDistanceSquared(predX, predY, preyX[i], preyX[i]);
+            predDists[i] = calcDistanceSquared(predX, predY, preyX[i], preyY[i]);
             preyDists[i][i] = 0.0;
             
             for (int j = i + 1; j < swarmSize; ++j)
             {
-                preyDists[i][j] = calcDistanceSquared(preyX[i], preyY[i], preyX[j], preyY[j]);
-                preyDists[j][i] = preyDists[i][j];
+                if (!preyDead[j])
+                {
+                    preyDists[i][j] = calcDistanceSquared(preyX[i], preyY[i], preyX[j], preyY[j]);
+                    preyDists[j][i] = preyDists[i][j];
+                }
             }
         }
     }
