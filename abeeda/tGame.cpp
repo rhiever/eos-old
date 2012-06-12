@@ -23,11 +23,12 @@
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
-#define killDist 4.0 * 4.0
-#define killChance 0.25
+#define killDist 5.0 * 5.0
+#define killChance 1.0
 #define boundaryDist 250.0
 
 // precalculated cos and sin lookup tables for the game
+// precalculated lookup tables for the game
 double cosLookup[360];
 double sinLookup[360];
 
@@ -131,7 +132,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     char text[1000];
                     
                     double dist = predDists[i];
-                    double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i], dist);
+                    double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45 && dist < predatorVisionRange) // predator has a 90 degree vision field in front of it
@@ -311,7 +312,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 // don't bother if an agent is too far
                 if(d < predatorVisionRange)
                 {
-                    double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i], d);
+                    double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
                     if(fabs(angle) < 45) // predator has a 90 degree vision field in front of it
@@ -432,7 +433,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         //don't bother if an agent is too far
                         if(d < preyVisionRange)
                         {
-                            double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j], d);
+                            double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j]);
                             
                             //here we have to map the angle into the sensor, btw: angle in degrees
                             if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
@@ -448,7 +449,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 if (d < preyVisionRange)
                 {
-                    double angle = calcAngle(preyX[i], preyY[i], preyA[i], predX, predY, d);
+                    double angle = calcAngle(preyX[i], preyY[i], preyA[i], predX, predY);
 
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // you have a 180 degree vision field infront of you
@@ -656,25 +657,15 @@ double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double
 }
 
 // calculates the angle between two agents
-double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY, double dist)
+double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)
 {
-    double d = 0.0;
     double Ux, Uy, Vx, Vy;
     
-    if (dist == 0.0)
-    {
-        d = calcDistanceSquared(fromX, fromY, toX, toY);
-    }
-    else
-    {
-        d = dist;
-    }
-    
     //ann kathete divided by hypothenuse
-    Ux = (toX - fromX) / d;
+    Ux = (toX - fromX);
     
     //gegenkathete divided by hypothenuse
-    Uy = (toY - fromY) / d;
+    Uy = (toY - fromY);
     
     //I forgot what the line below does...
     Vx = cosLookup[(int)fromAngle];
