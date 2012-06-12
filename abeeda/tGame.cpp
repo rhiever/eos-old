@@ -647,10 +647,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
 
 
 // calculates the distance^2 between two points
-double tGame::calcDistanceSquared(double fropredX, double fropredY, double toX, double toY)
+double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double toY)
 {
-    double diffX = fropredX - toX;
-    double diffY = fropredY - toY;
+    double diffX = fromX - toX;
+    double diffY = fromY - toY;
     
     return ( diffX * diffX ) + ( diffY * diffY );
 }
