@@ -221,13 +221,12 @@ void tAgent::resetBrain(void){
 
 void tAgent::updateStates(void)
 {
-	int i;
-	for(vector<tHMMU*>::iterator i = hmmus.begin(); i != hmmus.end(); ++i)
+	for(vector<tHMMU*>::iterator it = hmmus.begin(), end = hmmus.end(); it != end; ++it)
     {
-		(*i)->update(&states[0],&newStates[0]);
+		(*it)->update(&states[0],&newStates[0]);
     }
     
-	for(i=0;i<maxNodes*swarmSize;i++)
+	for(int i=0;i<maxNodes*swarmSize;i++)
     {
 		states[i]=newStates[i];
 		newStates[i]=0;

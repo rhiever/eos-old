@@ -23,12 +23,22 @@
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
-#define killDist 5.0 * 5.0
+#define killDist 4.0 * 4.0
 #define killChance 0.25
 #define boundaryDist 250.0
 
+// precalculated cos and sin lookup tables for the game
+double cosLookup[360];
+double sinLookup[360];
+
 tGame::tGame()
 {
+    // fill lookup tables
+    for (int i = 0; i < 360; ++i)
+    {
+        cosLookup[i] = cos((double)i * (cPI / 180.0));
+        sinLookup[i] = sin((double)i * (cPI / 180.0));
+    }
 }
 
 tGame::~tGame()
@@ -67,7 +77,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // predator X, Y, and angle
     double predX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
     double predY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
-    double predA = (double)((double)rand()/(double)RAND_MAX * 360.0);
+    double predA = (int)((double)rand()/(double)RAND_MAX * 360.0);
 
     // string containing the information to create a video of the simulation
     string reportString = "";
@@ -84,7 +94,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     {
         preyX[k] = (double)((double)rand() / (double)RAND_MAX * gridX * 2.0) - gridX;
         preyY[k] = (double)((double)rand() / (double)RAND_MAX * gridY * 2.0) - gridY;
-        preyA[k] = (double)((double)rand() / (double)RAND_MAX * 360.0);
+        preyA[k] = (int)((double)rand() / (double)RAND_MAX * 360.0);
         preyDead[k] = false;
     }
     
@@ -333,8 +343,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     predA -= 360.0;
                 }
                 
-                predX += cos(predA * (cPI / 180.0));
-                predY += sin(predA * (cPI / 180.0));
+                predX += cosLookup[(int)predA];
+                predY += sinLookup[(int)predA];
                 
                 predatorFitness += 1;
                 
@@ -349,8 +359,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     predA += 360.0;
                 }
                 
-                predX += cos(predA * (cPI / 180.0));
-                predY += sin(predA * (cPI / 180.0));
+                predX += cosLookup[(int)predA];
+                predY += sinLookup[(int)predA];
                 
                 predatorFitness += 1;
                 
@@ -358,8 +368,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
             // move straight ahead
             case 3:
-                predX += cos(predA * (cPI / 180.0)) * 2.0;
-                predY += sin(predA * (cPI / 180.0)) * 2.0;
+                predX += cosLookup[(int)predA] * 2.0;
+                predY += sinLookup[(int)predA] * 2.0;
                 
                 predatorFitness += 2;
                 
@@ -476,8 +486,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] -= 360.0;
                         }
                         
-                        preyX[i] += cos(preyA[i] * (cPI / 180.0));
-                        preyY[i] += sin(preyA[i] * (cPI / 180.0));
+                        preyX[i] += cosLookup[(int)preyA[i]];
+                        preyY[i] += sinLookup[(int)preyA[i]];
                         
                         swarmFitness += 1.0 / (double)swarmSize;
                         
@@ -491,8 +501,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] += 360.0;
                         }
                         
-                        preyX[i] += cos(preyA[i] * (cPI / 180.0));
-                        preyY[i] += sin(preyA[i] * (cPI / 180.0));
+                        preyX[i] += cosLookup[(int)preyA[i]];
+                        preyY[i] += sinLookup[(int)preyA[i]];
                         
                         swarmFitness += 1.0 / (double)swarmSize;
                         
@@ -500,8 +510,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         
                     // move straight ahead
                     case 3:
-                        preyX[i] += cos(preyA[i] * (cPI / 180.0));
-                        preyY[i] += sin(preyA[i] * (cPI / 180.0));
+                        preyX[i] += cosLookup[(int)preyA[i]];
+                        preyY[i] += sinLookup[(int)preyA[i]];
                         
                         swarmFitness += 2.0 / (double)swarmSize;
                         
@@ -653,11 +663,11 @@ double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX
     
     if (dist == 0.0)
     {
-        d = sqrt( calcDistanceSquared(fromX, fromY, toX, toY) );
+        d = calcDistanceSquared(fromX, fromY, toX, toY);
     }
     else
     {
-        d = sqrt(dist);
+        d = dist;
     }
     
     //ann kathete divided by hypothenuse
@@ -667,8 +677,8 @@ double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX
     Uy = (toY - fromY) / d;
     
     //I forgot what the line below does...
-    Vx = cos(fromAngle * (cPI / 180.0));
-    Vy = sin(fromAngle * (cPI / 180.0));
+    Vx = cosLookup[(int)fromAngle];
+    Vy = sinLookup[(int)fromAngle];
     
     //anyway the following line computes the angle between predY own and the object I am looking at
     return atan2(((Ux * Vy) - (Uy * Vx)), ((Ux * Vx) + (Uy * Vy))) * 180.0 / cPI;
