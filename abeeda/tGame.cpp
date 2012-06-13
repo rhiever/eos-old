@@ -420,7 +420,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     swarmAgent->states[j + (i * maxNodes)] = 0;
                 }
                 
-                //iterate for agent i over all agents j
                 // indicate the presence of other visible agents in agent i's retina
                 for(int j = 0; j < swarmSize; ++j)
                 {
@@ -432,12 +431,18 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         //don't bother if an agent is too far
                         if(d < preyVisionRange)
                         {
-                            double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j]);
-                            
-                            //here we have to map the angle into the sensor, btw: angle in degrees
-                            if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
+                            // ignore if agent i isn't even facing agent j (won't be within retina)
+                            if (calcDistanceSquared(preyX[i] + cosLookup[(int)preyA[i]],
+                                                    preyY[i] + sinLookup[(int)preyA[i]],
+                                                    preyX[j], preyY[j]) < d)
                             {
-                                swarmAgent->states[(int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                                double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j]);
+                                
+                                //here we have to map the angle into the sensor, btw: angle in degrees
+                                if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
+                                {
+                                    swarmAgent->states[(int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                                }
                             }
                         }
                     }
@@ -658,19 +663,15 @@ double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double
 // calculates the angle between two agents
 double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)
 {
-    double Ux, Uy, Vx, Vy;
-    
-    //ann kathete divided by hypothenuse
+    double Ux = 0.0, Uy = 0.0, Vx = 0.0, Vy = 0.0;
+
     Ux = (toX - fromX);
-    
-    //gegenkathete divided by hypothenuse
     Uy = (toY - fromY);
     
-    //I forgot what the line below does...
     Vx = cosLookup[(int)fromAngle];
     Vy = sinLookup[(int)fromAngle];
     
-    //anyway the following line computes the angle between predY own and the object I am looking at
+    // compute the angle between fromAgent's facing and the agent it is looking at
     return atan2(((Ux * Vy) - (Uy * Vx)), ((Ux * Vx) + (Uy * Vy))) * 180.0 / cPI;
 }
 
