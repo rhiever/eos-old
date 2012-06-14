@@ -124,7 +124,20 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
+        string rs = "";
+        double bf = 0.0;
+        for (int i = 0; i < 500; ++i)
+        {
+            rs = game->executeGame(swarmAgent, predatorAgent, NULL, true);
+            
+            if (predatorAgent->fitness > bf)
+            {
+                cout << i << " " << predatorAgent->fitness << endl;
+                bf = predatorAgent->fitness;
+                reportString = rs;
+            }
+        }
+        
         reportString.append("X");
         doBroadcast(reportString);
         exit(0);

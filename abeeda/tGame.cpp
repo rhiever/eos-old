@@ -78,6 +78,11 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     double predX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
     double predY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
     double predA = (int)((double)rand()/(double)RAND_MAX * 360.0);
+    /*int start = (int)(1) * 180;
+    //int start = (int)(rand() % 2) * 180;
+    double predX = cosLookup[start] * 250.0;
+    double predY = sinLookup[start] * 250.0;
+    double predA = 270;*/
 
     // string containing the information to create a video of the simulation
     string reportString = "";
@@ -90,13 +95,30 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     predatorAgent->setupPhenotype();
     predatorAgent->fitness = 0.0;
     
+    double increment = 360.0 / (double)swarmSize;
+    
     for(int k = 0; k < swarmSize; ++k)
     {
         preyX[k] = (double)((double)rand() / (double)RAND_MAX * gridX * 2.0) - gridX;
         preyY[k] = (double)((double)rand() / (double)RAND_MAX * gridY * 2.0) - gridY;
         preyA[k] = (int)((double)rand() / (double)RAND_MAX * 360.0);
         preyDead[k] = false;
+        /*preyX[k] = cosLookup[(int)(k * increment)] * 250.0;
+        preyY[k] = sinLookup[(int)(k * increment)] * 250.0;
+        preyA[k] = 270;
+        preyDead[k] = true;*/
     }
+    
+    //start==0, index swarmSize-1 and go down
+    //start==180, index swarmSize/2 and go up
+    /*int circleIndex = swarmSize - 1;
+    
+    if (start == 180)
+    {
+        circleIndex = (swarmSize / 2) + 1;
+    }
+    
+    preyDead[circleIndex] = false;*/
     
     // initialize predator and prey lookup tables
     recalcPredAndPreyDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
@@ -115,13 +137,13 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             reportString.append(text);
             
             // compute center of swarm
-            double cX = 0.0, cY = 0.0;
+            /*double cX = 0.0, cY = 0.0;
             calcSwarmCenter(preyX,preyY, preyDead, cX, cY);
             
             // report X, Y of center of swarm
             char text2[1000];
             sprintf(text2,"%f,%f,%f,%d,%d,%d=", cX, cY, 0.0, 124, 252, 0);
-            reportString.append(text2);
+            reportString.append(text2);*/
             
             // report X, Y, angle of all prey
             for(int i = 0; i <swarmSize; ++i)
@@ -387,7 +409,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         recalcPredDistTable(preyX, preyY, preyDead, predX, predY, predDists);
         
         // determine if the predator made a kill
-        if (numAlive > 2)
+        if (true)
         {
             bool killed = false;
             
@@ -399,8 +421,38 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     
                     if ((d < killDist) && (randDouble < killChance))
                     {
-                        preyDead[i] = killed = true;
-                        --numAlive;
+                        int nearbyCount = 0;
+                        
+                        for (int j = 0; j < swarmSize; ++j)
+                        {
+                            if (!preyDead[j] && preyDists[i][j] < killDist)
+                            {
+                                ++nearbyCount;
+                            }
+                        }
+                        if (nearbyCount < 3)
+                        {
+                            preyDead[i] = killed = true;
+                            --numAlive;
+                            
+                            //start==0, index swarmSize-1 and go down
+                            //start==180, index swarmSize/2 and go up
+                            /*if (start == 0)
+                            {
+                                circleIndex = circleIndex - 1;
+                                
+                                if (circleIndex < 0)
+                                {
+                                    circleIndex = swarmSize - 1;
+                                }
+                            }
+                            else
+                            {
+                                circleIndex = (circleIndex + 1) % swarmSize;
+                            }
+                            
+                            preyDead[circleIndex] = false;*/
+                        }
                     }
                 }
             }
@@ -410,7 +462,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         
         /*       UPDATE SWARM       */
-        for(int i = 0; i < swarmSize; ++i)
+        for(int i = 0; i < swarmSize && false; ++i)
         {
             if (!preyDead[i])
             {
@@ -466,10 +518,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         }
         
         // activate the swarm agent's brains
-        swarmAgent->updateStates();
+        //swarmAgent->updateStates();
         
         // activate each swarm agent's brain, determine its action for this update, and update its position and angle
-        for(int i = 0; i < swarmSize; ++i)
+        for(int i = 0; i < swarmSize && false; ++i)
         {
             if (!preyDead[i])
             {
@@ -533,7 +585,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         }
         
         // recalculate both the predator and prey distances lookup tables since the entire swarm has moved
-        recalcPredAndPreyDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
+        //recalcPredAndPreyDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
         
         /*       END OF SWARM UPDATE       */
 
@@ -542,27 +594,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         predatorFitness += swarmSize - numAlive;
         
-        vector<double> nearbyCounts;
-        
-        for (int i = 0; i < swarmSize; ++i)
-        {
-            if (!preyDead[i])
-            {
-                int nearbyCount = 1;
-                
-                for (int j = 0; j < swarmSize; ++j)
-                {
-                    if (!preyDead[j] && i != j && preyDists[i][j] < 50.0 * 50.0)
-                    {
-                        ++nearbyCount;
-                    }
-                }
-                
-                nearbyCounts.push_back((double)nearbyCount);
-            }
-        }
-        
-        swarmFitness += numAlive * (average(nearbyCounts) / (double)numAlive);
+        swarmFitness += numAlive;
         
         /*       END OF FITNESS CALCULATIONS       */
         

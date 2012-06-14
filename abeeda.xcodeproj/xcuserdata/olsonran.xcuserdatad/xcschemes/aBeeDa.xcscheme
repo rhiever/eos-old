@@ -35,7 +35,7 @@
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/olsonran/Documents/experiments/abeeda/work"
-      buildConfiguration = "Release">
+      buildConfiguration = "Debug">
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -48,11 +48,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-d swarm.genome predator.genome"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.txt swarm.genome predator.genome"
-            isEnabled = "YES">
+            argument = "-e lod.txt swarm.genome predator.genome -g 250"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.txt swarm.genome predator.genome -v"

@@ -26,6 +26,7 @@ tHMMU::~tHMMU(){
 	chosenOutPos.clear();
 	chosenOutNeg.clear();
 }
+
 void tHMMU::setup(vector<unsigned char> &genome, int start){
 	int i,j,k;
 	ins.clear();
