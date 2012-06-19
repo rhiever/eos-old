@@ -15,13 +15,14 @@
 using namespace std;
 
 //double replacementRate = 0.1;
-double perSiteMutationRate = 0.005;
-int populationSize = 100;
-int totalGenerations = 252;
-bool make_video = false;
-bool display_only = false;
-bool track_best_brains = false;
-int track_best_brains_frequency = 25;
+double  perSiteMutationRate = 0.005;
+int     populationSize = 100;
+int     totalGenerations = 252;
+bool    make_video = false;
+int     make_video_frequency = 25;
+bool    display_only = false;
+bool    track_best_brains = false;
+int     track_best_brains_frequency = 25;
 
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
@@ -49,21 +50,12 @@ void doBroadcast(string data);
 
 int main(int argc, char *argv[])
 {
-	vector<tAgent*> swarmAgents;
-	vector<tAgent*> SANextGen;
-    vector<tAgent*> predatorAgents;
-	vector<tAgent*> PANextGen;
-	tAgent *swarmAgent;
-    tAgent *predatorAgent;
+	vector<tAgent*> swarmAgents, SANextGen, predatorAgents, PANextGen;
+	tAgent *swarmAgent, *predatorAgent, *bestSwarmAgent, *bestPredatorAgent;
 	tGame *game;
-	double swarmMaxFitness = 0.0;
-    double predatorMaxFitness = 0.0;
-    string reportString = "", bestString = "";
-    FILE *LOD;
-    FILE *swarmGenomeFile;
-    FILE *predatorGenomeFile;
-    char *swarmGenomeFileName = "";
-    char *predatorGenomeFileName = "";
+	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
+    FILE *LOD, *swarmGenomeFile, *predatorGenomeFile;
+    string swarmGenomeFileName = "", predatorGenomeFileName = "";
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -95,9 +87,13 @@ int main(int argc, char *argv[])
             ++i;
             LOD = fopen(argv[i], "w");
             ++i;
-            swarmGenomeFileName = argv[i];
+            stringstream sgfn;
+            sgfn << argv[i];
+            swarmGenomeFileName = sgfn.str();
             ++i;
-            swarmGenomeFileName = argv[i];
+            stringstream pgfn;
+            pgfn << argv[i];
+            predatorGenomeFileName = pgfn.str();
         }
         
         // -s [int]: seed
@@ -134,10 +130,18 @@ int main(int argc, char *argv[])
             }
         }
         
-        // -v: make video
-        else if (strcmp(argv[i], "-v") == 0)
+        // -v [int]: make video
+        else if (strcmp(argv[i], "-v") == 0 && (i + 1) < argc)
         {
             make_video = true;
+            ++i;
+            make_video_frequency = atoi(argv[i]);
+            
+            if (make_video_frequency < 1)
+            {
+                cout << "Minimum video making frequency is 1." << endl;
+                exit(0);
+            }
         }
     }
     
@@ -149,7 +153,7 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
+        string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
         reportString.append("X");
         doBroadcast(reportString);
         exit(0);
@@ -212,7 +216,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            reportString = game->executeGame(swarmAgents[i], predatorAgents[i], NULL, make_video);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -226,14 +230,14 @@ int main(int argc, char *argv[])
             
             if(swarmAgents[i]->fitness > swarmMaxFitness)
             {
-                // show simulation with best-performing swarm agents, since more interested in swarming behavior
-                bestString = reportString;
                 swarmMaxFitness = swarmAgents[i]->fitness;
+                bestSwarmAgent = swarmAgents[i];
             }
             
             if(predatorAgents[i]->fitness > predatorMaxFitness)
             {
                 predatorMaxFitness = predatorAgents[i]->fitness;
+                bestPredatorAgent = predatorAgents[i];
             }
 		}
         
@@ -243,15 +247,33 @@ int main(int argc, char *argv[])
 		cout << "generation " << update << ": swarm [" << swarmAvgFitness << "] :: predator ["<< predatorAvgFitness << "]" << endl;
         
         // display video of simulation
-        if(make_video)
+        if (make_video)
         {
-            if((update & 15) == 0)
+            bool finalGeneration = update == totalGenerations;
+            
+            if (update % make_video_frequency == 0 || finalGeneration)
             {
-                doBroadcast(bestString);
-            }
-            else if (update == totalGenerations)
-            {
-                bestString.append("X");
+                string reportString = "", bestString = "";
+                double bestFitness = 0.0;
+                
+                // repeatedly face the two brains against each other to account for stochasticity
+                for (int i = 0; i < 100; ++i)
+                {
+                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, make_video);
+                    
+                    // interested in seeing the best swarms
+                    if (bestSwarmAgent->fitness > bestFitness)
+                    {
+                        bestFitness = bestSwarmAgent->fitness;
+                        bestString = reportString;
+                    }
+                }
+                
+                if (finalGeneration)
+                {
+                    bestString.append("X");
+                }
+                
                 doBroadcast(bestString);
             }
         }
@@ -337,8 +359,8 @@ int main(int argc, char *argv[])
 	}
 	
     // save the genome file of the lmrca
-    swarmGenomeFile = fopen(swarmGenomeFileName, "w");
-    predatorGenomeFile = fopen(predatorGenomeFileName, "w");
+    swarmGenomeFile = fopen(swarmGenomeFileName.c_str(), "w");
+    predatorGenomeFile = fopen(predatorGenomeFileName.c_str(), "w");
     
 	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
     predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
