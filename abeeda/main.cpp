@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>
 #include <string.h>
 #include <vector>
 #include <map>
@@ -19,6 +20,8 @@ int populationSize = 100;
 int totalGenerations = 252;
 bool make_video = false;
 bool display_only = false;
+bool track_best_brains = false;
+int track_best_brains_frequency = 25;
 
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
@@ -90,9 +93,7 @@ int main(int argc, char *argv[])
             ++i;
             LOD = fopen(argv[i], "w");
             ++i;
-            swarmGenomeFile = fopen(argv[i], "w");
             ++i;
-            predatorGenomeFile = fopen(argv[i], "w");
         }
         
         // -s [int]: seed
@@ -114,6 +115,14 @@ int main(int argc, char *argv[])
         {
             make_video = true;
         }
+        
+        // -t [int]: track best brains
+        else if (strcmp(argv[i], "-t") == 0)
+        {
+            track_best_brains = true;
+            ++i;
+            track_best_brains_frequency = atoi(argv[i]);
+        }
     }
     
     if(make_video)
@@ -134,12 +143,12 @@ int main(int argc, char *argv[])
     delete swarmAgent;
     swarmAgent = new tAgent;
     swarmAgent->setupRandomAgent(5000);
-    //swarmAgent->loadAgent("startAgent.genome");
+    //swarmAgent->loadAgent("startSwarm.genome");
     
     delete predatorAgent;
     predatorAgent = new tAgent;
     predatorAgent->setupRandomAgent(5000);
-    //predatorAgent->loadAgent("startAgent.genome");
+    //predatorAgent->loadAgent("startPredator.genome");
     
     // save start organism to file
     //swarmAgent->saveGenome(swarmGenomeFile);
@@ -162,13 +171,12 @@ int main(int argc, char *argv[])
     PANextGen.resize(populationSize);
     
 	swarmAgent->nrPointingAtMe--;
-    
     predatorAgent->nrPointingAtMe--;
     
 	cout << "setup complete" << endl;
     
     // main loop
-	for (int update = 0; update < totalGenerations; ++update)
+	for (int update = 1; update <= totalGenerations; ++update)
     {
         // reset fitnesses
 		for(int i = 0; i < populationSize; ++i)
@@ -183,6 +191,8 @@ int main(int argc, char *argv[])
         // determine fitness of population
 		swarmMaxFitness = 0.0;
         predatorMaxFitness = 0.0;
+        double swarmAvgFitness = 0.0;
+        double predatorAvgFitness = 0.0;
         
 		for(int i = 0; i < populationSize; ++i)
         {
@@ -191,6 +201,9 @@ int main(int argc, char *argv[])
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
             swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
+            
+            swarmAvgFitness += swarmAgents[i]->fitness;
+            predatorAvgFitness += predatorAgents[i]->fitness;
             
             //swarmAgents[i]->fitnesses.push_back(swarmAgents[i]->fitness);
             //predatorAgents[i]->fitnesses.push_back(predatorAgents[i]->fitness);
@@ -207,8 +220,11 @@ int main(int argc, char *argv[])
                 predatorMaxFitness = predatorAgents[i]->fitness;
             }
 		}
+        
+        swarmAvgFitness /= (double)populationSize;
+        predatorAvgFitness /= (double)populationSize;
 		
-		cout << "generation " << update << ": swarm [" << (double)swarmMaxFitness << "] :: predator ["<< (double)predatorMaxFitness << "]" << endl;
+		cout << "generation " << update << ": swarm [" << swarmAvgFitness << "] :: predator ["<< predatorAvgFitness << "]" << endl;
         
         // display video of simulation
         if(make_video)
@@ -217,7 +233,7 @@ int main(int argc, char *argv[])
             {
                 doBroadcast(bestString);
             }
-            else if (update == totalGenerations - 1)
+            else if (update == totalGenerations)
             {
                 bestString.append("X");
                 doBroadcast(bestString);
@@ -285,9 +301,29 @@ int main(int argc, char *argv[])
 		}
         
 		predatorAgents = PANextGen;
+        
+        if (track_best_brains && update > 2 && update % 25 == 0)
+        {
+            std::stringstream sss, pss;
+            
+            sss << "swarm" << update << ".genome";
+            pss << "predator" << update << ".genome";
+            
+            swarmGenomeFile = fopen(sss.str().c_str(), "w");
+            predatorGenomeFile = fopen(pss.str().c_str(), "w");
+            
+            swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
+            predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
+            
+            fclose(swarmGenomeFile);
+            fclose(predatorGenomeFile);
+        }
 	}
 	
     // save the genome file of the lmrca
+    swarmGenomeFile = fopen(argv[i], "w");
+    predatorGenomeFile = fopen(argv[i], "w");
+    
 	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
     predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
     
