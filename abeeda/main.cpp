@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
     FILE *LOD;
     FILE *swarmGenomeFile;
     FILE *predatorGenomeFile;
+    char *swarmGenomeFileName = "";
+    char *predatorGenomeFileName = "";
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -93,7 +95,9 @@ int main(int argc, char *argv[])
             ++i;
             LOD = fopen(argv[i], "w");
             ++i;
+            swarmGenomeFileName = argv[i];
             ++i;
+            swarmGenomeFileName = argv[i];
         }
         
         // -s [int]: seed
@@ -108,20 +112,32 @@ int main(int argc, char *argv[])
         {
             ++i;
             totalGenerations = atoi(argv[i]);
+            
+            if (totalGenerations < 3)
+            {
+                cout << "Minimum number of generations permitted is 3." << endl;
+                exit(0);
+            }
+        }
+        
+        // -t [int]: track best brains
+        else if (strcmp(argv[i], "-t") == 0 && (i + 1) < argc)
+        {
+            track_best_brains = true;
+            ++i;
+            track_best_brains_frequency = atoi(argv[i]);
+            
+            if (track_best_brains_frequency < 1)
+            {
+                cout << "Minimum brain tracking frequency is 1." << endl;
+                exit(0);
+            }
         }
         
         // -v: make video
         else if (strcmp(argv[i], "-v") == 0)
         {
             make_video = true;
-        }
-        
-        // -t [int]: track best brains
-        else if (strcmp(argv[i], "-t") == 0)
-        {
-            track_best_brains = true;
-            ++i;
-            track_best_brains_frequency = atoi(argv[i]);
         }
     }
     
@@ -321,8 +337,8 @@ int main(int argc, char *argv[])
 	}
 	
     // save the genome file of the lmrca
-    swarmGenomeFile = fopen(argv[i], "w");
-    predatorGenomeFile = fopen(argv[i], "w");
+    swarmGenomeFile = fopen(swarmGenomeFileName, "w");
+    predatorGenomeFile = fopen(predatorGenomeFileName, "w");
     
 	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
     predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
