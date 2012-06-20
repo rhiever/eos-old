@@ -167,12 +167,8 @@ int main(int argc, char *argv[])
     
     delete predatorAgent;
     predatorAgent = new tAgent;
-    predatorAgent->setupRandomAgent(5000);
-    //predatorAgent->loadAgent("startPredator.genome");
-    
-    // save start organism to file
-    //swarmAgent->saveGenome(swarmGenomeFile);
-    //predatorAgent->saveGenome(predatorGenomeFile);
+    //predatorAgent->setupRandomAgent(5000);
+    predatorAgent->loadAgent("startPredator.genome");
     
     swarmAgents[0] = swarmAgent;
     predatorAgents[0] = predatorAgent;
@@ -244,7 +240,7 @@ int main(int argc, char *argv[])
         swarmAvgFitness /= (double)populationSize;
         predatorAvgFitness /= (double)populationSize;
 		
-		cout << "generation " << update << ": swarm [" << swarmAvgFitness << "] :: predator ["<< predatorAvgFitness << "]" << endl;
+		cout << "generation " << update << ": swarm [" << (int)swarmAvgFitness << " : " << (int)swarmMaxFitness << "] :: predator [" << (int)predatorAvgFitness << " : " << (int)predatorMaxFitness << "]" << endl;
         
         // display video of simulation
         if (make_video)

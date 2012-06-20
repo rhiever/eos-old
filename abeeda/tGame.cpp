@@ -24,7 +24,7 @@
 #define gridX 256.0
 #define gridY 256.0
 #define killDist 5.0 * 5.0
-#define killChance 1.0
+#define safetyDist 15.0 * 15.0
 #define boundaryDist 250.0
 
 // precalculated lookup tables for the game
@@ -75,9 +75,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     int numAlive = swarmSize;
     
     // predator X, Y, and angle
-    double predX = (double)((double)rand()/(double)RAND_MAX * gridX * 2.0) - gridX;
-    double predY = (double)((double)rand()/(double)RAND_MAX * gridY * 2.0) - gridY;
-    double predA = (int)((double)rand()/(double)RAND_MAX * 360.0);
+    double predX = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
+    double predY = (double)(randDouble * gridY) - gridY / 2.0; //* 2.0) - gridY;
+    double predA = (int)(randDouble * 360.0);
 
     // string containing the information to create a video of the simulation
     string reportString = "";
@@ -90,12 +90,30 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     predatorAgent->setupPhenotype();
     predatorAgent->fitness = 0.0;
     
-    for(int k = 0; k < swarmSize; ++k)
+    for(int i = 0; i < swarmSize; ++i)
     {
-        preyX[k] = (double)((double)rand() / (double)RAND_MAX * gridX * 2.0) - gridX;
-        preyY[k] = (double)((double)rand() / (double)RAND_MAX * gridY * 2.0) - gridY;
-        preyA[k] = (int)((double)rand() / (double)RAND_MAX * 360.0);
-        preyDead[k] = false;
+        bool goodPos = true;
+        
+        do
+        {
+            goodPos = true;
+            
+            preyX[i] = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
+            preyY[i] = (double)(randDouble * gridY) - gridY / 2.0; //* 2.0) - gridY;
+            
+            for (int j = 0; j < i; ++j)
+            {
+                if (calcDistanceSquared(preyX[i], preyY[i], preyX[j], preyY[j]) < safetyDist)
+                {
+                    goodPos = false;
+                    break;
+                }
+            }
+            
+        } while (!goodPos);
+        
+        preyA[i] = (int)(randDouble * 360.0);
+        preyDead[i] = false;
     }
     
     // initialize predator and prey lookup tables
@@ -130,18 +148,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 {
                     char text[1000];
                     
-                    double dist = predDists[i];
-                    double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
-                    
-                    // here we have to map the angle into the sensor, btw: angle in degrees
-                    if(fabs(angle) < 45 && dist < predatorVisionRange) // predator has a 90 degree vision field in front of it
-                    {
-                        sprintf(text,"%f,%f,%f,%d,%d,%d=", preyX[i], preyY[i], preyA[i], 30, 144, 255);
-                    }
-                    else
-                    {
-                        sprintf(text,"%f,%f,%f,%d,%d,%d=", preyX[i], preyY[i], preyA[i], 255, 255, 255);
-                    }
+                    sprintf(text,"%f,%f,%f,%d,%d,%d=", preyX[i], preyY[i], preyA[i], 255, 255, 255);
                     
                     reportString.append(text);
                 }
@@ -334,44 +341,38 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             case 0:
                 break;
                 
-            // turn 8 degrees right
+            // turn right
             case 1:
-                predA += 8.0;
+                predA += 6.0;
                 
                 while(predA >= 360.0)
                 {
                     predA -= 360.0;
                 }
                 
-                predX += cosLookup[(int)predA];
-                predY += sinLookup[(int)predA];
-                
-                predatorFitness += 1;
+                predX += cosLookup[(int)predA] * 2.25;
+                predY += sinLookup[(int)predA] * 2.25;
                 
                 break;
                 
-            // turn 8 degrees left
+            // turn left
             case 2:
-                predA -= 8.0;
+                predA -= 6.0;
                 
                 while(predA < 0.0)
                 {
                     predA += 360.0;
                 }
                 
-                predX += cosLookup[(int)predA];
-                predY += sinLookup[(int)predA];
-                
-                predatorFitness += 1;
+                predX += cosLookup[(int)predA] * 2.25;
+                predY += sinLookup[(int)predA] * 2.25;
                 
                 break;
                 
             // move straight ahead
             case 3:
-                predX += cosLookup[(int)predA] * 2.0;
-                predY += sinLookup[(int)predA] * 2.0;
-                
-                predatorFitness += 2;
+                predX += cosLookup[(int)predA] * 2.25;
+                predY += sinLookup[(int)predA] * 2.25;
                 
                 break;
                 
@@ -393,17 +394,34 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             
             for(int i = 0; i < swarmSize && !killed; ++i)
             {
-                if (!preyDead[i])
+                if (!preyDead[i] &&
+                    (predDists[i] < killDist))/* &&
+                    (preyA[i] + 360 > predA + 360 - 45) &&
+                    (preyA[i] + 360 < predA + 360 + 45))*/
                 {
-                    double d = predDists[i];
+                    int nearbyCount = 0;
                     
-                    if ((d < killDist) && (randDouble < killChance))
+                    for (int j = 0; j < swarmSize; ++j)
+                    {
+                        if (!preyDead[j] && preyDists[i][j] < safetyDist)
+                        {
+                            ++nearbyCount;
+                        }
+                    }
+                    
+                    if (nearbyCount < 2)
                     {
                         preyDead[i] = killed = true;
                         --numAlive;
                     }
                 }
             }
+        }
+        
+        // simulation over: all but two of the swarm agents have died
+        else
+        {
+            return reportString;
         }
         
         /*       END OF PREDATOR UPDATE       */
@@ -491,10 +509,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] -= 360.0;
                         }
                         
-                        preyX[i] += cosLookup[(int)preyA[i]];
-                        preyY[i] += sinLookup[(int)preyA[i]];
-                        
-                        swarmFitness += 1.0 / (double)swarmSize;
+                        preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
+                        preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
                         break;
                         
@@ -506,19 +522,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] += 360.0;
                         }
                         
-                        preyX[i] += cosLookup[(int)preyA[i]];
-                        preyY[i] += sinLookup[(int)preyA[i]];
-                        
-                        swarmFitness += 1.0 / (double)swarmSize;
+                        preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
+                        preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
                         break;
                         
                     // move straight ahead
                     case 3:
-                        preyX[i] += cosLookup[(int)preyA[i]];
-                        preyY[i] += sinLookup[(int)preyA[i]];
-                        
-                        swarmFitness += 2.0 / (double)swarmSize;
+                        preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
+                        preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
                         break;
                         
@@ -542,27 +554,21 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         predatorFitness += swarmSize - numAlive;
         
-        vector<double> nearbyCounts;
+        /*double swarmLandmarkFitness = 0.0;
         
         for (int i = 0; i < swarmSize; ++i)
         {
-            if (!preyDead[i])
+            double distToLandmark = calcDistanceSquared(preyX[i], preyY[i], 0.0, 0.0);
+            
+            if (distToLandmark > 25.0 * 25.0)
             {
-                int nearbyCount = 1;
-                
-                for (int j = 0; j < swarmSize; ++j)
-                {
-                    if (!preyDead[j] && i != j && preyDists[i][j] < 50.0 * 50.0)
-                    {
-                        ++nearbyCount;
-                    }
-                }
-                
-                nearbyCounts.push_back((double)nearbyCount);
+                swarmLandmarkFitness += 1.0 / sqrt(distToLandmark);
             }
         }
         
-        swarmFitness += numAlive * (average(nearbyCounts) / (double)numAlive);
+        swarmFitness += (double)numAlive * swarmLandmarkFitness;*/
+        
+        swarmFitness += numAlive;
         
         /*       END OF FITNESS CALCULATIONS       */
         
@@ -573,14 +579,14 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     swarmAgent->fitness = swarmFitness;
     predatorAgent->fitness = predatorFitness;
     
-    if(swarmAgent->fitness < 0.0)
+    if(swarmAgent->fitness <= 0.0)
     {
-        swarmAgent->fitness = 0.0;
+        swarmAgent->fitness = 1.0;
     }
     
-    if(predatorAgent->fitness < 0.0)
+    if(predatorAgent->fitness <= 0.0)
     {
-        predatorAgent->fitness = 0.0;
+        predatorAgent->fitness = 1.0;
     }
     
     // output to data file, if provided
