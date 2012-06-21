@@ -10,3 +10,5 @@ work/*.txt
 work/predator*.genome
 
 work/swarm*.genome
+
+work/*.csv

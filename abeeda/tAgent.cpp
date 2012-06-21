@@ -9,14 +9,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <map>
 #include "tAgent.h"
 
 tAgent::tAgent(){
-	int i;
 	nrPointingAtMe=1;
 	ancestor = NULL;
     predator = NULL;
-	for(i=0;i<maxNodes;i++)
+	for(int i=0;i<maxNodes;i++)
     {
 		states[i]=0;
 		newStates[i]=0;
@@ -41,7 +41,10 @@ tAgent::~tAgent(){
 		delete hmmus[i];
     }
     
-    delete predator;
+    if (predator != NULL)
+    {
+        //delete predator;
+    }
     
 	if(ancestor!=NULL)
     {
@@ -174,8 +177,12 @@ void tAgent::setupMegaPhenotype(int howMany){
 	int i,j;
 	tHMMU *hmmu;
 	if(hmmus.size()!=0)
-		for(i=0;i<hmmus.size();i++)
-			delete hmmus[i];
+    {
+		for(vector<tHMMU*>::iterator it = hmmus.begin(), end = hmmus.end(); it != end; ++it)
+        {
+			delete *it;
+        }
+    }
 	hmmus.clear();
 	for(i=0;i<genome.size();i++){
 		if((genome[i]==42)&&(genome[(i+1)%genome.size()]==(255-42)))
@@ -309,31 +316,131 @@ void tAgent::showPhenotype(void){
 	cout<<"------"<<endl;
 }
 
-void tAgent::saveToDot(char *filename){
+void tAgent::saveToDot(char *filename, bool predator)
+{
 	FILE *f=fopen(filename,"w+t");
-	int i,j,k;
+	int i,j,k,node;
 	fprintf(f,"digraph brain {\n");
 	fprintf(f,"	ranksep=2.0;\n");
-	for(i=0;i<4;i++)
-		fprintf(f,"	%i [shape=invtriangle,style=filled,color=red];\n",i);
-	for(i=4;i<13;i++)
-		fprintf(f,"	%i [shape=circle,color=blue];\n",i);
-	for(i=13;i<16;i++)
-		fprintf(f,"	%i [shape=circle,style=filled,color=green];\n",i);
-	for(i=0;i<hmmus.size();i++){
-	//	fprintf(f,"	{\n");
-		for(j=0;j<hmmus[i]->ins.size();j++){
+    
+    // determine which nodes to print (no connections = do not print)
+    bool print_node[32];
+    
+    for(i = 0; i < 32; i++)
+    {
+        print_node[i] = false;
+    }
+    
+    for(i=0;i<hmmus.size();i++)
+    {
+        for(j=0;j<hmmus[i]->ins.size();j++)
+        {
+            print_node[hmmus[i]->ins[j]] = true;
+        }
+        
+        for(k=0;k<hmmus[i]->outs.size();k++)
+        {
+            print_node[hmmus[i]->outs[k]] = true;
+        }
+    }
+    
+    // swarm agent input layer
+	for(node=0;node<12;node++)
+    {
+        if(print_node[node])
+        {
+            fprintf(f,"	%i [shape=invtriangle,style=filled,color=cornflowerblue];\n",node);
+        }
+    }
+    
+    // for prey brains
+    if (!predator)
+    {
+        // predator input layer
+        for(node=12;node<24;node++)
+        {
+            if(print_node[node])
+            {
+                fprintf(f,"	%i [shape=invtriangle,style=filled,color=red];\n",node);
+            }
+        }
+        
+        // hidden states
+        for(node=24;node<30;node++)
+        {
+            if(print_node[node])
+            {
+                fprintf(f,"	%i [shape=circle,color=black];\n",node);
+            }
+        }
+    }
+    
+    // for predator brains (no predator-detecting retina, more hidden states)
+    else
+    {
+        // hidden states
+        for(node=12;node<30;node++)
+        {
+            if(print_node[node])
+            {
+                fprintf(f,"	%i [shape=circle,color=black];\n",node);
+            }
+        }
+    }
+    
+    // outputs
+	for(node=30;node<32;node++)
+    {
+		fprintf(f,"	%i [shape=circle,style=filled,color=green];\n",node);
+    }
+    
+    // connections
+	for(i=0;i<hmmus.size();i++)
+    {
+		for(j=0;j<hmmus[i]->ins.size();j++)
+        {
 			for(k=0;k<hmmus[i]->outs.size();k++)
+            {
 				fprintf(f,"	%i	->	%i;\n",hmmus[i]->ins[j],hmmus[i]->outs[k]);
+            }
 		}
-	//	fprintf(f,"	}\n");
 	}
-	fprintf(f,"	{ rank=same; 0; 1; 2; 3;}\n"); 
-	fprintf(f,"	{ rank=same; 4; 5; 6; 7; 8; 9; 10; 11; 12; }\n"); 
-	fprintf(f,"	{ rank=same; 13; 14; 15; }\n"); 
+    
+    // which nodes go on the same level
+    
+    // inputs
+	fprintf(f,"	{ rank=same; ");
+    
+    for(node = 0; node < 24; node++)
+    {
+        if(print_node[node])
+        {
+            fprintf(f, "%d; ", node);
+        }
+    }
+    
+    fprintf(f, "}\n");
+    
+    // hidden states
+	fprintf(f,"	{ rank=same; ");
+    
+    for(node = 24; node < 30; node++)
+    {
+        if(print_node[node])
+        {
+            fprintf(f, "%d; ", node);
+        }
+    }
+    
+    fprintf(f, "}\n");
+    
+    // outputs
+	fprintf(f,"	{ rank=same; 30; 31; }\n");
+    
 	fprintf(f,"}\n");
 	fclose(f);
 }
+
 void tAgent::saveToDotFullLayout(char *filename){
 	FILE *f=fopen(filename,"w+t");
 	int i,j,k;
@@ -370,27 +477,129 @@ void tAgent::setupDots(int x, int y,double spacing){
 		}
 }
 
-void tAgent::saveLogicTable(FILE *f){
-	int i,j;
-	fprintf(f,"0_t0,1_t0,2_t0,3_t0,4_t0,5_t0,6_t0,7_t0,8_t0,9_t0,10_t0,11_t0,12_t0,13_t0,14_t0,15_t0,,0_t1,1_t1,2_t1,3_t1,4_t1,5_t1,6_t1,7_t1,8_t1,9_t1,10_t1,11_t1,12_t1,13_t1,14_t1,15_t1\n");
-	for(i=0;i<65536;i++){
-		for(j=0;j<16;j++){
-			fprintf(f,"%i,",(i>>j)&1);
-			states[j]=(i>>j)&1;
-		}
-		updateStates();
-		for(j=0;j<16;j++){
-			fprintf(f,",%i",states[j]);
-		}
-		fprintf(f,"\n");
-	}
-}
-void tAgent::saveGenome(FILE *f)
+void tAgent::saveLogicTable(char *filename)
 {
-	int i;
-	for(i=0;i<genome.size();i++)
-		fprintf(f,"%i	",genome[i]);
-	fprintf(f,"\n");
+    FILE *f=fopen(filename, "w");
+	int i,j;
+	//fprintf(f,"s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,p1,p2,p6,p8,,o1,o2\n");
+    fprintf(f,"s5,s8,s23,s24,,o1,o2\n");
+    
+	//for(i=0;i<65536;i++)
+    for(i = 0; i < 16; i++)
+    {
+        map<vector<int>, int> outputCounts;
+        const int NUM_REPEATS = 1001;
+        
+        for (int repeat = 1; repeat < NUM_REPEATS; repeat++)
+        {
+            for(j = 0; j < 30; j++)
+            {
+                if (j == 5)
+                {
+                    if(repeat == 1)
+                    {
+                        fprintf(f,"%i,",(i>>0)&1);
+                    }
+                    
+                    states[j] = (i>>0)&1;
+                }
+                else if (j == 6)
+                {
+                    if (repeat == 1)
+                    {
+                        fprintf(f,"%i,",(i>>1)&1);
+                    }
+                    
+                    states[j] = (i>>1)&1;
+                }
+                else if (j == 14)
+                {
+                    if (repeat == 1)
+                    {
+                        fprintf(f,"%i,",(i>>2)&1);
+                    }
+                    
+                    states[j] = (i>>2)&1;
+                }
+                else if (j == 18)
+                {
+                    if (repeat == 1)
+                    {
+                        fprintf(f,"%i,",(i>>3)&1);
+                    }
+                    
+                    states[j] = (i>>3)&1;
+                }
+                else
+                {
+                    states[j] = 0;
+                }
+                
+                /*if (j < 14)
+                 {
+                 fprintf(f,"%i,",(i>>j)&1);
+                 states[j]=(i>>j)&1;
+                 }
+                 else if(j == 17)
+                 {
+                 fprintf(f,"%i,",(i>>14)&1);
+                 states[14]=(i>>14)&1;
+                 }
+                 else if(j == 19)
+                 {
+                 fprintf(f,"%i,",(i>>15)&1);
+                 states[15]=(i>>15)&1;
+                 }*/
+            }
+            
+            updateStates();
+            
+            vector<int> output;
+            // order: 30 31
+            output.push_back(states[30]);
+            output.push_back(states[31]);
+            
+            if (outputCounts.count(output) > 0)
+            {
+                outputCounts[output]++;
+            }
+            else
+            {
+                outputCounts[output] = 1;
+            }
+            
+            // all repeats completed; determine most common output
+            if (repeat == (NUM_REPEATS - 1))
+            {
+                map<vector<int>, int>::iterator it;
+                map<vector<int>, int>::iterator mostCommonOutput = outputCounts.begin();
+                
+                for (it = outputCounts.begin(); it != outputCounts.end(); ++it)
+                {
+                    if (it->second > mostCommonOutput->second)
+                    {
+                        mostCommonOutput = it;
+                    }
+                }
+                
+                fprintf(f, ",%i,%i\n", mostCommonOutput->first[0], mostCommonOutput->first[1]);
+            }
+        }
+	}
+    
+    fclose(f);
 }
 
-
+void tAgent::saveGenome(const char *filename)
+{
+    FILE *f=fopen(filename, "w");
+    
+	for (int i = 0, end = (int)genome.size(); i < end; ++i)
+    {
+		fprintf(f, "%i	", genome[i]);
+    }
+    
+	fprintf(f, "\n");
+    
+    fclose(f);
+}

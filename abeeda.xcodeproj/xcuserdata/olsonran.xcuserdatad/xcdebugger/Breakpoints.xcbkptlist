@@ -9,11 +9,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "361815496.991241"
+         timestampString = "361997019.291221"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "300"
-         endingLineNumber = "300"
+         startingLineNumber = "252"
+         endingLineNumber = "252"
          landmarkName = "main(int argc, char *argv[])"
          landmarkType = "7">
       </FileBreakpoint>
@@ -23,25 +23,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "361815496.991241"
+         timestampString = "361994641.59505"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "237"
-         endingLineNumber = "237"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "aBeeDa/main.cpp"
-         timestampString = "361812774.629473"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "66"
-         endingLineNumber = "66"
+         startingLineNumber = "67"
+         endingLineNumber = "67"
          landmarkName = "main(int argc, char *argv[])"
          landmarkType = "7">
       </FileBreakpoint>

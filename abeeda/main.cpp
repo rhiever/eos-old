@@ -7,22 +7,11 @@
 #include <math.h>
 #include <time.h>
 #include <iostream>
+
 #include "globalConst.h"
 #include "tHMM.h"
 #include "tAgent.h"
 #include "tGame.h"
-
-using namespace std;
-
-//double replacementRate = 0.1;
-double  perSiteMutationRate = 0.005;
-int     populationSize = 100;
-int     totalGenerations = 252;
-bool    make_video = false;
-int     make_video_frequency = 25;
-bool    display_only = false;
-bool    track_best_brains = false;
-int     track_best_brains_frequency = 25;
 
 #include <sys/socket.h>       /*  socket definitions        */
 #include <sys/types.h>        /*  socket types              */
@@ -34,9 +23,9 @@ int     track_best_brains_frequency = 25;
 #define ECHO_PORT          (2002)
 #define MAX_LINE           (100000)
 
-#define BUFLEN  512
-#define NPACK   10
-#define PORT    9930
+#define BUFLEN              512
+#define NPACK               10
+#define PORT                9930
 
 int       list_s;                /*  listening socket          */
 int       conn_s;                /*  connection socket         */
@@ -48,14 +37,26 @@ char     *endptr;                /*  for strtol()              */
 void setupBroadcast(void);
 void doBroadcast(string data);
 
+using namespace std;
+
+//double replacementRate = 0.1;
+double  perSiteMutationRate         = 0.005;
+int     populationSize              = 100;
+int     totalGenerations            = 252;
+bool    make_video                  = false;
+int     make_video_frequency        = 25;
+bool    make_LOD_video              = false;
+bool    display_only                = false;
+bool    track_best_brains           = false;
+int     track_best_brains_frequency = 25;
+
 int main(int argc, char *argv[])
 {
 	vector<tAgent*> swarmAgents, SANextGen, predatorAgents, PANextGen;
-	tAgent *swarmAgent, *predatorAgent, *bestSwarmAgent, *bestPredatorAgent;
-	tGame *game;
+	tAgent *swarmAgent = NULL, *predatorAgent = NULL, *bestSwarmAgent = NULL, *bestPredatorAgent = NULL;
+	tGame *game = NULL;
 	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
-    FILE *LOD, *swarmGenomeFile, *predatorGenomeFile;
-    string swarmGenomeFileName = "", predatorGenomeFileName = "";
+    string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "";
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; ++i)
     {
         // -d [filename] [filename]: display
-        if (strcmp(argv[i], "-d") == 0 && (i + 1) < argc)
+        if (strcmp(argv[i], "-d") == 0 && (i + 2) < argc)
         {
             ++i;
             swarmAgent->loadAgent(argv[i]);
@@ -78,32 +79,36 @@ int main(int argc, char *argv[])
             ++i;
             predatorAgent->loadAgent(argv[i]);
             
-            display_only = make_video = true;
+            make_video = display_only = true;
         }
         
         // -e [filename] [filename] [filename]: evolve
-        else if (strcmp(argv[i], "-e") == 0 && (i + 2) < argc)
+        else if (strcmp(argv[i], "-e") == 0 && (i + 3) < argc)
         {
             ++i;
-            LOD = fopen(argv[i], "w");
+            stringstream lodfn;
+            lodfn << argv[i];
+            LODFileName = lodfn.str();
+            
             ++i;
             stringstream sgfn;
             sgfn << argv[i];
             swarmGenomeFileName = sgfn.str();
+            
             ++i;
             stringstream pgfn;
             pgfn << argv[i];
             predatorGenomeFileName = pgfn.str();
         }
         
-        // -s [int]: seed
+        // -s [int]: set seed
         else if (strcmp(argv[i], "-s") == 0 && (i + 1) < argc)
         {
             ++i;
             srand(atoi(argv[i]));
         }
         
-        // -g [int]: generations
+        // -g [int]: set generations
         else if (strcmp(argv[i], "-g") == 0 && (i + 1) < argc)
         {
             ++i;
@@ -130,7 +135,7 @@ int main(int argc, char *argv[])
             }
         }
         
-        // -v [int]: make video
+        // -v [int]: make video of best brains at an interval
         else if (strcmp(argv[i], "-v") == 0 && (i + 1) < argc)
         {
             make_video = true;
@@ -143,9 +148,15 @@ int main(int argc, char *argv[])
                 exit(0);
             }
         }
+        
+        // -lv: make video of LOD of best agent brain at the end
+        else if (strcmp(argv[i], "-lv") == 0)
+        {
+            make_LOD_video = true;
+        }
     }
     
-    if(make_video)
+    if(make_video || make_LOD_video)
     {
         // start monitor first, then abeeda
         setupBroadcast();
@@ -168,7 +179,7 @@ int main(int argc, char *argv[])
     delete predatorAgent;
     predatorAgent = new tAgent;
     //predatorAgent->setupRandomAgent(5000);
-    predatorAgent->loadAgent("startPredator.genome");
+    predatorAgent->loadAgent((char *)"startPredator.genome");
     
     swarmAgents[0] = swarmAgent;
     predatorAgents[0] = predatorAgent;
@@ -217,6 +228,10 @@ int main(int argc, char *argv[])
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
             swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
+            predatorAgents[i]->nrPointingAtMe--;
+            predatorAgents[i]->nrOfOffspring--;
+            swarmAgents[i]->predator->setupPhenotype();
+            swarmAgents[i]->predator->updateStates();
             
             swarmAvgFitness += swarmAgents[i]->fitness;
             predatorAvgFitness += predatorAgents[i]->fitness;
@@ -274,9 +289,10 @@ int main(int argc, char *argv[])
             }
         }
         
-        // construct swarm agent population for the next generation
+        
 		for(int i = 0; i < populationSize; ++i)
 		{
+            // construct swarm agent population for the next generation
 			tAgent *d = new tAgent;
             int j = 0;
             
@@ -287,13 +303,10 @@ int main(int argc, char *argv[])
             
 			d->inherit(swarmAgents[j], perSiteMutationRate, update);
 			SANextGen[i] = d;
-		}
-        
-        // construct predator agent population for the next generation
-        for(int i = 0; i < populationSize; ++i)
-		{
-			tAgent *d = new tAgent;
-            int j = 0;
+            
+            // construct predator agent population for the next generation
+            d = new tAgent;
+            j = 0;
             
 			do
             {
@@ -304,13 +317,13 @@ int main(int argc, char *argv[])
 			PANextGen[i] = d;
 		}
         
-        // shuffle the populations so there is a small chance of the same predator/prey combo in the next generation
+        // shuffle the populations so there is a minimal chance of the same predator/prey combo in the next generation
         random_shuffle(SANextGen.begin(), SANextGen.end());
         random_shuffle(PANextGen.begin(), PANextGen.end());
         
-        // retire and replace the swarm agents from the previous generation
 		for(int i = 0; i < populationSize; ++i)
         {
+            // retire and replace the swarm agents from the previous generation
 			swarmAgents[i]->retire();
 			swarmAgents[i]->nrPointingAtMe--;
 			if(swarmAgents[i]->nrPointingAtMe == 0)
@@ -318,14 +331,9 @@ int main(int argc, char *argv[])
 				delete swarmAgents[i];
             }
 			swarmAgents[i] = SANextGen[i];
-		}
-        
-		swarmAgents = SANextGen;
-        
-        // retire and replace the predator agents from the previous generation
-		for(int i = 0; i < populationSize; ++i)
-        {
-			predatorAgents[i]->retire();
+            
+            // retire and replace the predator agents from the previous generation
+            predatorAgents[i]->retire();
 			predatorAgents[i]->nrPointingAtMe--;
 			if(predatorAgents[i]->nrPointingAtMe == 0)
             {
@@ -334,39 +342,31 @@ int main(int argc, char *argv[])
 			predatorAgents[i] = PANextGen[i];
 		}
         
+		swarmAgents = SANextGen;
 		predatorAgents = PANextGen;
         
-        if (track_best_brains && update > 2 && update % 25 == 0)
+        if (track_best_brains && update % track_best_brains_frequency == 0)
         {
-            std::stringstream sss, pss;
+            stringstream sss, pss;
             
             sss << "swarm" << update << ".genome";
             pss << "predator" << update << ".genome";
             
-            swarmGenomeFile = fopen(sss.str().c_str(), "w");
-            predatorGenomeFile = fopen(pss.str().c_str(), "w");
-            
-            swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
-            predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
-            
-            fclose(swarmGenomeFile);
-            fclose(predatorGenomeFile);
+            swarmAgents[0]->ancestor->ancestor->saveGenome(sss.str().c_str());
+            predatorAgents[0]->ancestor->ancestor->saveGenome(pss.str().c_str());
         }
 	}
 	
     // save the genome file of the lmrca
-    swarmGenomeFile = fopen(swarmGenomeFileName.c_str(), "w");
-    predatorGenomeFile = fopen(predatorGenomeFileName.c_str(), "w");
+	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFileName.c_str());
+    predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFileName.c_str());
     
-	swarmAgents[0]->ancestor->ancestor->saveGenome(swarmGenomeFile);
-    predatorAgents[0]->ancestor->ancestor->saveGenome(predatorGenomeFile);
+    // save video and quantitative stats on the best swarm agent's LOD
+    vector<tAgent*> saveLOD;
     
-    fclose(swarmGenomeFile);
-    fclose(predatorGenomeFile);
+    cout << "building ancestor list" << endl;
     
-    // save LOD
-    /*vector<tAgent*> saveLOD;
-    
+    // use 2 ancestors down from current population because that ancestor is highly likely to have high fitness
     tAgent* curAncestor = swarmAgents[0]->ancestor->ancestor;
     
     while (curAncestor != NULL)
@@ -376,6 +376,11 @@ int main(int argc, char *argv[])
         curAncestor = curAncestor->ancestor;
     }
     
+    FILE *LOD = fopen(LODFileName.c_str(), "w");
+    
+    cout << "analyzing ancestor list" << endl;
+    string finalString = "";
+    
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {
         if ((*it)->predator == NULL)
@@ -384,9 +389,35 @@ int main(int argc, char *argv[])
         }
         else
         {
-            game->executeGame(*it, (*it)->predator, LOD, make_video);
+            // collect quantitative stats
+            game->executeGame(*it, (*it)->predator, LOD, false);
+            
+            // make video
+            if (make_LOD_video)
+            {
+                string bestString = "", reportString = "";
+                double bestFitness = 0.0;
+                
+                for (int i = 0; i < 100; ++i)
+                {
+                    reportString = game->executeGame(*it, (*it)->predator, NULL, true);
+                    
+                    if ((*it)->fitness > bestFitness)
+                    {
+                        bestFitness = (*it)->fitness;
+                        bestString = reportString;
+                    }
+                }
+                
+                if ( (it + 1) == saveLOD.end() )
+                {
+                    bestString.append("X");
+                }
+                
+                doBroadcast(bestString);
+            }
         }
-    }*/
+    }
     
     fclose(LOD);
     

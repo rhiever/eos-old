@@ -633,7 +633,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         avgVarianceDistToCentroid = average(varsDistToCentroid);
             
-        fprintf(data_file, "%d %f %f %d %f %f %f %f %f %f %f %f %f %f %i %i %f %f\n",
+        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%i,%i,%f,%f\n",
                 swarmAgent->born,               // update born
                 swarmAgent->fitness,            // swarm fitness
                 predatorAgent->fitness,         // predator fitness

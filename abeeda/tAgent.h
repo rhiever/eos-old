@@ -65,7 +65,7 @@ public:
 	void ampUpStartCodons(void);
 	void showBrain(void);
 	void showPhenotype(void);
-	void saveToDot(char *filename);
+	void saveToDot(char *filename, bool predator);
 	void saveToDotFullLayout(char *filename);
 	
 	void initialize(int x, int y, int d);
@@ -74,8 +74,8 @@ public:
 	//void saveLOD(FILE *statsFile,FILE *genomeFile);
 	void retire(void);
 	void setupDots(int x, int y,double spacing);
-	void saveLogicTable(FILE *f);
-	void saveGenome(FILE *f);
+	void saveLogicTable(char *filename);
+	void saveGenome(const char *filename);
 };
 
 #endif
