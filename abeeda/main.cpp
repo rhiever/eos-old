@@ -43,10 +43,9 @@ using namespace std;
 double  perSiteMutationRate         = 0.005;
 int     populationSize              = 100;
 int     totalGenerations            = 252;
-bool    make_video                  = false;
+bool    make_interval_video         = false;
 int     make_video_frequency        = 25;
 bool    make_LOD_video              = false;
-bool    display_only                = false;
 bool    track_best_brains           = false;
 int     track_best_brains_frequency = 25;
 
@@ -56,7 +55,7 @@ int main(int argc, char *argv[])
 	tAgent *swarmAgent = NULL, *predatorAgent = NULL, *bestSwarmAgent = NULL, *bestPredatorAgent = NULL;
 	tGame *game = NULL;
 	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
-    string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "";
+    string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "", inputGenomeFileName = "";
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
     
     for (int i = 1; i < argc; ++i)
     {
-        // -d [filename] [filename]: display
+        // -d [in file name] [in file name]: display
         if (strcmp(argv[i], "-d") == 0 && (i + 2) < argc)
         {
             ++i;
@@ -78,11 +77,16 @@ int main(int argc, char *argv[])
             
             ++i;
             predatorAgent->loadAgent(argv[i]);
+
+            setupBroadcast();
             
-            make_video = display_only = true;
+            string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
+            reportString.append("X");
+            doBroadcast(reportString);
+            exit(0);
         }
         
-        // -e [filename] [filename] [filename]: evolve
+        // -e [out file name] [out file name] [out file name]: evolve
         else if (strcmp(argv[i], "-e") == 0 && (i + 3) < argc)
         {
             ++i;
@@ -138,7 +142,7 @@ int main(int argc, char *argv[])
         // -v [int]: make video of best brains at an interval
         else if (strcmp(argv[i], "-v") == 0 && (i + 1) < argc)
         {
-            make_video = true;
+            make_interval_video = true;
             ++i;
             make_video_frequency = atoi(argv[i]);
             
@@ -154,20 +158,42 @@ int main(int argc, char *argv[])
         {
             make_LOD_video = true;
         }
+        
+        // -lt [in file name] [out file name]: create logic table for given genome
+        else if (strcmp(argv[i], "-lt") == 0 && (i + 2) < argc)
+        {
+            ++i;
+            swarmAgent->loadAgent(argv[i]);
+            ++i;
+            swarmAgent->saveLogicTable(argv[i]);
+            exit(0);
+        }
+        
+        // -dfs [in file name] [out file name]: create dot image file for given swarm genome
+        else if (strcmp(argv[i], "-dfs") == 0 && (i + 2) < argc)
+        {
+            ++i;
+            swarmAgent->loadAgent(argv[i]);
+            ++i;
+            swarmAgent->saveToDot(argv[i], false);
+            exit(0);
+        }
+        
+        // -dfp [in file name] [out file name]: create dot image file for given predator genome
+        else if (strcmp(argv[i], "-dfp") == 0 && (i + 2) < argc)
+        {
+            ++i;
+            predatorAgent->loadAgent(argv[i]);
+            ++i;
+            predatorAgent->saveToDot(argv[i], true);
+            exit(0);
+        }
     }
     
-    if(make_video || make_LOD_video)
+    if (make_interval_video || make_LOD_video)
     {
         // start monitor first, then abeeda
         setupBroadcast();
-    }
-    
-    if (display_only)
-    {
-        string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
-        reportString.append("X");
-        doBroadcast(reportString);
-        exit(0);
     }
     
     // seed the agents
@@ -258,7 +284,7 @@ int main(int argc, char *argv[])
 		cout << "generation " << update << ": swarm [" << (int)swarmAvgFitness << " : " << (int)swarmMaxFitness << "] :: predator [" << (int)predatorAvgFitness << " : " << (int)predatorMaxFitness << "]" << endl;
         
         // display video of simulation
-        if (make_video)
+        if (make_interval_video)
         {
             bool finalGeneration = update == totalGenerations;
             
@@ -270,7 +296,7 @@ int main(int argc, char *argv[])
                 // repeatedly face the two brains against each other to account for stochasticity
                 for (int i = 0; i < 100; ++i)
                 {
-                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, make_video);
+                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true);
                     
                     // interested in seeing the best swarms
                     if (bestSwarmAgent->fitness > bestFitness)
