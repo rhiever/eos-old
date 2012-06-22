@@ -176,7 +176,8 @@ void tAgent::setupPhenotype(void){
 void tAgent::setupMegaPhenotype(int howMany){
 	int i,j;
 	tHMMU *hmmu;
-	if(hmmus.size()!=0)
+    
+	if(hmmus.size() > 0)
     {
 		for(vector<tHMMU*>::iterator it = hmmus.begin(), end = hmmus.end(); it != end; ++it)
         {

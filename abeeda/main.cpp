@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             
             if (make_video_frequency < 1)
             {
-                cout << "Minimum video making frequency is 1." << endl;
+                cout << "Minimum video creation frequency is 1." << endl;
                 exit(0);
             }
         }
@@ -403,9 +403,10 @@ int main(int argc, char *argv[])
     }
     
     FILE *LOD = fopen(LODFileName.c_str(), "w");
+
+    fprintf(LOD, "update,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info\n");
     
     cout << "analyzing ancestor list" << endl;
-    string finalString = "";
     
     for (vector<tAgent*>::iterator it = saveLOD.begin(); it != saveLOD.end(); ++it)
     {

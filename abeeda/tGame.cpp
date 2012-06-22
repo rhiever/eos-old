@@ -54,11 +54,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     vector<double> bbSizes;
     vector<double> shortestDists;
-    vector<double> swarmDensityCount20;
-    vector<double> swarmDensityCount30;
-    vector<double> swarmDensityCount40;
+    vector<double> swarmDensityCounts;
     vector<int> predatorAngle, preyAngle;
-    vector<double> distsToCentroid[swarmSize];
     
     // swarm agent x, y, angles
     double preyX[swarmSize], preyY[swarmSize], preyA[swarmSize];
@@ -196,18 +193,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             
             // area = L x W
             //                L = dist (rbX, rbY) to (rbX, luY); W = dist (luX, luY) to (rbX, luY)
-            bbSizes.push_back( calcDistanceSquared(rbX, rbY, rbX, luY) * calcDistanceSquared(luX, luY, rbX, luY) );
+            bbSizes.push_back( sqrt(calcDistanceSquared(rbX, rbY, rbX, luY)) * sqrt(calcDistanceSquared(luX, luY, rbX, luY)) );
             
             // calculate mean of shortest distance to other swarm agents
-            double aliveCount = 0.0;
             double meanShortestDist = 0.0;
             
             for(int i = 0; i < swarmSize; ++i)
             {
                 if (!preyDead[i])
                 {
-                    aliveCount += 1.0;
-                    
                     // find closest agent to agent i
                     double shortestDist = DBL_MAX;
                     
@@ -228,13 +222,13 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             }
             
             // average the shortest distances
-            meanShortestDist /= aliveCount;
+            meanShortestDist /= (double)numAlive;
             
             // store mean shortest dist for this update
             shortestDists.push_back(meanShortestDist);
             
-            // calculate swarm density counts: avg. agents within 20, 30, and 40 units of each other
-            double avgWithin20 = 0.0, avgWithin30 = 0.0, avgWithin40 = 0.0;
+            // calculate swarm density count
+            double avgWithin = 0.0;
             
             for(int i = 0; i < swarmSize; ++i)
             {
@@ -244,55 +238,26 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     {
                         if (!preyDead[j] && i != j)
                         {
-                            double dist = preyDists[i][j];
-                            
-                            if (dist <= 40.0 * 40.0)
+                            if (preyDists[i][j] <= 20.0 * 20.0)
                             {
-                                avgWithin40 += 1.0;
-                                avgWithin30 += 1.0;
-                                avgWithin20 += 1.0;
-                            }
-                            else if (dist <= 30.0 * 30.0)
-                            {
-                                avgWithin30 += 1.0;
-                                avgWithin20 += 1.0;
-                            }
-                            else if (dist <= 20.0 * 20.0)
-                            {
-                                avgWithin20 += 1.0;
+                                avgWithin += 1.0;
                             }
                         }
                     }
                 }
             }
             
-            avgWithin20 /= aliveCount;
-            avgWithin30 /= aliveCount;
-            avgWithin40 /= aliveCount;
+            avgWithin /= (double)numAlive;
             
-            swarmDensityCount20.push_back(avgWithin20);
-            swarmDensityCount30.push_back(avgWithin30);
-            swarmDensityCount40.push_back(avgWithin40);
+            swarmDensityCounts.push_back(avgWithin);
             
-            // log predator and prey angles
+            // store predator and prey angles
             for(int i = 0; i < swarmSize; ++i)
             {
                 if(!preyDead[i])
                 {
                     predatorAngle.push_back((int)(predA/36.0));
                     preyAngle.push_back((int)(preyA[i]/36.0));
-                }
-            }
-
-            // log distances to swarm centroid
-            double cX = 0.0, cY = 0.0;
-            calcSwarmCenter(preyX,preyY, preyDead, cX, cY);
-            
-            for(int i = 0; i < swarmSize; ++i)
-            {
-                if (!preyDead[i])
-                {
-                    distsToCentroid[i].push_back(calcDistanceSquared(preyX[i], preyY[i], cX, cY));
                 }
             }
             
@@ -592,64 +557,19 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // output to data file, if provided
     if (data_file != NULL)
     {
-        // find final bounding box coordinates
-        double luX = DBL_MAX, luY = DBL_MAX;
-        double rbX = -DBL_MAX, rbY = -DBL_MAX;
-        
-        for(int i = 0; i < swarmSize; ++i)
-        {
-            if (!preyDead[i])
-            {
-                if (preyX[i] < luX)
-                {
-                    luX = preyX[i];
-                }
-                
-                if (preyX[i] > rbX)
-                {
-                    rbX = preyX[i];
-                }
-                
-                if (preyY[i] < luY)
-                {
-                    luY = preyY[i];
-                }
-                
-                if (preyY[i] > rbY)
-                {
-                    rbY = preyY[i];
-                }
-            }
-        }
-
-        // compute avg variance in each swarm agent's distance to the swarm centroid
-        double avgVarianceDistToCentroid = 0.0;
-        vector<double> varsDistToCentroid;
-        
-        for (int i = 0; i < swarmSize; ++i)
-        {
-            varsDistToCentroid.push_back(variance(distsToCentroid[i]));
-        }
-        
-        avgVarianceDistToCentroid = average(varsDistToCentroid);
-            
-        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%i,%i,%f,%f\n",
-                swarmAgent->born,               // update born
-                swarmAgent->fitness,            // swarm fitness
-                predatorAgent->fitness,         // predator fitness
-                numAlive,                       // # alive at end
-                luX, luY,                       // (x1, y1) of bounding box at end
-                rbX, rbY,                       // (x2, y2) of bounding box at end
-                average(bbSizes),               // average bounding box size
-                variance(bbSizes),              // variance in bounding box size
-                average(shortestDists),         // average of avg. shortest distance to other swarm agent
-                average(swarmDensityCount20),   // average # of agents within 20 units of each other
-                average(swarmDensityCount30),   // average # of agents within 30 units of each other
-                average(swarmDensityCount40),   // average # of agents within 40 units of each other
-                neuronsConnectedToPreyRetina(swarmAgent), // #neurons connected to prey part of retina
-                neuronsConnectedToPredatorRetina(swarmAgent), // #neurons connected to predator part of retina
-                mutualInformation(predatorAngle, preyAngle), // mutual Information between prey flight angle and predator flight angle
-                avgVarianceDistToCentroid       // avg variance in each swarm agent's distance to the swarm centroid
+        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%i,%i,%i,%f\n",
+                swarmAgent->born,                               // update born (prey)
+                swarmAgent->fitness,                            // swarm fitness
+                predatorAgent->fitness,                         // predator fitness
+                numAlive,                                       // # alive at end
+                average(bbSizes),                               // average bounding box size
+                variance(bbSizes),                              // variance in bounding box size
+                average(shortestDists),                         // average of avg. shortest distance to other swarm agent
+                average(swarmDensityCounts),                   // average # of agents within 20 units of each other
+                neuronsConnectedToPreyRetina(swarmAgent),       // # neurons connected to prey part of retina (prey)
+                neuronsConnectedToPredatorRetina(swarmAgent),   // # neurons connected to predator part of retina (prey)
+                neuronsConnectedToPreyRetina(predatorAgent),    // # neurons connected to prey part of retina (predator)
+                mutualInformation(predatorAngle, preyAngle)    // mutual Information between prey flight angle and predator flight angle
                 );
     }
     
