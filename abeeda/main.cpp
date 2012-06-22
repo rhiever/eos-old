@@ -246,9 +246,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            //game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
-            swarmAgents[i]->fitness = randDouble;
-            predatorAgents[i]->fitness = randDouble;
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
