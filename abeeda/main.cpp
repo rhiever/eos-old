@@ -207,17 +207,14 @@ int main(int argc, char *argv[])
     //predatorAgent->setupRandomAgent(5000);
     predatorAgent->loadAgent((char *)"startPredator.genome");
     
-    swarmAgents[0] = swarmAgent;
-    predatorAgents[0] = predatorAgent;
-    
     // make mutated copies of the start genome to fill up the initial population
-	for(int i = 1; i < populationSize; ++i)
+	for(int i = 0; i < populationSize; ++i)
     {
 		swarmAgents[i] = new tAgent;
-		swarmAgents[i]->inherit(swarmAgent, 0.01, 0);
+		swarmAgents[i]->inherit(swarmAgent, 0.01, 1);
         
         predatorAgents[i] = new tAgent;
-		predatorAgents[i]->inherit(predatorAgent, 0.01, 0);
+		predatorAgents[i]->inherit(predatorAgent, 0.01, 1);
     }
     
 	SANextGen.resize(populationSize);
@@ -249,15 +246,15 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
+            //game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
+            swarmAgents[i]->fitness = randDouble;
+            predatorAgents[i]->fitness = randDouble;
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
             swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
             predatorAgents[i]->nrPointingAtMe--;
             predatorAgents[i]->nrOfOffspring--;
-            swarmAgents[i]->predator->setupPhenotype();
-            swarmAgents[i]->predator->updateStates();
             
             swarmAvgFitness += swarmAgents[i]->fitness;
             predatorAvgFitness += predatorAgents[i]->fitness;
@@ -397,14 +394,18 @@ int main(int argc, char *argv[])
     
     while (curAncestor != NULL)
     {
-        saveLOD.insert(saveLOD.begin(), curAncestor);
+        // don't add the base ancestor
+        if (curAncestor->ancestor != NULL)
+        {
+            saveLOD.insert(saveLOD.begin(), curAncestor);
+        }
         
         curAncestor = curAncestor->ancestor;
     }
     
     FILE *LOD = fopen(LODFileName.c_str(), "w");
 
-    fprintf(LOD, "update,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info\n");
+    fprintf(LOD, "generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info\n");
     
     cout << "analyzing ancestor list" << endl;
     

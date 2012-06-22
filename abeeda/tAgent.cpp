@@ -124,25 +124,38 @@ void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
 	genome.clear();
 	genome.resize(from->genome.size());
 	for(i=0;i<nucleotides;i++)
+    {
 		if(((double)rand()/(double)RAND_MAX)<mutationRate)
+        {
 			genome[i]=rand()&255;
+        }
 		else
+        {
 			genome[i]=from->genome[i];
-	if((((double)rand()/(double)RAND_MAX)<0.05)&&(genome.size()<20000)){
-		//duplication
-		w=15+rand()&511;
-		s=rand()%((int)genome.size()-w);
-		o=rand()%(int)genome.size();
-		buffer.clear();
-		buffer.insert(buffer.begin(),genome.begin()+s,genome.begin()+s+w);
-		genome.insert(genome.begin()+o,buffer.begin(),buffer.end());
-	}
-	if((((double)rand()/(double)RAND_MAX)<0.02)&&(genome.size()>1000)){
-		//deletion
-		w=15+rand()&511;
-		s=rand()%((int)genome.size()-w);
-		genome.erase(genome.begin()+s,genome.begin()+s+w);
-	}
+        }
+    }
+    
+    if (mutationRate != 0.0)
+    {
+        if((((double)rand()/(double)RAND_MAX)<0.05)&&(genome.size()<20000))
+        {
+            //duplication
+            w=15+rand()&511;
+            s=rand()%((int)genome.size()-w);
+            o=rand()%(int)genome.size();
+            buffer.clear();
+            buffer.insert(buffer.begin(),genome.begin()+s,genome.begin()+s+w);
+            genome.insert(genome.begin()+o,buffer.begin(),buffer.end());
+        }
+        if((((double)rand()/(double)RAND_MAX)<0.02)&&(genome.size()>1000))
+        {
+            //deletion
+            w=15+rand()&511;
+            s=rand()%((int)genome.size()-w);
+            genome.erase(genome.begin()+s,genome.begin()+s+w);
+        }
+    }
+
 	//setupPhenotype();
 	fitness=0.0;
 #ifdef useANN

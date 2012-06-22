@@ -238,7 +238,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     {
                         if (!preyDead[j] && i != j)
                         {
-                            if (preyDists[i][j] <= 20.0 * 20.0)
+                            if (preyDists[i][j] <= 15.0 * 15.0)
                             {
                                 avgWithin += 1.0;
                             }
