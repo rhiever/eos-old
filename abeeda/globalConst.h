@@ -10,8 +10,8 @@
 #ifndef _globalConst_h_included_
 #define _globalConst_h_included_
 
-#define randDouble ((double)rand() / (double)RAND_MAX)
-#define maxNodes 32
-#define swarmSize 50
+#define     randDouble      ((double)rand() / (double)RAND_MAX)
+#define     maxNodes        32
+#define     swarmSize       50
 
 #endif

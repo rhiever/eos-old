@@ -24,7 +24,6 @@
 #define gridX 256.0
 #define gridY 256.0
 #define killDist 5.0 * 5.0
-#define safetyDist 15.0 * 15.0
 #define boundaryDist 250.0
 
 // precalculated lookup tables for the game
@@ -46,7 +45,7 @@ tGame::~tGame()
 }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist)
 {
     // LOD data variables
     double swarmFitness = 0.0;

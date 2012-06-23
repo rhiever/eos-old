@@ -39,15 +39,21 @@ void doBroadcast(string data);
 
 using namespace std;
 
-//double replacementRate = 0.1;
+//double  replacementRate             = 0.1;
 double  perSiteMutationRate         = 0.005;
 int     populationSize              = 100;
 int     totalGenerations            = 252;
+
 bool    make_interval_video         = false;
 int     make_video_frequency        = 25;
 bool    make_LOD_video              = false;
 bool    track_best_brains           = false;
 int     track_best_brains_frequency = 25;
+bool    display_only                = false;
+bool    make_logic_table            = false;
+bool    make_dot_pred               = false;
+bool    make_dot_swarm              = false;
+double  safetyDist                  = 15.0 * 15.0;
 
 int main(int argc, char *argv[])
 {
@@ -56,6 +62,7 @@ int main(int argc, char *argv[])
 	tGame *game = NULL;
 	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
     string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "", inputGenomeFileName = "";
+    string swarmDotFileName = "", predatorDotFileName = "", logicTableFileName = "";
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -77,13 +84,8 @@ int main(int argc, char *argv[])
             
             ++i;
             predatorAgent->loadAgent(argv[i]);
-
-            setupBroadcast();
             
-            string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true);
-            reportString.append("X");
-            doBroadcast(reportString);
-            exit(0);
+            display_only = true;
         }
         
         // -e [out file name] [out file name] [out file name]: evolve
@@ -116,7 +118,9 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-g") == 0 && (i + 1) < argc)
         {
             ++i;
-            totalGenerations = atoi(argv[i]);
+            
+            // add 2 generations because we look at ancestor->ancestor as best agent at end of sim
+            totalGenerations = atoi(argv[i]) + 2;
             
             if (totalGenerations < 3)
             {
@@ -165,8 +169,10 @@ int main(int argc, char *argv[])
             ++i;
             swarmAgent->loadAgent(argv[i]);
             ++i;
-            swarmAgent->saveLogicTable(argv[i]);
-            exit(0);
+            stringstream ltfn;
+            ltfn << argv[i];
+            logicTableFileName = ltfn.str();
+            make_logic_table = true;
         }
         
         // -dfs [in file name] [out file name]: create dot image file for given swarm genome
@@ -175,8 +181,10 @@ int main(int argc, char *argv[])
             ++i;
             swarmAgent->loadAgent(argv[i]);
             ++i;
-            swarmAgent->saveToDot(argv[i], false);
-            exit(0);
+            stringstream dfn;
+            dfn << argv[i];
+            swarmDotFileName = dfn.str();
+            make_dot_swarm = true;
         }
         
         // -dfp [in file name] [out file name]: create dot image file for given predator genome
@@ -185,15 +193,53 @@ int main(int argc, char *argv[])
             ++i;
             predatorAgent->loadAgent(argv[i]);
             ++i;
-            predatorAgent->saveToDot(argv[i], true);
-            exit(0);
+            stringstream dfn;
+            dfn << argv[i];
+            predatorDotFileName = dfn.str();
+            make_dot_pred = true;
+        }
+        
+        // -sd [int]: set swarm safety distance (default: 15)
+        else if (strcmp(argv[i], "-sd") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            safetyDist = atoi(argv[i]);
+            
+            // simulation works in distance squared
+            safetyDist *= safetyDist;
         }
     }
     
-    if (make_interval_video || make_LOD_video)
+    if (display_only || make_interval_video || make_LOD_video)
     {
         // start monitor first, then abeeda
         setupBroadcast();
+    }
+    
+    if (display_only)
+    {
+        string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
+        reportString.append("X");
+        doBroadcast(reportString);
+        exit(0);
+    }
+    
+    if (make_logic_table)
+    {
+        swarmAgent->saveLogicTable(logicTableFileName.c_str());
+        exit(0);
+    }
+    
+    if (make_dot_swarm)
+    {
+        swarmAgent->saveToDot(swarmDotFileName.c_str(), false);
+        exit(0);
+    }
+    
+    if (make_dot_pred) 
+    {
+        swarmAgent->saveToDot(predatorDotFileName.c_str(), true);
+        exit(0);
     }
     
     // seed the agents
@@ -246,7 +292,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -291,7 +337,7 @@ int main(int argc, char *argv[])
                 // repeatedly face the two brains against each other to account for stochasticity
                 for (int i = 0; i < 100; ++i)
                 {
-                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true);
+                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist);
                     
                     // interested in seeing the best swarms
                     if (bestSwarmAgent->fitness > bestFitness)
@@ -314,7 +360,7 @@ int main(int argc, char *argv[])
 		for(int i = 0; i < populationSize; ++i)
 		{
             // construct swarm agent population for the next generation
-			tAgent *d = new tAgent;
+			tAgent *offspring = new tAgent;
             int j = 0;
             
 			do
@@ -322,11 +368,11 @@ int main(int argc, char *argv[])
                 j = rand() % populationSize;
             } while((j == i) || (randDouble > (swarmAgents[j]->fitness / swarmMaxFitness)));
             
-			d->inherit(swarmAgents[j], perSiteMutationRate, update);
-			SANextGen[i] = d;
+			offspring->inherit(swarmAgents[j], perSiteMutationRate, update);
+			SANextGen[i] = offspring;
             
             // construct predator agent population for the next generation
-            d = new tAgent;
+            offspring = new tAgent;
             j = 0;
             
 			do
@@ -334,8 +380,8 @@ int main(int argc, char *argv[])
                 j = rand() % populationSize;
             } while((j == i) || (randDouble > (predatorAgents[j]->fitness / predatorMaxFitness)));
             
-			d->inherit(predatorAgents[j], perSiteMutationRate, update);
-			PANextGen[i] = d;
+			offspring->inherit(predatorAgents[j], perSiteMutationRate, update);
+			PANextGen[i] = offspring;
 		}
         
         // shuffle the populations so there is a minimal chance of the same predator/prey combo in the next generation
@@ -416,7 +462,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist);
             
             // make video
             if (make_LOD_video)
@@ -426,7 +472,7 @@ int main(int argc, char *argv[])
                 
                 for (int i = 0; i < 100; ++i)
                 {
-                    reportString = game->executeGame(*it, (*it)->predator, NULL, true);
+                    reportString = game->executeGame(*it, (*it)->predator, NULL, true, safetyDist);
                     
                     if ((*it)->fitness > bestFitness)
                     {

@@ -330,7 +330,7 @@ void tAgent::showPhenotype(void){
 	cout<<"------"<<endl;
 }
 
-void tAgent::saveToDot(char *filename, bool predator)
+void tAgent::saveToDot(const char *filename, bool predator)
 {
 	FILE *f=fopen(filename,"w+t");
 	int i,j,k,node;
@@ -491,7 +491,7 @@ void tAgent::setupDots(int x, int y,double spacing){
 		}
 }
 
-void tAgent::saveLogicTable(char *filename)
+void tAgent::saveLogicTable(const char *filename)
 {
     FILE *f=fopen(filename, "w");
 	int i,j;
