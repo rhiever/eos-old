@@ -3,7 +3,7 @@ import processing.video.*;
 // the following parameters must fit the c++ code:
 int totalNrOfUpdates=1999;
 
-MovieMaker mm;  // Declare MovieMaker object
+MovieMaker mm;
 
 int[] x=new int[4];
 int[] y=new int[4];
@@ -21,6 +21,8 @@ PFont f;
 
 int frame=0;//1000000;
 
+boolean showLegend = true;
+
 
 void drawArea(){
   //noStroke();
@@ -30,7 +32,7 @@ void drawArea(){
     //if(currentStep==1)
      background(0);
 
-     if (currentStep < 200)
+     if (showLegend && currentStep < 200)
      {
        fill(255, 0, 0);
        text("Red - predator", 10, 40);
@@ -43,6 +45,11 @@ void drawArea(){
       
        //fill(30, 144, 255);
        //text("Blue - prey visible to predator", 10, 115);
+     }
+     
+     if (showLegend && currentStep > 200)
+     {
+       showLegend = false;
      }
      
      for(int t=0;t<1;t++)
