@@ -153,7 +153,7 @@ void setup()
   
   String movname = "swarm-" + y + "-" + mo + "-" + d + "-" + h + "-" + mi + "-" + s + ".mov";
   
-  mm = new MovieMaker(this, width, height, movname, 30, MovieMaker.H263, MovieMaker.HIGH);
+  mm = new MovieMaker(this, width, height, movname, 30, MovieMaker.ANIMATION, MovieMaker.BEST);
   background(#000000);
   fill(0);
   noStroke();
