@@ -47,8 +47,12 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-d swarm.genome predator.genome"
+            argument = "-d /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30/ /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30/ -sd 30"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30/ -sd 30"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.csv swarm.genome predator.genome -g 300 -t 50"
@@ -56,7 +60,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.csv swarm.genome predator.genome -g 1000 -t 50"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

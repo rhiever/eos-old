@@ -8,6 +8,7 @@
 #include <math.h>
 #include <time.h>
 #include <iostream>
+#include <dirent.h>
 
 #include "globalConst.h"
 #include "tHMM.h"
@@ -51,6 +52,7 @@ bool    make_LOD_video              = false;
 bool    track_best_brains           = false;
 int     track_best_brains_frequency = 25;
 bool    display_only                = false;
+bool    display_directory           = false;
 bool    make_logic_table            = false;
 bool    make_dot_pred               = false;
 bool    make_dot_swarm              = false;
@@ -64,6 +66,7 @@ int main(int argc, char *argv[])
 	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
     string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "", inputGenomeFileName = "";
     string swarmDotFileName = "", predatorDotFileName = "", logicTableFileName = "";
+    int displayDirectoryArgvIndex = 0;
     
     // initial object setup
     swarmAgents.resize(populationSize);
@@ -87,6 +90,15 @@ int main(int argc, char *argv[])
             predatorAgent->loadAgent(argv[i]);
             
             display_only = true;
+        }
+        
+        // -dd [directory]: display all genome files in a given directory
+        if (strcmp(argv[i], "-dd") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            displayDirectoryArgvIndex = i;
+            
+            display_directory = true;
         }
         
         // -e [out file name] [out file name] [out file name]: evolve
@@ -125,7 +137,7 @@ int main(int argc, char *argv[])
             
             if (totalGenerations < 3)
             {
-                cout << "Minimum number of generations permitted is 3." << endl;
+                cerr << "Minimum number of generations permitted is 3." << endl;
                 exit(0);
             }
         }
@@ -139,7 +151,7 @@ int main(int argc, char *argv[])
             
             if (track_best_brains_frequency < 1)
             {
-                cout << "Minimum brain tracking frequency is 1." << endl;
+                cerr << "Minimum brain tracking frequency is 1." << endl;
                 exit(0);
             }
         }
@@ -153,7 +165,7 @@ int main(int argc, char *argv[])
             
             if (make_video_frequency < 1)
             {
-                cout << "Minimum video creation frequency is 1." << endl;
+                cerr << "Minimum video creation frequency is 1." << endl;
                 exit(0);
             }
         }
@@ -211,7 +223,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    if (display_only || make_interval_video || make_LOD_video)
+    if (display_only || display_directory || make_interval_video || make_LOD_video)
     {
         // start monitor first, then abeeda
         setupBroadcast();
@@ -219,9 +231,110 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        string reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
-        reportString.append("X");
-        doBroadcast(reportString);
+        string reportString = "", bestString = "";
+        double bestFitness = 0.0;
+        
+        for (int rep = 0; rep < 100; ++rep)
+        {
+            reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
+            
+            if (swarmAgent->fitness > bestFitness)
+            {
+                bestString = reportString;
+                bestFitness = swarmAgent->fitness;
+            }
+        }
+        
+        bestString.append("X");
+        doBroadcast(bestString);
+        exit(0);
+    }
+    
+    if (display_directory)
+    {
+        DIR *dir;
+        struct dirent *ent;
+        dir = opendir(argv[displayDirectoryArgvIndex]);
+        
+        // map: run # -> [swarm file name, predator file name]
+        map< int, vector<string> > fileNameMap;
+        
+        if (dir != NULL)
+        {
+            // read all of the files in the directory
+            while ((ent = readdir(dir)) != NULL)
+            {
+                string dirFile = string(ent->d_name);
+                
+                if (dirFile.find(".genome") != string::npos)
+                {
+                    // find the first character in the file name that is a digit
+                    int i = 0;
+                    
+                    for ( ; i < dirFile.length(); ++i)
+                    {
+                        if (isdigit(dirFile[i]))
+                        {
+                            break;
+                        }
+                    }
+                    
+                    // get the run number from the file name
+                    int runNumber = atoi(dirFile.substr(i).c_str());
+                    
+                    if (fileNameMap[runNumber].size() == 0)
+                    {
+                        fileNameMap[runNumber].resize(2);
+                    }
+                    
+                    // map the file name into the appropriate location
+                    if (dirFile.find("swarm") != string::npos)
+                    {
+                        fileNameMap[runNumber][0] = argv[displayDirectoryArgvIndex] + dirFile;
+                    }
+                    else if (dirFile.find("predator") != string::npos)
+                    {
+                        fileNameMap[runNumber][1] = argv[displayDirectoryArgvIndex] + dirFile;
+                    }
+                }
+            }
+            
+            closedir(dir);
+        }
+        else
+        {
+            cerr << "Invalid directory: " << argv[displayDirectoryArgvIndex] << endl;
+            exit(0);
+        }
+        
+        // display every set of swarm/predator files
+        for (map< int, vector<string> >::iterator it = fileNameMap.begin(), end = fileNameMap.end(); it != end; )
+        {
+            swarmAgent->loadAgent((char *)(*it).second[0].c_str());
+            predatorAgent->loadAgent((char *)(*it).second[1].c_str());
+            
+            string reportString = "", bestString = "";
+            double bestFitness = 0.0;
+            
+            for (int rep = 0; rep < 100; ++rep)
+            {
+                reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
+                
+                if (swarmAgent->fitness > bestFitness)
+                {
+                    bestString = reportString;
+                    bestFitness = swarmAgent->fitness;
+                }
+            }
+            
+            if ( (++it) == end )
+            {
+                bestString.append("X");
+            }
+            
+            doBroadcast(bestString);
+        }
+        
         exit(0);
     }
     
