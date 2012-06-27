@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
             
             if (totalGenerations < 3)
             {
-                cerr << "Minimum number of generations permitted is 3." << endl;
+                cerr << "minimum number of generations permitted is 3." << endl;
                 exit(0);
             }
         }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
             
             if (track_best_brains_frequency < 1)
             {
-                cerr << "Minimum brain tracking frequency is 1." << endl;
+                cerr << "minimum brain tracking frequency is 1." << endl;
                 exit(0);
             }
         }
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
             
             if (make_video_frequency < 1)
             {
-                cerr << "Minimum video creation frequency is 1." << endl;
+                cerr << "minimum video creation frequency is 1." << endl;
                 exit(0);
             }
         }
@@ -249,6 +249,8 @@ int main(int argc, char *argv[])
         
         if (dir != NULL)
         {
+            cout << "reading in files" << endl;
+            
             // read all of the files in the directory
             while ((ent = readdir(dir)) != NULL)
             {
@@ -291,25 +293,35 @@ int main(int argc, char *argv[])
         }
         else
         {
-            cerr << "Invalid directory: " << argv[displayDirectoryArgvIndex] << endl;
+            cerr << "invalid directory: " << argv[displayDirectoryArgvIndex] << endl;
             exit(0);
         }
         
         // display every set of swarm/predator files
         for (map< int, vector<string> >::iterator it = fileNameMap.begin(), end = fileNameMap.end(); it != end; )
         {
-            cout << (*it).first << endl;
-            swarmAgent->loadAgent((char *)(*it).second[0].c_str());
-            predatorAgent->loadAgent((char *)(*it).second[1].c_str());
-            
-            string bestString = findBestRun(swarmAgent, predatorAgent);
-            
-            if ( (++it) == end )
+            if (it->second[0] != "" && it->second[1] != "")
             {
-                bestString.append("X");
+                cout << "building video for run " << it->first << endl;
+                
+                swarmAgent->loadAgent((char *)it->second[0].c_str());
+                predatorAgent->loadAgent((char *)it->second[1].c_str());
+                
+                string bestString = findBestRun(swarmAgent, predatorAgent);
+                
+                cout << "displaying video for run " << it->first << endl;
+                
+                if ( (++it) == end )
+                {
+                    bestString.append("X");
+                }
+                
+                doBroadcast(bestString);
             }
-            
-            doBroadcast(bestString);
+            else
+            {
+                cerr << "unmatched file: " << it->second[0] << " " << it->second[1] << endl;
+            }
         }
         
         exit(0);
