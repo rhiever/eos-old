@@ -36,8 +36,9 @@ struct    sockaddr_in servaddr;  /*  socket address structure  */
 char      buffer[MAX_LINE];      /*  character buffer          */
 char     *endptr;                /*  for strtol()              */
 
-void setupBroadcast(void);
-void doBroadcast(string data);
+void    setupBroadcast(void);
+void    doBroadcast(string data);
+string  findBestRun(tAgent *swarmAgent, tAgent *predatorAgent);
 
 using namespace std;
 
@@ -45,6 +46,7 @@ using namespace std;
 double  perSiteMutationRate         = 0.005;
 int     populationSize              = 100;
 int     totalGenerations            = 252;
+tGame   *game                       = NULL;
 
 bool    make_interval_video         = false;
 int     make_video_frequency        = 25;
@@ -62,7 +64,6 @@ int main(int argc, char *argv[])
 {
 	vector<tAgent*> swarmAgents, SANextGen, predatorAgents, PANextGen;
 	tAgent *swarmAgent = NULL, *predatorAgent = NULL, *bestSwarmAgent = NULL, *bestPredatorAgent = NULL;
-	tGame *game = NULL;
 	double swarmMaxFitness = 0.0, predatorMaxFitness = 0.0;
     string LODFileName = "", swarmGenomeFileName = "", predatorGenomeFileName = "", inputGenomeFileName = "";
     string swarmDotFileName = "", predatorDotFileName = "", logicTableFileName = "";
@@ -231,20 +232,7 @@ int main(int argc, char *argv[])
     
     if (display_only)
     {
-        string reportString = "", bestString = "";
-        double bestFitness = 0.0;
-        
-        for (int rep = 0; rep < 100; ++rep)
-        {
-            reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
-            
-            if (swarmAgent->fitness > bestFitness)
-            {
-                bestString = reportString;
-                bestFitness = swarmAgent->fitness;
-            }
-        }
-        
+        string bestString = findBestRun(swarmAgent, predatorAgent);
         bestString.append("X");
         doBroadcast(bestString);
         exit(0);
@@ -310,22 +298,11 @@ int main(int argc, char *argv[])
         // display every set of swarm/predator files
         for (map< int, vector<string> >::iterator it = fileNameMap.begin(), end = fileNameMap.end(); it != end; )
         {
+            cout << (*it).first << endl;
             swarmAgent->loadAgent((char *)(*it).second[0].c_str());
             predatorAgent->loadAgent((char *)(*it).second[1].c_str());
             
-            string reportString = "", bestString = "";
-            double bestFitness = 0.0;
-            
-            for (int rep = 0; rep < 100; ++rep)
-            {
-                reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
-                
-                if (swarmAgent->fitness > bestFitness)
-                {
-                    bestString = reportString;
-                    bestFitness = swarmAgent->fitness;
-                }
-            }
+            string bestString = findBestRun(swarmAgent, predatorAgent);
             
             if ( (++it) == end )
             {
@@ -441,25 +418,11 @@ int main(int argc, char *argv[])
         // display video of simulation
         if (make_interval_video)
         {
-            bool finalGeneration = update == totalGenerations;
+            bool finalGeneration = (update == totalGenerations);
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string reportString = "", bestString = "";
-                double bestFitness = 0.0;
-                
-                // repeatedly face the two brains against each other to account for stochasticity
-                for (int i = 0; i < 100; ++i)
-                {
-                    reportString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist);
-                    
-                    // interested in seeing the best swarms
-                    if (bestSwarmAgent->fitness > bestFitness)
-                    {
-                        bestFitness = bestSwarmAgent->fitness;
-                        bestString = reportString;
-                    }
-                }
+                string bestString = findBestRun(bestSwarmAgent, bestPredatorAgent);
                 
                 if (finalGeneration)
                 {
@@ -581,19 +544,7 @@ int main(int argc, char *argv[])
             // make video
             if (make_LOD_video)
             {
-                string bestString = "", reportString = "";
-                double bestFitness = 0.0;
-                
-                for (int i = 0; i < 100; ++i)
-                {
-                    reportString = game->executeGame(*it, (*it)->predator, NULL, true, safetyDist);
-                    
-                    if ((*it)->fitness > bestFitness)
-                    {
-                        bestFitness = (*it)->fitness;
-                        bestString = reportString;
-                    }
-                }
+                string bestString = findBestRun(swarmAgent, predatorAgent);
                 
                 if ( (it + 1) == saveLOD.end() )
                 {
@@ -608,6 +559,25 @@ int main(int argc, char *argv[])
     fclose(LOD);
     
     return 0;
+}
+
+string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
+{
+    string reportString = "", bestString = "";
+    double bestFitness = 0.0;
+    
+    for (int rep = 0; rep < 100; ++rep)
+    {
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
+        
+        if (swarmAgent->fitness > bestFitness)
+        {
+            bestString = reportString;
+            bestFitness = swarmAgent->fitness;
+        }
+    }
+    
+    return bestString;
 }
 
 void setupBroadcast(void)
