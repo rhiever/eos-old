@@ -373,6 +373,7 @@ int main(int argc, char *argv[])
     predatorAgent->nrPointingAtMe--;
     
 	cout << "setup complete" << endl;
+    cout << "starting evolution" << endl;
     
     // main loop
 	for (int update = 1; update <= totalGenerations; ++update)
@@ -434,7 +435,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = findBestRun(bestSwarmAgent, bestPredatorAgent);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist);
                 
                 if (finalGeneration)
                 {
