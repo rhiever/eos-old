@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
         {
             ++i;
             swarmAgent->loadAgent(argv[i]);
+            swarmAgent->setupPhenotype();
             ++i;
             stringstream dfn;
             dfn << argv[i];
@@ -206,6 +207,7 @@ int main(int argc, char *argv[])
         {
             ++i;
             predatorAgent->loadAgent(argv[i]);
+            predatorAgent->setupPhenotype();
             ++i;
             stringstream dfn;
             dfn << argv[i];
@@ -341,7 +343,7 @@ int main(int argc, char *argv[])
     
     if (make_dot_pred) 
     {
-        swarmAgent->saveToDot(predatorDotFileName.c_str(), true);
+        predatorAgent->saveToDot(predatorDotFileName.c_str(), true);
         exit(0);
     }
     
