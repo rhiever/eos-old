@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <map>
+#include <math.h>
 #include "tAgent.h"
 
 tAgent::tAgent(){
@@ -421,31 +422,59 @@ void tAgent::saveToDot(const char *filename, bool predator)
 	}
     
     // which nodes go on the same level
-    
-    // inputs
-	fprintf(f,"	{ rank=same; ");
-    
-    for(node = 0; node < 24; node++)
+    if (predator)
     {
-        if(print_node[node])
+        // inputs
+        fprintf(f,"	{ rank=same; ");
+        
+        for(node = 0; node < 12; node++)
         {
-            fprintf(f, "%d; ", node);
+            if(print_node[node])
+            {
+                fprintf(f, "%d; ", node);
+            }
+        }
+        
+        fprintf(f, "}\n");
+        
+        // hidden states
+        fprintf(f,"	{ rank=same; ");
+        
+        for(node = 12; node < 30; node++)
+        {
+            if(print_node[node])
+            {
+                fprintf(f, "%d; ", node);
+            }
         }
     }
-    
-    fprintf(f, "}\n");
-    
-    // hidden states
-	fprintf(f,"	{ rank=same; ");
-    
-    for(node = 24; node < 30; node++)
+    else
     {
-        if(print_node[node])
+        // inputs
+        fprintf(f,"	{ rank=same; ");
+        
+        for(node = 0; node < 24; node++)
         {
-            fprintf(f, "%d; ", node);
+            if(print_node[node])
+            {
+                fprintf(f, "%d; ", node);
+            }
+        }
+        
+        fprintf(f, "}\n");
+        
+        // hidden states
+        fprintf(f,"	{ rank=same; ");
+        
+        for(node = 24; node < 30; node++)
+        {
+            if(print_node[node])
+            {
+                fprintf(f, "%d; ", node);
+            }
         }
     }
-    
+        
     fprintf(f, "}\n");
     
     // outputs
@@ -495,75 +524,41 @@ void tAgent::saveLogicTable(const char *filename)
 {
     FILE *f=fopen(filename, "w");
 	int i,j;
-	//fprintf(f,"s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,p1,p2,p6,p8,,o1,o2\n");
-    fprintf(f,"s5,s8,s23,s24,,o1,o2\n");
     
-	//for(i=0;i<65536;i++)
-    for(i = 0; i < 16; i++)
+    fprintf(f,"s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,p15,,o1,o2\n");
+    //fprintf(f,"s11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,,o1,o2\n");
+    
+    for(i = 0; i < (int)pow(2.0, 13.0); i++)
     {
         map<vector<int>, int> outputCounts;
         const int NUM_REPEATS = 1001;
         
-        for (int repeat = 1; repeat < NUM_REPEATS; repeat++)
+        for (int repeat = 1; repeat < NUM_REPEATS; ++repeat)
         {
             for(j = 0; j < 30; j++)
             {
-                if (j == 5)
+                if (j < 12)
                 {
                     if(repeat == 1)
                     {
-                        fprintf(f,"%i,",(i>>0)&1);
+                        fprintf(f,"%i,",(i >> j) & 1);
                     }
                     
-                    states[j] = (i>>0)&1;
+                    states[j] = (i >> j) & 1;
                 }
-                else if (j == 6)
+                else if (j == 15)
                 {
-                    if (repeat == 1)
+                    if(repeat == 1)
                     {
-                        fprintf(f,"%i,",(i>>1)&1);
+                        fprintf(f,"%i,",(i >> 12) & 1);
                     }
                     
-                    states[j] = (i>>1)&1;
-                }
-                else if (j == 14)
-                {
-                    if (repeat == 1)
-                    {
-                        fprintf(f,"%i,",(i>>2)&1);
-                    }
-                    
-                    states[j] = (i>>2)&1;
-                }
-                else if (j == 18)
-                {
-                    if (repeat == 1)
-                    {
-                        fprintf(f,"%i,",(i>>3)&1);
-                    }
-                    
-                    states[j] = (i>>3)&1;
+                    states[j] = (i >> 12) & 1;
                 }
                 else
                 {
                     states[j] = 0;
                 }
-                
-                /*if (j < 14)
-                 {
-                 fprintf(f,"%i,",(i>>j)&1);
-                 states[j]=(i>>j)&1;
-                 }
-                 else if(j == 17)
-                 {
-                 fprintf(f,"%i,",(i>>14)&1);
-                 states[14]=(i>>14)&1;
-                 }
-                 else if(j == 19)
-                 {
-                 fprintf(f,"%i,",(i>>15)&1);
-                 states[15]=(i>>15)&1;
-                 }*/
             }
             
             updateStates();
