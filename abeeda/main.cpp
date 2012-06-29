@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
         {
             ++i;
             swarmAgent->loadAgent(argv[i]);
+            swarmAgent->setupPhenotype();
             ++i;
             stringstream ltfn;
             ltfn << argv[i];
