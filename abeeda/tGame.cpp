@@ -367,25 +367,19 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     
                     for (int j = 0; j < swarmSize; ++j)
                     {
-                        if (!preyDead[j] && preyDists[i][j] < safetyDist)
+                        if (i != j && !preyDead[j] && preyDists[i][j] < safetyDist)
                         {
                             ++nearbyCount;
                         }
                     }
                     
-                    if (nearbyCount < 2)
+                    if (nearbyCount < 1)
                     {
                         preyDead[i] = killed = true;
                         --numAlive;
                     }
                 }
             }
-        }
-        
-        // simulation over: all but two of the swarm agents have died
-        else
-        {
-            return reportString;
         }
         
         /*       END OF PREDATOR UPDATE       */
