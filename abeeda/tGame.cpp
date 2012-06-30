@@ -45,7 +45,7 @@ tGame::~tGame()
 }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, int minimumNearbyCount)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -373,7 +373,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         }
                     }
                     
-                    if (nearbyCount < 1)
+                    if (nearbyCount < minimumNearbyCount)
                     {
                         preyDead[i] = killed = true;
                         --numAlive;

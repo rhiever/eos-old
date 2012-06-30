@@ -59,6 +59,7 @@ bool    make_logic_table            = false;
 bool    make_dot_pred               = false;
 bool    make_dot_swarm              = false;
 double  safetyDist                  = 15.0 * 15.0;
+int     minimumNearbyCount          = 1;
 
 int main(int argc, char *argv[])
 {
@@ -220,10 +221,17 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-sd") == 0 && (i + 1) < argc)
         {
             ++i;
-            safetyDist = atoi(argv[i]);
+            safetyDist = atof(argv[i]);
             
             // simulation works in distance squared
             safetyDist *= safetyDist;
+        }
+        
+        // -nc [int]: set minimum nearby count to survive (default: 1)
+        else if (strcmp(argv[i], "-nc") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            minimumNearbyCount = atoi(argv[i]);
         }
     }
     
@@ -399,7 +407,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, minimumNearbyCount);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -438,7 +446,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, minimumNearbyCount);
                 
                 if (finalGeneration)
                 {
@@ -555,7 +563,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, minimumNearbyCount);
             
             // make video
             if (make_LOD_video)
@@ -584,7 +592,7 @@ string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
     
     for (int rep = 0; rep < 100; ++rep)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, minimumNearbyCount);
         
         if (swarmAgent->fitness > bestFitness)
         {
