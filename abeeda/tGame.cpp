@@ -543,20 +543,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         predatorFitness += swarmSize - numAlive;
         
-        /*double swarmLandmarkFitness = 0.0;
-         
-         for (int i = 0; i < swarmSize; ++i)
-         {
-         double distToLandmark = calcDistanceSquared(preyX[i], preyY[i], 0.0, 0.0);
-         
-         if (distToLandmark > 25.0 * 25.0)
-         {
-         swarmLandmarkFitness += 1.0 / sqrt(distToLandmark);
-         }
-         }
-         
-         swarmFitness += (double)numAlive * swarmLandmarkFitness;*/
-        
         swarmFitness += numAlive;
         
         /*       END OF FITNESS CALCULATIONS       */
