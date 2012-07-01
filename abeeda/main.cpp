@@ -79,7 +79,7 @@ bool    display_directory           = false;
 bool    make_logic_table            = false;
 bool    make_dot_pred               = false;
 bool    make_dot_swarm              = false;
-double  safetyDist                  = 15.0 * 15.0;
+double  safetyDist                  = 30.0 * 30.0;
 
 int main(int argc, char *argv[])
 {
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
             make_dot_pred = true;
         }
         
-        // -sd [int]: set swarm safety distance (default: 15)
+        // -sd [int]: set swarm safety distance (default: 30)
         else if (strcmp(argv[i], "-sd") == 0 && (i + 1) < argc)
         {
             ++i;
