@@ -52,15 +52,15 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30/ -sd 30"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.csv swarm.genome predator.genome -g 300 -t 50"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.csv swarm.genome predator.genome -g 1000 -t 50"
-            isEnabled = "NO">
+            argument = "-e lod.csv swarm.genome predator.genome -g 1000"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
@@ -69,7 +69,8 @@
    <ProfileAction
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
-      useCustomWorkingDirectory = "NO"
+      useCustomWorkingDirectory = "YES"
+      customWorkingDirectory = "/Users/olsonran/Documents/experiments/abeeda/work"
       buildConfiguration = "Debug">
       <BuildableProductRunnable>
          <BuildableReference
