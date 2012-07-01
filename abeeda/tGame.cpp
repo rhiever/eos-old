@@ -29,6 +29,7 @@
 // precalculated lookup tables for the game
 double cosLookup[360];
 double sinLookup[360];
+double atan2Lookup[400][400];
 
 tGame::tGame()
 {
@@ -38,11 +39,17 @@ tGame::tGame()
         cosLookup[i] = cos((double)i * (cPI / 180.0));
         sinLookup[i] = sin((double)i * (cPI / 180.0));
     }
+    
+    for (int i = 0; i < 400; ++i)
+    {
+        for (int j = 0; j < 400; ++j)
+        {
+            atan2Lookup[i][j] = atan2(i - 200, j - 200) * 180.0 / cPI;
+        }
+    }
 }
 
-tGame::~tGame()
-{
-}
+tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
 string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, int minimumNearbyCount)
@@ -583,15 +590,17 @@ double tGame::calcDistanceSquared(double fromX, double fromY, double toX, double
 double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)
 {
     double Ux = 0.0, Uy = 0.0, Vx = 0.0, Vy = 0.0;
-
+    
     Ux = (toX - fromX);
     Uy = (toY - fromY);
     
     Vx = cosLookup[(int)fromAngle];
     Vy = sinLookup[(int)fromAngle];
     
-    // compute the angle between fromAgent's facing and the agent it is looking at
-    return atan2(((Ux * Vy) - (Uy * Vx)), ((Ux * Vx) + (Uy * Vy))) * 180.0 / cPI;
+    int firstTerm = (int)((Ux * Vy) - (Uy * Vx));
+    int secondTerm = (int)((Ux * Vx) + (Uy * Vy));
+    
+    return atan2Lookup[firstTerm + 200][secondTerm + 200];
 }
 
 // calculates the center of the swarm and stores it in (cX, cY)

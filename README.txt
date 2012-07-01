@@ -1,8 +1,8 @@
 ###################################
 # aBeeDa Swarm Evolution Platform #
 #                                 #
-# Authors: Dr. Arend Hintze       #
-#          Randal S. Olson        #
+# Authors: Randal S. Olson        #
+#          Dr. Arend Hintze       #
 #                                 #
 # Michigan State University       #
 ###################################
