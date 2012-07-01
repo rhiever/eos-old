@@ -36,21 +36,22 @@ tAgent::tAgent(){
 #endif
 }
 
-tAgent::~tAgent(){
-	for(int i=0;i<hmmus.size();i++)
+tAgent::~tAgent()
+{
+	for (int i = 0; i < hmmus.size(); ++i)
     {
-		delete hmmus[i];
+        delete hmmus[i];
     }
     
     if (predator != NULL)
     {
-        //delete predator;
+        delete predator;
     }
     
-	if(ancestor!=NULL)
+	if (ancestor!=NULL)
     {
 		ancestor->nrPointingAtMe--;
-		if(ancestor->nrPointingAtMe==0)
+		if (ancestor->nrPointingAtMe == 0)
         {
 			delete ancestor;
         }
@@ -60,7 +61,8 @@ tAgent::~tAgent(){
 #endif
 }
 
-void tAgent::setupRandomAgent(int nucleotides){
+void tAgent::setupRandomAgent(int nucleotides)
+{
 	int i;
 	genome.resize(nucleotides);
 	for(i=0;i<nucleotides;i++)
@@ -71,17 +73,21 @@ void tAgent::setupRandomAgent(int nucleotides){
 	ANN->setup();
 #endif
 }
-void tAgent::loadAgent(char* filename){
+void tAgent::loadAgent(char* filename)
+{
 	FILE *f=fopen(filename,"r+t");
 	int i;
 	genome.clear();
-	while(!(feof(f))){
+	while(!(feof(f)))
+    {
 		fscanf(f,"%i	",&i);
 		genome.push_back((unsigned char)(i&255));
 	}
 	//setupPhenotype();
 }
-void tAgent::loadAgentWithTrailer(char* filename){
+
+void tAgent::loadAgentWithTrailer(char* filename)
+{
 #ifdef useANN
 	ANN=new tANN;
 	ANN->load(filename);
@@ -99,7 +105,8 @@ void tAgent::loadAgentWithTrailer(char* filename){
 }
 
 
-void tAgent::ampUpStartCodons(void){
+void tAgent::ampUpStartCodons(void)
+{
 	int i,j;
 	for(i=0;i<genome.size();i++)
 		genome[i]=rand()&255;
@@ -113,7 +120,8 @@ void tAgent::ampUpStartCodons(void){
 	}
 }
 
-void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
+void tAgent::inherit(tAgent *from, double mutationRate, int theTime)
+{
 	int nucleotides=(int)from->genome.size();
 	int i,s,o,w;
 	//double localMutationRate=4.0/from->genome.size();
@@ -163,15 +171,23 @@ void tAgent::inherit(tAgent *from,double mutationRate,int theTime){
 	ANN->inherit(ancestor->ANN,mutationRate);
 #endif
 }
-void tAgent::setupPhenotype(void){
+
+void tAgent::setupPhenotype(void)
+{
 	int i;
 	tHMMU *hmmu;
 	if(hmmus.size()!=0)
+    {
 		for(i=0;i<hmmus.size();i++)
+        {
 			delete hmmus[i];
+        }
+    }
 	hmmus.clear();
-	for(i=0;i<genome.size();i++){
-		if((genome[i]==42)&&(genome[(i+1)%genome.size()]==(255-42))){
+	for(i=0;i<genome.size();i++)
+    {
+		if((genome[i]==42)&&(genome[(i+1)%genome.size()]==(255-42)))
+        {
 			hmmu=new tHMMU;
 			//hmmu->setupQuick(genome,i);
 			hmmu->setup(genome,i);
@@ -187,7 +203,8 @@ void tAgent::setupPhenotype(void){
          */
 	}
 }
-void tAgent::setupMegaPhenotype(int howMany){
+void tAgent::setupMegaPhenotype(int howMany)
+{
 	int i,j;
 	tHMMU *hmmu;
     
@@ -199,8 +216,10 @@ void tAgent::setupMegaPhenotype(int howMany){
         }
     }
 	hmmus.clear();
-	for(i=0;i<genome.size();i++){
+	for(i=0;i<genome.size();i++)
+    {
 		if((genome[i]==42)&&(genome[(i+1)%genome.size()]==(255-42)))
+        {
             for(j=0;j<howMany;j++)
             {
                 hmmu=new tHMMU;
@@ -212,6 +231,7 @@ void tAgent::setupMegaPhenotype(int howMany){
                 }
                 hmmus.push_back(hmmu);
             }
+        }
         /*
          if((genome[i]==43)&&(genome[(i+1)%genome.size()]==(255-43))){
          hmmu=new tHMMU;
@@ -225,17 +245,22 @@ void tAgent::setupMegaPhenotype(int howMany){
 }
 
 
-void tAgent::retire(void){
+void tAgent::retire(void)
+{
 	retired=true;
 }
 
-unsigned char * tAgent::getStatesPointer(void){
+unsigned char * tAgent::getStatesPointer(void)
+{
 	return states;
 }
 
-void tAgent::resetBrain(void){
+void tAgent::resetBrain(void)
+{
 	for(int i=0;i<maxNodes*swarmSize;i++)
+    {
 		states[i]=0;
+    }
 #ifdef useANN
 	ANN->resetBrain();
 #endif
@@ -256,13 +281,17 @@ void tAgent::updateStates(void)
 	++totalSteps;
 }
 
-void tAgent::showBrain(void){
+void tAgent::showBrain(void)
+{
 	for(int i=0;i<maxNodes;i++)
+    {
 		cout<<(int)states[i];
+    }
 	cout<<endl;
 }
 
-void tAgent::initialize(int x, int y, int d){
+void tAgent::initialize(int x, int y, int d)
+{
 	//int i,j;
 	//unsigned char dummy;
 	xPos=x;
@@ -277,7 +306,8 @@ void tAgent::initialize(int x, int y, int d){
 	*/
 }
 
-tAgent* tAgent::findLMRCA(void){
+tAgent* tAgent::findLMRCA(void)
+{
 	tAgent *r,*d;
 	if(ancestor==NULL)
 		return NULL;
@@ -325,7 +355,8 @@ void tAgent::saveLOD(FILE *statsFile,FILE *genomeFile){
 	
 }*/
 
-void tAgent::showPhenotype(void){
+void tAgent::showPhenotype(void)
+{
 	for(int i=0;i<hmmus.size();i++)
 		hmmus[i]->show();
 	cout<<"------"<<endl;

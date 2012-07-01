@@ -412,8 +412,11 @@ int main(int argc, char *argv[])
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
             swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
+            
+            // cleanup for memory management
             predatorAgents[i]->nrPointingAtMe--;
             predatorAgents[i]->nrOfOffspring--;
+            swarmAgents[i]->predator->ancestor = NULL;
             
             swarmAvgFitness += swarmAgents[i]->fitness;
             predatorAvgFitness += predatorAgents[i]->fitness;
