@@ -9,13 +9,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362796742.946962"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "422"
-         endingLineNumber = "422"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -23,13 +21,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362458354.054764"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "77"
-         endingLineNumber = "77"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -37,11 +33,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/tGame.cpp"
-         timestampString = "362086395.885232"
+         timestampString = "362802118.292829"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "659"
-         endingLineNumber = "659"
+         startingLineNumber = "668"
+         endingLineNumber = "668"
          landmarkName = "tGame::applyBoundary(double&amp; positionVal)"
          landmarkType = "5">
       </FileBreakpoint>
@@ -51,13 +47,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362796742.946962"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "557"
-         endingLineNumber = "557"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -65,13 +59,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362796742.946962"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "543"
-         endingLineNumber = "543"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -79,13 +71,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362796742.946962"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "544"
-         endingLineNumber = "544"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -93,13 +83,39 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "aBeeDa/main.cpp"
-         timestampString = "362796742.946962"
+         timestampString = "362802679.378107"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "538"
-         endingLineNumber = "538"
-         landmarkName = "main(int argc, char *argv[])"
-         landmarkType = "7">
+         startingLineNumber = "5"
+         endingLineNumber = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "aBeeDa/tGame.cpp"
+         timestampString = "362802118.292829"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "603"
+         endingLineNumber = "603"
+         landmarkName = "tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "aBeeDa/tGame.cpp"
+         timestampString = "362802118.292829"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "601"
+         endingLineNumber = "601"
+         landmarkName = "tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY)"
+         landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>
