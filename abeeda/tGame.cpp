@@ -298,10 +298,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             if (!preyDead[i])
             {
-                double d = predDists[i];
-                
                 // don't bother if an agent is too far
-                if(d < predatorVisionRange)
+                if(predDists[i] < predatorVisionRange)
                 {
                     double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
                     
@@ -379,20 +377,23 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             {
                 bool killed = false;
                 
-                for(int i = 0; i < swarmSize && !killed; ++i)
+                for(int i = 0; !killed && i < swarmSize; ++i)
                 {
-                    if (!preyDead[i] &&
-                        (predDists[i] < killDist))/* &&
-                                                   (preyA[i] + 360 > predA + 360 - 45) &&
-                                                   (preyA[i] + 360 < predA + 360 + 45))*/
+                    // victim prey must be within kill range
+                    if (!preyDead[i] && predDists[i] < killDist)
                     {
                         int nearbyCount = 0;
                         
                         for (int j = 0; j < swarmSize; ++j)
                         {
+                            // other prey must be close to victim prey
                             if (i != j && !preyDead[j] && preyDists[i][j] < safetyDist)
                             {
-                                ++nearbyCount;
+                                // other prey must be within predator's retina
+                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < 45)
+                                {
+                                    ++nearbyCount;
+                                }
                             }
                         }
                         
@@ -402,6 +403,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             --numAlive;
                         }
                         
+                        // add a short delay in between kill attempts
                         delay = 10;
                         break;
                     }
