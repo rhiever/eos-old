@@ -52,15 +52,15 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30-nopredconfusion/ -sd 30"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-e lod.csv swarm.genome predator.genome -g 600 -t 50"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-e lod.csv swarm.genome predator.genome -g 5 -v 50 -sd 30"
             isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-e lod.csv swarm.genome predator.genome -g 300 -t 50"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "-e lod.csv swarm.genome predator.genome -g 1000 -v 50 -sd 30"
-            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

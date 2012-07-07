@@ -29,7 +29,9 @@
 
 // simulation-specific constants
 #define preyVisionRange 100.0 * 100.0
+#define preyVisionAngle 180.0 / 2.0
 #define predatorVisionRange 200.0 * 200.0
+#define predatorVisionAngle 90.0 / 2.0
 #define preySensors 12
 #define predatorSensors 12
 #define totalStepsInSimulation 2000
@@ -304,9 +306,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
-                    if(fabs(angle) < 45) // predator has a 90 degree vision field in front of it
+                    if(fabs(angle) < predatorVisionAngle) // predator has a 90 degree vision field in front of it
                     {
-                        predatorAgent->states[(int)(angle / (90.0 / ((double)predatorSensors / 2.0)) + ((double)predatorSensors / 2.0))] = 1;
+                        predatorAgent->states[(int)(angle / (predatorVisionAngle / ((double)predatorSensors / 2.0)) + ((double)predatorSensors / 2.0))] = 1;
                     }
                 }
             }
@@ -380,7 +382,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 for(int i = 0; !killed && i < swarmSize; ++i)
                 {
                     // victim prey must be within kill range
-                    if (!preyDead[i] && predDists[i] < killDist)
+                    if (!preyDead[i] && (predDists[i] < killDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorVisionAngle)
                     {
                         int nearbyCount = 0;
                         
@@ -390,7 +392,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             if (i != j && !preyDead[j] && preyDists[i][j] < safetyDist)
                             {
                                 // other prey must be within predator's retina
-                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < 45)
+                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
                                 {
                                     ++nearbyCount;
                                 }
@@ -448,9 +450,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                                 double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j]);
                                 
                                 //here we have to map the angle into the sensor, btw: angle in degrees
-                                if(fabs(angle) < 90) // you have a 180 degree vision field infront of you
+                                if(fabs(angle) < preyVisionAngle) // you have a 180 degree vision field infront of you
                                 {
-                                    swarmAgent->states[(int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                                    swarmAgent->states[(int)(angle / (preyVisionAngle / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
                                 }
                             }
                         }
@@ -466,9 +468,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // you have a 180 degree vision field infront of you
-                    if(fabs(angle) < 90)
+                    if(fabs(angle) < preyVisionAngle)
                     {
-                        swarmAgent->states[preySensors + (int)(angle / (90.0 / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                        swarmAgent->states[preySensors + (int)(angle / (preyVisionAngle / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
                     }
                 }
             }
