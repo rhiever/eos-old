@@ -31,7 +31,6 @@
 #define preyVisionRange 100.0 * 100.0
 #define preyVisionAngle 180.0 / 2.0
 #define predatorVisionRange 200.0 * 200.0
-#define predatorVisionAngle 180.0 / 2.0
 #define preySensors 12
 #define predatorSensors 24
 #define totalStepsInSimulation 2000
@@ -66,7 +65,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle)
 {
     // LOD data variables
     double swarmFitness = 0.0;
