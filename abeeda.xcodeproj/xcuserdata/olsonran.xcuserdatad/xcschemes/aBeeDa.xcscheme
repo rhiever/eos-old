@@ -56,6 +56,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.csv swarm.genome predator.genome -g 1200 -t 50 -v 50"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-dfp startPredator.genome startPredator.dot"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
