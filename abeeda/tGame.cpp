@@ -65,7 +65,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -405,7 +405,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         }
                         
                         // add a short delay in between kill attempts
-                        delay = 10;
+                        delay = killDelay;
                         break;
                     }
                 }
