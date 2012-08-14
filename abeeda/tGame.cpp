@@ -29,10 +29,10 @@
 
 // simulation-specific constants
 #define preyVisionRange 100.0 * 100.0
-#define preyVisionAngle 180.0 / 2.0
+//#define preyVisionAngle 180.0 / 2.0
 #define predatorVisionRange 200.0 * 200.0
-#define preySensors 12
-#define predatorSensors 12
+//#define preySensors 12
+//#define predatorSensors 12
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
@@ -65,7 +65,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, int killDelay)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -289,7 +289,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         /*       UPDATE PREDATOR       */
         
         // clear the predator sensors
-        for(int i = 0; i < predatorSensors; ++i)
+        for(int i = 0; i < predatorAgent->retinaSlices; ++i)
         {
             predatorAgent->states[i] = 0;
         }
@@ -305,9 +305,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     double angle = calcAngle(predX, predY, predA, preyX[i], preyY[i]);
                     
                     // here we have to map the angle into the sensor, btw: angle in degrees
-                    if(fabs(angle) < predatorVisionAngle) // predator has a limited vision field in front of it
+                    if(fabs(angle) < predatorAgent->retinaAngle) // predator has a limited vision field in front of it
                     {
-                        predatorAgent->states[(int)(angle / (predatorVisionAngle / ((double)predatorSensors / 2.0)) + ((double)predatorSensors / 2.0))] = 1;
+                        predatorAgent->states[(int)(angle / (predatorAgent->retinaAngle / ((double)predatorAgent->retinaSlices / 2.0)) + ((double)predatorAgent->retinaSlices / 2.0))] = 1;
                     }
                 }
             }
@@ -381,7 +381,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 for(int i = 0; !killed && i < swarmSize; ++i)
                 {
                     // victim prey must be within kill range
-                    if (!preyDead[i] && (predDists[i] < killDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorVisionAngle)
+                    if (!preyDead[i] && (predDists[i] < killDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorAgent->retinaAngle)
                     {
                         int nearbyCount = 0;
                         
@@ -391,7 +391,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             if (i != j && !preyDead[j] && preyDists[i][j] < safetyDist)
                             {
                                 // other prey must be within predator's retina
-                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
+                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorAgent->retinaAngle)
                                 {
                                     ++nearbyCount;
                                 }
@@ -425,7 +425,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             if (!preyDead[i])
             {
                 //clear the sensors of agent i
-                for(int j = 0; j < preySensors * 2; ++j)
+                for(int j = 0; j < swarmAgent->retinaSlices * 2; ++j)
                 {
                     swarmAgent->states[j + (i * maxNodes)] = 0;
                 }
@@ -449,9 +449,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                                 double angle = calcAngle(preyX[i], preyY[i], preyA[i], preyX[j], preyY[j]);
                                 
                                 //here we have to map the angle into the sensor, btw: angle in degrees
-                                if(fabs(angle) < preyVisionAngle) // prey has a limited vision field infront of it
+                                if(fabs(angle) < swarmAgent->retinaAngle) // prey has a limited vision field infront of it
                                 {
-                                    swarmAgent->states[(int)(angle / (preyVisionAngle / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                                    swarmAgent->states[(int)(angle / (swarmAgent->retinaAngle / ((double)swarmAgent->retinaSlices / 2.0)) + ((double)swarmAgent->retinaSlices / 2.0)) + (i * maxNodes)] = 1;
                                 }
                             }
                         }
@@ -467,9 +467,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     
                     //here we have to map the angle into the sensor, btw: angle in degree
                     // prey has a limited vision field infront of it
-                    if(fabs(angle) < preyVisionAngle)
+                    if(fabs(angle) < swarmAgent->retinaAngle)
                     {
-                        swarmAgent->states[preySensors + (int)(angle / (preyVisionAngle / ((double)preySensors / 2.0)) + ((double)preySensors / 2.0)) + (i * maxNodes)] = 1;
+                        swarmAgent->states[swarmAgent->retinaSlices + (int)(angle / (swarmAgent->retinaAngle / ((double)swarmAgent->retinaSlices / 2.0)) + ((double)swarmAgent->retinaSlices / 2.0)) + (i * maxNodes)] = 1;
                     }
                 }
             }
@@ -570,7 +570,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // output to data file, if provided
     if (data_file != NULL)
     {
-        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%i,%i,%i,%f\n",
+        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%i,%i,%i,%f,%i,%i,%i,%i\n",
                 swarmAgent->born,                               // update born (prey)
                 swarmAgent->fitness,                            // swarm fitness
                 predatorAgent->fitness,                         // predator fitness
@@ -578,11 +578,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 average(bbSizes),                               // average bounding box size
                 variance(bbSizes),                              // variance in bounding box size
                 average(shortestDists),                         // average of avg. shortest distance to other swarm agent
-                average(swarmDensityCounts),                   // average # of agents within 20 units of each other
+                average(swarmDensityCounts),                    // average # of agents within 20 units of each other
                 neuronsConnectedToPreyRetina(swarmAgent),       // # neurons connected to prey part of retina (prey)
                 neuronsConnectedToPredatorRetina(swarmAgent),   // # neurons connected to predator part of retina (prey)
                 neuronsConnectedToPreyRetina(predatorAgent),    // # neurons connected to prey part of retina (predator)
-                mutualInformation(predatorAngle, preyAngle)    // mutual Information between prey flight angle and predator flight angle
+                mutualInformation(predatorAngle, preyAngle),    // mutual Information between prey flight angle and predator flight angle
+                swarmAgent->retinaAngle,
+                swarmAgent->retinaSlices,
+                predatorAgent->retinaAngle,
+                predatorAgent->retinaSlices
                 );
     }
     
@@ -897,7 +901,7 @@ int tGame::neuronsConnectedToPreyRetina(tAgent *agent){
     A->setupPhenotype();
     for(i=0;i<A->hmmus.size();i++)
         for(j=0;j<A->hmmus[i]->ins.size();j++)
-            if(A->hmmus[i]->ins[j]<preySensors)
+            if(A->hmmus[i]->ins[j]<agent->retinaSlices)
                 c++;
     delete A;
     return c;
@@ -910,7 +914,7 @@ int tGame::neuronsConnectedToPredatorRetina(tAgent* agent){
     A->setupPhenotype();
     for(i=0;i<A->hmmus.size();i++)
         for(j=0;j<A->hmmus[i]->ins.size();j++)
-            if((A->hmmus[i]->ins[j]<(preySensors*2))&&(A->hmmus[i]->ins[j]>=preySensors))
+            if((A->hmmus[i]->ins[j]<(agent->retinaSlices*2))&&(A->hmmus[i]->ins[j]>=agent->retinaSlices))
                 c++;
     delete A;
     return c;

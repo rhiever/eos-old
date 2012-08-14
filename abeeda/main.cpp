@@ -80,7 +80,6 @@ bool    make_logic_table            = false;
 bool    make_dot_pred               = false;
 bool    make_dot_swarm              = false;
 double  safetyDist                  = 30.0 * 30.0;
-double  predatorVisionAngle         = 180.0 / 2.0;
 int     killDelay                   = 10;
 
 int main(int argc, char *argv[])
@@ -249,15 +248,6 @@ int main(int argc, char *argv[])
             safetyDist *= safetyDist;
         }
         
-        // -pva [int]: set predator vision angle (default: 180)
-        else if (strcmp(argv[i], "-pva") == 0 && (i + 1) < argc)
-        {
-            ++i;
-            
-            // halve angle since it's split evenly in front of the predator (required for simulation)
-            predatorVisionAngle = atof(argv[i]) / 2.0;
-        }
-        
         // -kd [int]: set predator kill attempt delay (default: 10)
         else if (strcmp(argv[i], "-kd") == 0 && (i + 1) < argc)
         {
@@ -403,10 +393,10 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < populationSize; ++i)
     {
 		swarmAgents[i] = new tAgent;
-		swarmAgents[i]->inherit(swarmAgent, 0.01, 1);
+		swarmAgents[i]->inherit(swarmAgent, 0.01, 1, false);
         
         predatorAgents[i] = new tAgent;
-		predatorAgents[i]->inherit(predatorAgent, 0.01, 1);
+		predatorAgents[i]->inherit(predatorAgent, 0.01, 1, true);
     }
     
 	SANextGen.resize(populationSize);
@@ -439,11 +429,11 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, killDelay);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
-            swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born);
+            swarmAgents[i]->predator->inherit(predatorAgents[i], 0.0, predatorAgents[i]->born, true);
             
             // cleanup for memory management
             predatorAgents[i]->nrPointingAtMe--;
@@ -481,7 +471,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, killDelay);
                 
                 if (finalGeneration)
                 {
@@ -504,7 +494,7 @@ int main(int argc, char *argv[])
                 j = rand() % populationSize;
             } while((j == i) || (randDouble > (swarmAgents[j]->fitness / swarmMaxFitness)));
             
-			offspring->inherit(swarmAgents[j], perSiteMutationRate, update);
+			offspring->inherit(swarmAgents[j], perSiteMutationRate, update, false);
 			SANextGen[i] = offspring;
             
             // construct predator agent population for the next generation
@@ -516,7 +506,7 @@ int main(int argc, char *argv[])
                 j = rand() % populationSize;
             } while((j == i) || (randDouble > (predatorAgents[j]->fitness / predatorMaxFitness)));
             
-			offspring->inherit(predatorAgents[j], perSiteMutationRate, update);
+			offspring->inherit(predatorAgents[j], perSiteMutationRate, update, true);
 			PANextGen[i] = offspring;
 		}
         
@@ -585,7 +575,7 @@ int main(int argc, char *argv[])
     
     FILE *LOD = fopen(LODFileName.c_str(), "w");
 
-    fprintf(LOD, "generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info\n");
+    fprintf(LOD, "generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info,prey_retina_angle,prey_retina_slices,predator_retina_angle,predator_retina_slices\n");
     
     cout << "analyzing ancestor list" << endl;
     
@@ -598,7 +588,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, killDelay);
             
             // make video
             if (make_LOD_video)
@@ -627,7 +617,7 @@ string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
     
     for (int rep = 0; rep < 100; ++rep)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, killDelay);
         
         if (swarmAgent->fitness > bestFitness)
         {
