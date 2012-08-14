@@ -31,7 +31,7 @@
 #define preyVisionRange 100.0 * 100.0
 #define preyVisionAngle 180.0 / 2.0
 #define predatorVisionRange 200.0 * 200.0
-#define preySensors 12
+#define preySensors 8
 #define predatorSensors 12
 #define totalStepsInSimulation 2000
 #define gridX 256.0
