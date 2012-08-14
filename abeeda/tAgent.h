@@ -51,7 +51,7 @@ public:
 	unsigned char states[maxNodes*swarmSize],newStates[maxNodes*swarmSize];
 	double fitness,convFitness;
 	vector<double> fitnesses;
-	int retinaAngle, retinaSlices;
+	int food;
 	
 	double xPos,yPos,direction;
 	double sX,sY;
@@ -70,7 +70,7 @@ public:
 	void loadAgentWithTrailer(char* filename);
 	void setupPhenotype(void);
     void setupMegaPhenotype(int howMany);
-	void inherit(tAgent *from,double mutationRate,int theTime, bool predator);
+	void inherit(tAgent *from,double mutationRate,int theTime);
 	unsigned char * getStatesPointer(void);
 	void updateStates(void);
 	void resetBrain(void);

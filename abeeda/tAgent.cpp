@@ -25,8 +25,7 @@
 #include <math.h>
 #include "tAgent.h"
 
-tAgent::tAgent()
-{
+tAgent::tAgent(){
 	nrPointingAtMe=1;
 	ancestor = NULL;
     predator = NULL;
@@ -42,8 +41,7 @@ tAgent::tAgent()
 	hmmus.clear();
 	nrOfOffspring=0;
 	retired=false;
-	retinaAngle = 180;
-    retinaSlices = 6;
+	food=0;
     totalSteps=0;
 #ifdef useANN
 	ANN=new tANN;
@@ -134,7 +132,7 @@ void tAgent::ampUpStartCodons(void)
 	}
 }
 
-void tAgent::inherit(tAgent *from, double mutationRate, int theTime, bool predator)
+void tAgent::inherit(tAgent *from, double mutationRate, int theTime)
 {
 	int nucleotides=(int)from->genome.size();
 	int i,s,o,w;
@@ -144,74 +142,6 @@ void tAgent::inherit(tAgent *from, double mutationRate, int theTime, bool predat
 	ancestor=from;
 	from->nrPointingAtMe++;
 	from->nrOfOffspring++;
-    
-    // mutate retina angle
-    retinaAngle = from->retinaAngle;
-    
-    if ( (double)rand() / (double)RAND_MAX < mutationRate )
-    {
-        // 50%/50% chance of being a positive or negative mutation
-        if ((double)rand() / (double)RAND_MAX < 0.5)
-        {
-            retinaAngle += rand() % 20;
-        }
-        else
-        {
-            retinaAngle -= rand() % 20;
-        }
-        
-        // bound retina angle within [10, 360]
-        if (retinaAngle < 10)
-        {
-            retinaAngle = 10;
-        }
-        else if (retinaAngle > 360)
-        {
-            retinaAngle = 360;
-        }
-    }
-    
-    // mutate retina slice #
-    retinaSlices = from->retinaSlices;
-    
-    if ( (double)rand() / (double)RAND_MAX < mutationRate )
-    {
-        // 50%/50% chance of being a positive or negative mutation
-        if ((double)rand() / (double)RAND_MAX < 0.5)
-        {
-            retinaSlices += rand() % 4;
-        }
-        else
-        {
-            retinaSlices -= rand() % 4;
-        }
-        
-        if (predator)
-        {
-            // bound retina slices within [2, 28]
-            if (retinaSlices < 2)
-            {
-                retinaSlices = 2;
-            }
-            else if (retinaSlices > 28)
-            {
-                retinaSlices = 28;
-            }
-        }
-        else
-        {
-            // bound retina slices within [2, 14]
-            if (retinaSlices < 2)
-            {
-                retinaSlices = 2;
-            }
-            else if (retinaSlices > 14)
-            {
-                retinaSlices = 14;
-            }
-        }
-    }
-    
 	genome.clear();
 	genome.resize(from->genome.size());
 	for(i=0;i<nucleotides;i++)
