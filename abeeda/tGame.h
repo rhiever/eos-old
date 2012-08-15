@@ -64,6 +64,9 @@ public:
     void recalcPredAndPreyDistTable(double preyX[], double preyY[], bool preyDead[],
                                     double predX, double predY,
                                     double predDists[swarmSize], double preyDists[swarmSize][swarmSize]);
+    void recalcFoodDistTable(double preyX[], double preyY[], bool preyDead[],
+                             double foodX[], double foodY[], bool foodEaten[],
+                             double foodDists[swarmSize][foodNumber]);
     void applyBoundary(double& positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);

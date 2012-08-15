@@ -25,5 +25,6 @@
 #define     randDouble      ((double)rand() / (double)RAND_MAX)
 #define     maxNodes        32
 #define     swarmSize       50
+#define     foodNumber      20
 
 #endif
