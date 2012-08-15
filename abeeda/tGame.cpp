@@ -106,7 +106,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     double foodDists[swarmSize][foodNumber];
     
     // number of food left
-    int foodRemaining = foodNumber;
+    int foodRemaining = 0;
     
     // string containing the information to create a video of the simulation
     string reportString = "";
@@ -146,31 +146,6 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         preyDead[i] = false;
     }
     
-    // place food
-    double initialFoodX = (double)(randDouble * gridX) - gridX / 2.0;
-    double initialFoodY = (double)(randDouble * gridY) - gridY / 2.0;
-    
-    for (int i = 0; i < foodNumber; ++i)
-    {
-        double mulX = 1;
-        double mulY = 1;
-        
-        if (randDouble < 0.5)
-        {
-            mulX *= -1;
-        }
-        
-        if (randDouble < 0.5)
-        {
-            mulY *= -1;
-        }
-        
-        foodX[i] = initialFoodX + (mulX * randDouble * 25.0);
-        foodY[i] = initialFoodY + (mulY * randDouble * 25.0);
-    
-        foodEaten[i] = false;
-    }
-    
     // initialize predator and prey lookup tables
     recalcPredAndPreyDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
     
@@ -186,6 +161,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         // if all food eaten, reset it
         if (foodRemaining < 1)
         {
+            foodRemaining = foodNumber;
+            
             double baseFoodX = (double)(randDouble * gridX) - gridX / 2.0;
             double baseFoodY = (double)(randDouble * gridY) - gridY / 2.0;
             
