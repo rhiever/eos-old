@@ -186,6 +186,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 foodEaten[i] = false;
             }
+            
+            recalcFoodDistTable(preyX, preyY, preyDead, foodX, foodY, foodEaten, foodDists);
         }
         
         /*      END FOOD PLACEMENT      */
@@ -631,7 +633,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             {
                                 foodEaten[j] = ateFood = true;
                                 
-                                --foodRemaining;
+                                foodRemaining -= 1;
                                 
                                 swarmFoodFitness += 1;
                             }

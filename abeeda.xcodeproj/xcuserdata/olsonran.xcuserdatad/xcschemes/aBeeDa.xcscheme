@@ -51,12 +51,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30-nopredconfusion/ -sd 30"
-            isEnabled = "NO">
+            argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/roaming-swarm/swarm-sd30-roaming-predconfusion/"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-e lod.csv swarm.genome predator.genome -g 1200 -v 50"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-dfp startPredator.genome startPredator.dot"
