@@ -41,7 +41,7 @@ void drawArea(){
        text("White - prey", 10, 65);
       
        fill(0, 255, 0);
-       text("Green - center of swarm", 10, 90);
+       text("Green - food", 10, 90);
       
        //fill(30, 144, 255);
        //text("Blue - prey visible to predator", 10, 115);
