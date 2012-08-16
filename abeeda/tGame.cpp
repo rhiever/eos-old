@@ -184,6 +184,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 foodX[i] = baseFoodX + (mulX * randDouble * 25.0);
                 foodY[i] = baseFoodY + (mulY * randDouble * 25.0);
                 
+                applyBoundary(foodX[i]);
+                applyBoundary(foodY[i]);
+                
                 foodEaten[i] = false;
             }
             
