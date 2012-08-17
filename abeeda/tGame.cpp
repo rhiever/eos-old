@@ -158,31 +158,15 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     {
         /*      FOOD PLACEMENT      */
         
-        // if all food eaten, reset it
+        // if all food has been eaten, reset it
         if (foodRemaining < 1)
         {
             foodRemaining = foodNumber;
             
-            double baseFoodX = (double)(randDouble * gridX) - gridX / 2.0;
-            double baseFoodY = (double)(randDouble * gridY) - gridY / 2.0;
-            
             for (int i = 0; i < foodNumber; ++i)
             {
-                double mulX = 1;
-                double mulY = 1;
-                
-                if (randDouble < 0.5)
-                {
-                    mulX *= -1;
-                }
-                
-                if (randDouble < 0.5)
-                {
-                    mulY *= -1;
-                }
-                
-                foodX[i] = baseFoodX + (mulX * randDouble * 25.0);
-                foodY[i] = baseFoodY + (mulY * randDouble * 25.0);
+                foodX[i] = (double)(randDouble * gridX) - gridX / 2.0;
+                foodY[i] = (double)(randDouble * gridY) - gridY / 2.0;
                 
                 applyBoundary(foodX[i]);
                 applyBoundary(foodY[i]);
@@ -681,7 +665,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 average(bbSizes),                               // average bounding box size
                 variance(bbSizes),                              // variance in bounding box size
                 average(shortestDists),                         // average of avg. shortest distance to other swarm agent
-                average(swarmDensityCounts),                   // average # of agents within 20 units of each other
+                average(swarmDensityCounts),                   // average # of agents within 30 units of each other
                 neuronsConnectedToPreyRetina(swarmAgent),       // # neurons connected to prey part of retina (prey)
                 neuronsConnectedToPredatorRetina(swarmAgent),   // # neurons connected to predator part of retina (prey)
                 neuronsConnectedToPreyRetina(predatorAgent),    // # neurons connected to prey part of retina (predator)
