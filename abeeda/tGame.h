@@ -64,6 +64,10 @@ public:
     void recalcPredAndPreyDistTable(double preyX[], double preyY[], bool preyDead[],
                                     double predX, double predY,
                                     double predDists[swarmSize], double preyDists[swarmSize][swarmSize]);
+    void recalcPredAndPreyDistTableForOnePrey(double preyX[], double preyY[], bool preyDead[],
+                                              double predX, double predY,
+                                              double predDists[swarmSize], double preyDists[swarmSize][swarmSize],
+                                              int preyIndex);
     void applyBoundary(double& positionVal);
     double sum(vector<double> values);
     double average(vector<double> values);

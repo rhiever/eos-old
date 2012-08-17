@@ -78,6 +78,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     // swarm agent x, y, angles
     double preyX[swarmSize], preyY[swarmSize], preyA[swarmSize];
+    double lastPreyX[swarmSize], lastPreyY[swarmSize];
     // swarm alive status
     bool preyDead[swarmSize];
     
@@ -93,6 +94,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // predator X, Y, and angle
     double predX = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
     double predY = (double)(randDouble * gridY) - gridY / 2.0; //* 2.0) - gridY;
+    double lastPredX = predX, lastPredY = predY;
     double predA = (int)(randDouble * 360.0);
     
     int delay = 0;
@@ -129,6 +131,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             }
             
         } while (!goodPos);
+        
+        lastPreyX[i] = preyX[i];
+        lastPreyY[i] = preyY[i];
         
         preyA[i] = (int)(randDouble * 360.0);
         preyDead[i] = false;
@@ -334,6 +339,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     predA -= 360.0;
                 }
                 
+                lastPredX = predX;
+                lastPredY = predY;
+                
                 predX += cosLookup[(int)predA] * 2.25;
                 predY += sinLookup[(int)predA] * 2.25;
                 
@@ -348,6 +356,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                     predA += 360.0;
                 }
                 
+                lastPredX = predX;
+                lastPredY = predY;
+                
                 predX += cosLookup[(int)predA] * 2.25;
                 predY += sinLookup[(int)predA] * 2.25;
                 
@@ -355,6 +366,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 
                 // move straight ahead
             case 3:
+                lastPredX = predX;
+                lastPredY = predY;
+                
                 predX += cosLookup[(int)predA] * 2.25;
                 predY += sinLookup[(int)predA] * 2.25;
                 
@@ -501,6 +515,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] -= 360.0;
                         }
                         
+                        lastPreyX[i] = preyX[i];
+                        lastPreyY[i] = preyY[i];
+                        
                         preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
                         preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
@@ -514,6 +531,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             preyA[i] += 360.0;
                         }
                         
+                        lastPreyX[i] = preyX[i];
+                        lastPreyY[i] = preyY[i];
+                        
                         preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
                         preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
@@ -521,6 +541,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         
                         // move straight ahead
                     case 3:
+                        lastPreyX[i] = preyX[i];
+                        lastPreyY[i] = preyY[i];
+                        
                         preyX[i] += cosLookup[(int)preyA[i]] * 0.75;
                         preyY[i] += sinLookup[(int)preyA[i]] * 0.75;
                         
@@ -540,6 +563,51 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         recalcPredAndPreyDistTable(preyX, preyY, preyDead, predX, predY, predDists, preyDists);
         
         /*       END OF SWARM UPDATE       */
+        
+        /*       COLLISION DETECTION       */
+        
+        for (int i = 0; i < swarmSize; ++i)
+        {
+            if (!preyDead[i])
+            {
+                for (int j = i + 1; j < swarmSize; ++j)
+                {
+                    if (!preyDead[j])
+                    {
+                        // collision with other prey happened
+                        if (preyDists[i][j] < 5.0)
+                        {
+                            // reset both prey back to their position before the collision
+                            preyX[i] = lastPreyX[i];
+                            preyY[i] = lastPreyY[i];
+                            
+                            preyX[j] = lastPreyX[j];
+                            preyY[j] = lastPreyY[j];
+                            
+                            // update the lookup table entries for the two affected prey
+                            recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, i);
+                            recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, j);
+                        }
+                    }
+                }
+                
+                // collision with predator happened
+                if (predDists[i] < 5.0)
+                {
+                    // move predator back
+                    predX = lastPredX;
+                    predY = lastPredY;
+                    
+                    preyX[i] = lastPreyX[i];
+                    preyY[i] = lastPreyY[i];
+                    
+                    // update the distance lookup tables for the affected predator and prey
+                    recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, i);
+                }
+            }
+        }
+        
+        /*       END COLLISION DETECTION       */
         
         
         /*       DETERMINE FITNESSES FOR THIS UPDATE       */
@@ -671,6 +739,24 @@ void tGame::recalcPredAndPreyDistTable(double preyX[], double preyY[], bool prey
                     preyDists[j][i] = preyDists[i][j];
                 }
             }
+        }
+    }
+}
+
+// recalculates the predator and prey distance lookup tables only for a given prey
+void tGame::recalcPredAndPreyDistTableForOnePrey(double preyX[], double preyY[], bool preyDead[],
+                                                 double predX, double predY,
+                                                 double predDists[swarmSize], double preyDists[swarmSize][swarmSize],
+                                                 int preyIndex)
+{
+    predDists[preyIndex] = calcDistanceSquared(predX, predY, preyX[preyIndex], preyY[preyIndex]);
+    
+    for (int j = 0; j < swarmSize; ++j)
+    {
+        if (preyIndex != j && !preyDead[j])
+        {
+            preyDists[preyIndex][j] = calcDistanceSquared(preyX[preyIndex], preyY[preyIndex], preyX[j], preyY[j]);
+            preyDists[j][preyIndex] = preyDists[preyIndex][j];
         }
     }
 }
