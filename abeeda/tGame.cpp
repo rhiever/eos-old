@@ -165,11 +165,11 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             
             for (int i = 0; i < foodNumber; ++i)
             {
-                foodX[i] = (double)(randDouble * gridX) - gridX / 2.0;
-                foodY[i] = (double)(randDouble * gridY) - gridY / 2.0;
+                foodX[i] = (double)(randDouble * gridX * 2.0) - gridX;
+                foodY[i] = (double)(randDouble * gridY * 2.0) - gridY;
                 
-                applyBoundary(foodX[i]);
-                applyBoundary(foodY[i]);
+                //applyBoundary(foodX[i]);
+                //applyBoundary(foodY[i]);
                 
                 foodEaten[i] = false;
             }
