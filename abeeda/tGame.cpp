@@ -36,7 +36,7 @@
 #define totalStepsInSimulation 2000
 #define gridX 256.0
 #define gridY 256.0
-#define killDist 5.0 * 5.0
+#define collisionDist 5.0 * 5.0
 #define boundaryDist 250.0
 
 // precalculated lookup tables for the game
@@ -395,7 +395,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 for(int i = 0; !killed && i < swarmSize; ++i)
                 {
                     // victim prey must be within kill range
-                    if (!preyDead[i] && (predDists[i] < killDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorVisionAngle)
+                    if (!preyDead[i] && (predDists[i] < collisionDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorVisionAngle)
                     {
                         int nearbyCount = 0;
                         
@@ -568,41 +568,40 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         
         for (int i = 0; i < swarmSize; ++i)
         {
+            bool collisionHappened = false;
+            
             if (!preyDead[i])
             {
-                for (int j = i + 1; j < swarmSize; ++j)
+                for (int j = 0; !collisionHappened && j < swarmSize; ++j)
                 {
-                    if (!preyDead[j])
+                    if (i != j && !preyDead[j])
                     {
-                        // collision with other prey happened
-                        if (preyDists[i][j] < 5.0)
+                        // collision with other prey?
+                        if (preyDists[i][j] < collisionDist)
                         {
-                            // reset both prey back to their position before the collision
+                            // reset prey back to its position before the collision
                             preyX[i] = lastPreyX[i];
                             preyY[i] = lastPreyY[i];
                             
-                            preyX[j] = lastPreyX[j];
-                            preyY[j] = lastPreyY[j];
-                            
-                            // update the lookup table entries for the two affected prey
+                            // update the lookup table entry for the affected prey
                             recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, i);
-                            recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, j);
+                            
+                            collisionHappened = true;
                         }
                     }
                 }
                 
-                // collision with predator happened
-                if (predDists[i] < 5.0)
+                // collision with predator?
+                if (!collisionHappened && predDists[i] < collisionDist)
                 {
-                    // move predator back
-                    predX = lastPredX;
-                    predY = lastPredY;
-                    
+                    // move prey back
                     preyX[i] = lastPreyX[i];
                     preyY[i] = lastPreyY[i];
                     
                     // update the distance lookup tables for the affected predator and prey
                     recalcPredAndPreyDistTableForOnePrey(preyX, preyY, preyDead, predX, predY, predDists, preyDists, i);
+                    
+                    collisionHappened = true;
                 }
             }
         }
