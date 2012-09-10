@@ -47,7 +47,7 @@ void drawArea(){
        //text("Blue - prey visible to predator", 10, 115);
      }
      
-     if (showLegend && currentStep > 200)
+     if (showLegend && currentStep > 150)
      {
        showLegend = false;
      }
@@ -92,9 +92,10 @@ void drawArea(){
               //  stroke(color(R,G,B));
               line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*3)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*3)));
               
-              if(R[j] == 255 && G[j] == 0 && B[j] == 0)
+              // un-comment to project predator retina
+              /*if(R[j] == 255 && G[j] == 0 && B[j] == 0)
               {
-                strokeWeight(1.0);
+                strokeWeight(2.0);
                 fill(0);
                 int predatorVisionDist = 200;
                 line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]+90)*(PI/180.0))*predatorVisionDist)),(int)(y[j]+(height/2)+(sin((a[j]+90)*(PI/180.0))*predatorVisionDist)));
@@ -103,7 +104,7 @@ void drawArea(){
                       (int)(x[j]+(width/2)+(cos((a[j]-90)*(PI/180.0))*predatorVisionDist)), (int)(y[j]+(height/2)+(sin((a[j]-90)*(PI/180.0))*predatorVisionDist)),
                       (int)(x[j]+(width/2)+(cos((a[j]+90)*(PI/180.0))*predatorVisionDist)), (int)(y[j]+(height/2)+(sin((a[j]+90)*(PI/180.0))*predatorVisionDist)),
                       (int)(x[j]+(width/2)+(cos((a[j]+180)*(PI/180.0))*predatorVisionDist*8)), (int)(y[j]+(height/2)+(sin((a[j]+180)*(PI/180.0))*predatorVisionDist*8)));
-              }
+              }*/
             }
         }
 //        fill(color(0,255,0));
