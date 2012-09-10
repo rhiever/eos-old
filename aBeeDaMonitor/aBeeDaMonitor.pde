@@ -96,9 +96,13 @@ void drawArea(){
               {
                 strokeWeight(1.0);
                 fill(0);
-                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*200)));
-                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*200)));
-                curve((int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*100)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*100)),(int)(x[j]+(width/2)+(cos((a[j]-45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]-45)*(PI/180.0))*200)), (int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*200)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*200)),(int)(x[j]+(width/2)+(cos((a[j]+45)*(PI/180.0))*100)),(int)(y[j]+(height/2)+(sin((a[j]+45)*(PI/180.0))*100)));
+                int predatorVisionDist = 200;
+                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]+90)*(PI/180.0))*predatorVisionDist)),(int)(y[j]+(height/2)+(sin((a[j]+90)*(PI/180.0))*predatorVisionDist)));
+                line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos((a[j]-90)*(PI/180.0))*predatorVisionDist)),(int)(y[j]+(height/2)+(sin((a[j]-90)*(PI/180.0))*predatorVisionDist)));
+                curve((int)(x[j]+(width/2)+(cos((a[j]-180)*(PI/180.0))*predatorVisionDist*8)), (int)(y[j]+(height/2)+(sin((a[j]-180)*(PI/180.0))*predatorVisionDist*8)),
+                      (int)(x[j]+(width/2)+(cos((a[j]-90)*(PI/180.0))*predatorVisionDist)), (int)(y[j]+(height/2)+(sin((a[j]-90)*(PI/180.0))*predatorVisionDist)),
+                      (int)(x[j]+(width/2)+(cos((a[j]+90)*(PI/180.0))*predatorVisionDist)), (int)(y[j]+(height/2)+(sin((a[j]+90)*(PI/180.0))*predatorVisionDist)),
+                      (int)(x[j]+(width/2)+(cos((a[j]+180)*(PI/180.0))*predatorVisionDist*8)), (int)(y[j]+(height/2)+(sin((a[j]+180)*(PI/180.0))*predatorVisionDist*8)));
               }
             }
         }
