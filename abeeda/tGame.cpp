@@ -65,7 +65,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay, double confusionMultiplier)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -89,6 +89,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     
     // counter of how many swarm agents are still alive
     int numAlive = swarmSize;
+    
+    // number of attacks the predator has made
+    int numAttacks = 0;
     
     // predator X, Y, and angle
     double predX = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
@@ -377,6 +380,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             if (delay < 1)
             {
                 bool killed = false;
+                ++numAttacks;
                 
                 for(int i = 0; !killed && i < swarmSize; ++i)
                 {
@@ -388,7 +392,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         for (int j = 0; j < swarmSize; ++j)
                         {
                             // other prey must be close to victim prey
-                            if (i != j && !preyDead[j] && preyDists[i][j] < safetyDist)
+                            if (!preyDead[j] && preyDists[i][j] < safetyDist)
                             {
                                 // other prey must be within predator's retina
                                 if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
@@ -398,7 +402,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             }
                         }
                         
-                        if (nearbyCount < 1 || randDouble < (1.0 / (double)(nearbyCount + 1.0)))
+                        if ( randDouble < (confusionMultiplier / (double)nearbyCount) )
                         {
                             preyDead[i] = killed = true;
                             --numAlive;
@@ -570,7 +574,7 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // output to data file, if provided
     if (data_file != NULL)
     {
-        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%i,%i,%i,%f\n",
+        fprintf(data_file, "%d,%f,%f,%d,%f,%f,%f,%f,%i,%i,%i,%f,%i\n",
                 swarmAgent->born,                               // update born (prey)
                 swarmAgent->fitness,                            // swarm fitness
                 predatorAgent->fitness,                         // predator fitness
@@ -578,11 +582,12 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                 average(bbSizes),                               // average bounding box size
                 variance(bbSizes),                              // variance in bounding box size
                 average(shortestDists),                         // average of avg. shortest distance to other swarm agent
-                average(swarmDensityCounts),                   // average # of agents within 20 units of each other
+                average(swarmDensityCounts),                    // average # of agents within 20 units of each other
                 neuronsConnectedToPreyRetina(swarmAgent),       // # neurons connected to prey part of retina (prey)
                 neuronsConnectedToPredatorRetina(swarmAgent),   // # neurons connected to predator part of retina (prey)
                 neuronsConnectedToPreyRetina(predatorAgent),    // # neurons connected to prey part of retina (predator)
-                mutualInformation(predatorAngle, preyAngle)    // mutual Information between prey flight angle and predator flight angle
+                mutualInformation(predatorAngle, preyAngle),    // mutual Information between prey flight angle and predator flight angle
+                numAttacks
                 );
     }
     

@@ -82,6 +82,7 @@ bool    make_dot_swarm              = false;
 double  safetyDist                  = 30.0 * 30.0;
 double  predatorVisionAngle         = 180.0 / 2.0;
 int     killDelay                   = 10;
+double  confusionMultiplier         = 1.0;
 
 int main(int argc, char *argv[])
 {
@@ -265,6 +266,14 @@ int main(int argc, char *argv[])
             
             killDelay = atoi(argv[i]);
         }
+        
+        // -cm [int]: set predator confusion multiplier (default: 1.0)
+        else if (strcmp(argv[i], "-cm") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            confusionMultiplier = atoi(argv[i]);
+        }
     }
     
     if (display_only || display_directory || make_interval_video || make_LOD_video)
@@ -439,7 +448,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -481,7 +490,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
                 
                 if (finalGeneration)
                 {
@@ -585,7 +594,7 @@ int main(int argc, char *argv[])
     
     FILE *LOD = fopen(LODFileName.c_str(), "w");
 
-    fprintf(LOD, "generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info\n");
+    fprintf(LOD, "generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info,num_attacks\n");
     
     cout << "analyzing ancestor list" << endl;
     
@@ -598,7 +607,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
             
             // make video
             if (make_LOD_video)
@@ -627,7 +636,7 @@ string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
     
     for (int rep = 0; rep < 100; ++rep)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
         
         if (swarmAgent->fitness > bestFitness)
         {

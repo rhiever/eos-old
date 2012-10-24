@@ -34,8 +34,11 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.GDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/olsonran/Documents/experiments/abeeda/work"
-      buildConfiguration = "Release">
+      customWorkingDirectory = "/Users/olsonran/Documents/experiments/eos/work"
+      buildConfiguration = "Release"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -52,11 +55,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-dd /Users/olsonran/Desktop/Dropbox/Private/notebooks/coevolution-of-swarming/swarm-sd30/"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-e lod.csv swarm.genome predator.genome -g 1200 -t 50 -v 50"
-            isEnabled = "NO">
+            argument = "-e lod.csv swarm.genome predator.genome -g 1200 -t 50 -v 50 -cm 5"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-dfp startPredator.genome startPredator.dot"
@@ -71,7 +74,8 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "YES"
       customWorkingDirectory = "/Users/olsonran/Documents/experiments/abeeda/work"
-      buildConfiguration = "Debug">
+      buildConfiguration = "Debug"
+      debugDocumentVersioning = "YES">
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
