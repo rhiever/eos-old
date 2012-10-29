@@ -92,6 +92,9 @@ void drawArea(){
               //  stroke(color(R,G,B));
               line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*3)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*3)));
               
+              strokeWeight(2.0);
+              line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*20)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*20)));
+              
               // un-comment to project predator retina
               /*if(R[j] == 255 && G[j] == 0 && B[j] == 0)
               {
