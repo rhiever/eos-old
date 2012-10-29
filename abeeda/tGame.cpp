@@ -42,7 +42,7 @@
 // precalculated lookup tables for the game
 double cosLookup[360];
 double sinLookup[360];
-double atan2Lookup[400][400];
+//double atan2Lookup[800][800];
 
 tGame::tGame()
 {
@@ -53,13 +53,13 @@ tGame::tGame()
         sinLookup[i] = sin((double)i * (cPI / 180.0));
     }
     
-    for (int i = 0; i < 400; ++i)
+    /*for (int i = 0; i < 800; ++i)
     {
-        for (int j = 0; j < 400; ++j)
+        for (int j = 0; j < 800; ++j)
         {
-            atan2Lookup[i][j] = atan2(i - 200, j - 200) * 180.0 / cPI;
+            atan2Lookup[i][j] = atan2(i - 400, j - 400) * 180.0 / cPI;
         }
-    }
+    }*/
 }
 
 tGame::~tGame() { }
@@ -70,6 +70,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // LOD data variables
     double swarmFitness = 0.0;
     double predatorFitness = 0.0;
+    // counter of how many swarm agents are still alive
+    int numAlive = swarmSize;
+    // number of attacks the predator has made
+    int numAttacks = 0;
     
     vector<double> bbSizes;
     vector<double> shortestDists;
@@ -87,15 +91,9 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     // lookup table for distances between swarm agents and other swarm agents
     double preyDists[swarmSize][swarmSize];
     
-    // counter of how many swarm agents are still alive
-    int numAlive = swarmSize;
-    
-    // number of attacks the predator has made
-    int numAttacks = 0;
-    
     // predator X, Y, and angle
-    double predX = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
-    double predY = (double)(randDouble * gridY) - gridY / 2.0; //* 2.0) - gridY;
+    double predX = (double)(randDouble * gridX * 2.0) - gridX;
+    double predY = (double)(randDouble * gridY * 2.0) - gridY;
     double predA = (int)(randDouble * 360.0);
     
     int delay = 0;
@@ -119,8 +117,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             goodPos = true;
             
-            preyX[i] = (double)(randDouble * gridX) - gridX / 2.0; //* 2.0) - gridX;
-            preyY[i] = (double)(randDouble * gridY) - gridY / 2.0; //* 2.0) - gridY;
+            preyX[i] = 0.6 * ((double)(randDouble * gridX * 2.0) - gridX);
+            preyY[i] = 0.6 * ((double)(randDouble * gridY * 2.0) - gridY);
             
             for (int j = 0; j < i; ++j)
             {
@@ -154,13 +152,13 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             reportString.append(text);
             
             // compute center of swarm
-            double cX = 0.0, cY = 0.0;
+            /*double cX = 0.0, cY = 0.0;
             calcSwarmCenter(preyX,preyY, preyDead, cX, cY);
             
             // report X, Y of center of swarm
             char text2[1000];
             sprintf(text2,"%f,%f,%f,%d,%d,%d=", cX, cY, 0.0, 124, 252, 0);
-            reportString.append(text2);
+            reportString.append(text2);*/
             
             // report X, Y, angle of all prey
             for(int i = 0; i <swarmSize; ++i)
@@ -391,18 +389,17 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                         
                         for (int j = 0; j < swarmSize; ++j)
                         {
-                            // other prey must be close to victim prey
-                            if (!preyDead[j] && preyDists[i][j] < safetyDist)
+                            // other prey must be close to target prey and within predator's retina
+                            if (preyDists[i][j] < safetyDist && predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
                             {
-                                // other prey must be within predator's retina
-                                if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
-                                {
-                                    ++nearbyCount;
-                                }
+                                ++nearbyCount;
                             }
                         }
                         
-                        if ( randDouble < (confusionMultiplier / (double)nearbyCount) )
+                        // minimum kill chance is 20%
+                        double killChance = max( (confusionMultiplier / (double)nearbyCount), 0.2);
+                        
+                        if (randDouble < killChance)
                         {
                             preyDead[i] = killed = true;
                             --numAlive;
@@ -618,7 +615,8 @@ double tGame::calcAngle(double fromX, double fromY, double fromAngle, double toX
     int firstTerm = (int)((Ux * Vy) - (Uy * Vx));
     int secondTerm = (int)((Ux * Vx) + (Uy * Vy));
     
-    return atan2Lookup[firstTerm + 200][secondTerm + 200];
+    return atan2(firstTerm, secondTerm) * 180.0 / cPI;
+    //return atan2Lookup[firstTerm + 400][secondTerm + 400];
 }
 
 // calculates the center of the swarm and stores it in (cX, cY)
