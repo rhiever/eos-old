@@ -277,6 +277,30 @@ int main(int argc, char *argv[])
             
             confusionMultiplier = atoi(argv[i]);
         }
+        
+        // -es [float]: set confusion effect equation response gradient (default: 0.05)
+        else if (strcmp(argv[i], "-es") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            Es = atof(argv[i]);
+        }
+        
+        // -emax [float]: set confusion effect equation maximum value (default: 0.9)
+        else if (strcmp(argv[i], "-emax") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            Emax = atof(argv[i]);
+        }
+        
+        // -emin [float]: set confusion effect equation minimum value (default: 0.2)
+        else if (strcmp(argv[i], "-emin") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            Emin = atof(argv[i]);
+        }
     }
     
     if (display_only || display_directory || make_interval_video || make_LOD_video)
