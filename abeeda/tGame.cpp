@@ -65,7 +65,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay, double confusionMultiplier)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay, double confusionMultiplier, double Es, double Emax, double Emin)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -396,8 +396,10 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
                             }
                         }
                         
-                        // minimum kill chance is 20%
-                        double killChance = max( (confusionMultiplier / (double)nearbyCount), 0.2);
+                        // Jeschke equation: e^(-E_s * x) * (E_max - E_min) + E_min
+                        double killChance = exp(-1 * Es * nearbyCount) * (Emax - Emin) + Emin;
+                        
+                        //double killChance = max( (confusionMultiplier / (double)nearbyCount), 0.2);
                         
                         if (randDouble < killChance)
                         {

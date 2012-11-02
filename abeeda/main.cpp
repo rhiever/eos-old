@@ -83,6 +83,9 @@ double  safetyDist                  = 30.0 * 30.0;
 double  predatorVisionAngle         = 180.0 / 2.0;
 int     killDelay                   = 10;
 double  confusionMultiplier         = 1.0;
+double  Es                          = 0.05;
+double  Emax                        = 0.9;
+double  Emin                        = 0.2;
 
 int main(int argc, char *argv[])
 {
@@ -448,7 +451,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier, Es, Emax, Emin);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -490,7 +493,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier, Es, Emax, Emin);
                 
                 if (finalGeneration)
                 {
@@ -607,7 +610,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier, Es, Emax, Emin);
             
             // make video
             if (make_LOD_video)
@@ -636,7 +639,7 @@ string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
     
     for (int rep = 0; rep < 100; ++rep)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, confusionMultiplier, Es, Emax, Emin);
         
         if (swarmAgent->fitness > bestFitness)
         {
