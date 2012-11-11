@@ -117,8 +117,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
         {
             goodPos = true;
             
-            preyX[i] = 0.6 * ((double)(randDouble * gridX * 2.0) - gridX);
-            preyY[i] = 0.6 * ((double)(randDouble * gridY * 2.0) - gridY);
+            preyX[i] = 0.5 * ((double)(randDouble * gridX * 2.0) - gridX);
+            preyY[i] = 0.5 * ((double)(randDouble * gridY * 2.0) - gridY);
             
             for (int j = 0; j < i; ++j)
             {
