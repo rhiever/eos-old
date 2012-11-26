@@ -81,6 +81,7 @@ bool    make_dot_pred               = false;
 bool    make_dot_swarm              = false;
 double  safetyDist                  = 30.0 * 30.0;
 double  predatorVisionAngle         = 180.0 / 2.0;
+double  predatorVisionRange         = 200.0 * 200.0;
 int     killDelay                   = 10;
 double  Es                          = 0.05;
 double  Emax                        = 0.9;
@@ -271,6 +272,29 @@ int main(int argc, char *argv[])
             
             // halve angle since it's split evenly in front of the predator (required for simulation)
             predatorVisionAngle = atof(argv[i]) / 2.0;
+            
+            if (predatorVisionAngle < 0.5 || predatorVisionAngle > 180)
+            {
+                cerr << "predator vision angle must be between 1 and 360." << endl;
+                exit(0);
+            }
+        }
+        
+        // -pvr [int]: set predator vision range (default: 200)
+        else if (strcmp(argv[i], "-pvr") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            predatorVisionRange = atof(argv[i]);
+            
+            // simulation works in distance squared
+            predatorVisionRange *= predatorVisionRange;
+            
+            if (predatorVisionRange < 1)
+            {
+                cerr << "predator vision range must be greater than 0." << endl;
+                exit(0);
+            }
         }
         
         // -kd [int]: set predator kill attempt delay (default: 10)
@@ -482,7 +506,7 @@ int main(int argc, char *argv[])
         
 		for(int i = 0; i < populationSize; ++i)
         {
-            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionAngle, killDelay, Es, Emax, Emin);
+            game->executeGame(swarmAgents[i], predatorAgents[i], NULL, false, safetyDist, predatorVisionRange, predatorVisionAngle, killDelay, Es, Emax, Emin);
             
             // store the swarm agent's corresponding predator agent
             swarmAgents[i]->predator = new tAgent;
@@ -524,7 +548,7 @@ int main(int argc, char *argv[])
             
             if (update % make_video_frequency == 0 || finalGeneration)
             {
-                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, Es, Emax, Emin);
+                string bestString = game->executeGame(bestSwarmAgent, bestPredatorAgent, NULL, true, safetyDist, predatorVisionRange, predatorVisionAngle, killDelay, Es, Emax, Emin);
                 
                 if (finalGeneration)
                 {
@@ -641,7 +665,7 @@ int main(int argc, char *argv[])
         else
         {
             // collect quantitative stats
-            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionAngle, killDelay, Es, Emax, Emin);
+            game->executeGame(*it, (*it)->predator, LOD, false, safetyDist, predatorVisionRange, predatorVisionAngle, killDelay, Es, Emax, Emin);
             
             // make video
             if (make_LOD_video)
@@ -670,7 +694,7 @@ string findBestRun(tAgent *swarmAgent, tAgent *predatorAgent)
     
     for (int rep = 0; rep < 100; ++rep)
     {
-        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionAngle, killDelay, Es, Emax, Emin);
+        reportString = game->executeGame(swarmAgent, predatorAgent, NULL, true, safetyDist, predatorVisionRange, predatorVisionAngle, killDelay, Es, Emax, Emin);
         
         if (swarmAgent->fitness > bestFitness)
         {

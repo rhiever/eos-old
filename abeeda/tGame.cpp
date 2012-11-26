@@ -30,7 +30,6 @@
 // simulation-specific constants
 #define preyVisionRange 100.0 * 100.0
 #define preyVisionAngle 180.0 / 2.0
-#define predatorVisionRange 200.0 * 200.0
 #define preySensors 12
 #define predatorSensors 12
 #define totalStepsInSimulation 2000
@@ -65,7 +64,7 @@ tGame::tGame()
 tGame::~tGame() { }
 
 // runs the simulation for the given agent(s)
-string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionAngle, int killDelay, double Es, double Emax, double Emin)
+string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionRange, double predatorVisionAngle, int killDelay, double Es, double Emax, double Emin)
 {
     // LOD data variables
     double swarmFitness = 0.0;
@@ -378,19 +377,21 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
             if (delay < 1)
             {
                 bool killed = false;
-                ++numAttacks;
                 
                 for(int i = 0; !killed && i < swarmSize; ++i)
                 {
                     // victim prey must be within kill range
                     if (!preyDead[i] && (predDists[i] < killDist) && fabs(calcAngle(predX, predY, predA, preyX[i], preyY[i])) < predatorVisionAngle)
                     {
+                        ++numAttacks;
+                        
                         int nearbyCount = 0;
                         
                         for (int j = 0; j < swarmSize; ++j)
                         {
                             // other prey must be close to target prey and within predator's retina
-                            if (preyDists[i][j] < safetyDist && predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
+                            //if (preyDists[i][j] < safetyDist && predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
+                            if (predDists[j] < predatorVisionRange && fabs(calcAngle(predX, predY, predA, preyX[j], preyY[j])) < predatorVisionAngle)
                             {
                                 ++nearbyCount;
                             }
