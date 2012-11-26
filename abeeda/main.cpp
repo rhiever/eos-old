@@ -96,8 +96,6 @@ int main(int argc, char *argv[])
     int displayDirectoryArgvIndex = 0;
     
     // initial object setup
-    swarmAgents.resize(populationSize);
-    predatorAgents.resize(populationSize);
 	game = new tGame;
 	swarmAgent = new tAgent;
     predatorAgent = new tAgent;
@@ -165,6 +163,20 @@ int main(int argc, char *argv[])
             if (totalGenerations < 3)
             {
                 cerr << "minimum number of generations permitted is 3." << endl;
+                exit(0);
+            }
+        }
+        
+        // -p [int]: set GA population size
+        else if (strcmp(argv[i], "-p") == 0 && (i + 1) < argc)
+        {
+            ++i;
+            
+            populationSize = atoi(argv[i]);
+            
+            if (populationSize < 1)
+            {
+                cerr << "minimum GA population size permitted is 1." << endl;
                 exit(0);
             }
         }
@@ -293,6 +305,10 @@ int main(int argc, char *argv[])
             Emin = atof(argv[i]);
         }
     }
+    
+    // initial population setup
+    swarmAgents.resize(populationSize);
+    predatorAgents.resize(populationSize);
     
     if (display_only || display_directory || make_interval_video || make_LOD_video)
     {
