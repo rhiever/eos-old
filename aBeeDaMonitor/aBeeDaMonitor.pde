@@ -90,7 +90,7 @@ void drawArea(){
               stroke(color(R[j],G[j],B[j]));
               //else
               //  stroke(color(R,G,B));
-              line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*3)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*3)));
+              //line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*3)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*3)));
               
               strokeWeight(2.0);
               line((int)(x[j]+(width/2)),(int)(y[j]+(height/2)),(int)(x[j]+(width/2)+(cos(a[j]*(PI/180.0))*20)),(int)(y[j]+(height/2)+(sin(a[j]*(PI/180.0))*20)));
