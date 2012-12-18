@@ -1,4 +1,4 @@
-This is aBeeDa Swarm Evolution project.
+This is Evolution of Swarming project.
 
 Copyright 2012 Randal S. Olson, Arend Hintze.
 
