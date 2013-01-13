@@ -95,6 +95,7 @@ void tAgent::loadAgent(char* filename)
 		fscanf(f,"%i	",&i);
 		genome.push_back((unsigned char)(i&255));
 	}
+	fclose(f);
 	//setupPhenotype();
 }
 

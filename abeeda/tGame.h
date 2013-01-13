@@ -31,37 +31,19 @@
 
 using namespace std;
 
-class tOctuplet{
+class tGame
+{
 public:
-    vector<int> data;
-    void loadOctuplet(FILE *f);
-};
-
-class tExperiment{
-public:
-    vector<tOctuplet> dropSequences,sizeSequences,selfSequences;
-    vector<vector<vector<bool> > > shouldHit;
-    void loadExperiment(char *filename);
-    void showExperimentProtokoll(void);
-    int drops(void);
-    int sizes(void);
-    int selves(void);
-};
-
-class tGame{
-public:
-    tExperiment theExperiment;
-    void loadExperiment(char *filename);
-    string executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionRange, double predatorVisionAngle, int killDelay, double Es, double Emax, double Emin);
+    string executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_file, bool report, double safetyDist, double predatorVisionRange, double predatorVisionAngle, int killDelay, double confusionMultiplier);
     tGame();
     ~tGame();
-    double calcDistanceSquared(double fromX, double fromY, double toX, double toY);
-    double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
+    inline double calcDistanceSquared(double fromX, double fromY, double toX, double toY);
+    inline double calcAngle(double fromX, double fromY, double fromAngle, double toX, double toY);
     void calcSwarmCenter(double preyX[], double preyY[], bool preyDead[], double& preyCenterX, double& preyCenterY);
     void recalcPredDistTable(double preyX[], double preyY[], bool preyDead[],
                              double predX, double predY,
                              double predDists[swarmSize]);
-    void recalcPredAndPreyDistTable(double preyX[], double preyY[], bool preyDead[],
+    inline void recalcPredAndPreyDistTable(double preyX[], double preyY[], bool preyDead[],
                                     double predX, double predY,
                                     double predDists[swarmSize], double preyDists[swarmSize][swarmSize]);
     void applyBoundary(double& positionVal);
