@@ -1,0 +1,5 @@
+generation,prey_fitness,predator_fitness,num_alive_end,avg_bb_size,var_bb_size,avg_shortest_dist,swarm_density_count,prey_neurons_connected_prey_retina,prey_neurons_connected_predator_retina,predator_neurons_connected_prey_retina,mutual_info
+1,59149.000000,851.000000,29,362.064960,3401.318655,4.466275,28.575000,1,1,1,0.003595
+1,59961.000000,39.000000,29,365.071886,4001.687571,4.897833,28.981000,1,1,1,0.008361
+2,59500.000000,500.000000,29,380.567659,3583.808057,4.831881,28.750500,1,1,1,0.004935
+3,58645.000000,1355.000000,28,370.439810,3692.758406,4.770143,28.323500,1,1,1,0.002236

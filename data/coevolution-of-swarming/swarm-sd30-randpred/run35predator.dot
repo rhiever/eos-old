@@ -1,0 +1,62 @@
+digraph brain {
+	ranksep=2.0;
+	2 [shape=invtriangle,style=filled,color=cornflowerblue];
+	5 [shape=invtriangle,style=filled,color=cornflowerblue];
+	6 [shape=invtriangle,style=filled,color=cornflowerblue];
+	8 [shape=invtriangle,style=filled,color=cornflowerblue];
+	9 [shape=invtriangle,style=filled,color=cornflowerblue];
+	10 [shape=invtriangle,style=filled,color=cornflowerblue];
+	13 [shape=circle,color=black];
+	14 [shape=circle,color=black];
+	15 [shape=circle,color=black];
+	17 [shape=circle,color=black];
+	18 [shape=circle,color=black];
+	22 [shape=circle,color=black];
+	23 [shape=circle,color=black];
+	27 [shape=circle,color=black];
+	28 [shape=circle,color=black];
+	29 [shape=circle,color=black];
+	30 [shape=circle,style=filled,color=green];
+	31 [shape=circle,style=filled,color=green];
+	13	->	27;
+	13	->	10;
+	13	->	28;
+	13	->	18;
+	22	->	27;
+	22	->	10;
+	22	->	28;
+	22	->	18;
+	9	->	27;
+	9	->	10;
+	9	->	28;
+	9	->	18;
+	8	->	27;
+	8	->	10;
+	8	->	28;
+	8	->	18;
+	22	->	30;
+	23	->	30;
+	6	->	30;
+	6	->	15;
+	6	->	31;
+	6	->	27;
+	15	->	29;
+	15	->	5;
+	15	->	2;
+	15	->	6;
+	17	->	29;
+	17	->	5;
+	17	->	2;
+	17	->	6;
+	17	->	29;
+	17	->	5;
+	17	->	2;
+	17	->	6;
+	14	->	29;
+	14	->	5;
+	14	->	2;
+	14	->	6;
+	{ rank=same; 2; 5; 6; 8; 9; 10; }
+	{ rank=same; 13; 14; 15; 17; 18; 22; 23; 27; 28; 29; }
+	{ rank=same; 30; 31; }
+}

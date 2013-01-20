@@ -1,0 +1,32 @@
+digraph brain {
+	ranksep=2.0;
+	4 [shape=invtriangle,style=filled,color=cornflowerblue];
+	9 [shape=invtriangle,style=filled,color=cornflowerblue];
+	13 [shape=invtriangle,style=filled,color=red];
+	16 [shape=invtriangle,style=filled,color=red];
+	20 [shape=invtriangle,style=filled,color=red];
+	21 [shape=invtriangle,style=filled,color=red];
+	30 [shape=circle,style=filled,color=green];
+	31 [shape=circle,style=filled,color=green];
+	16	->	21;
+	16	->	4;
+	13	->	21;
+	13	->	4;
+	9	->	21;
+	9	->	4;
+	16	->	30;
+	16	->	4;
+	16	->	20;
+	16	->	31;
+	13	->	30;
+	13	->	4;
+	13	->	20;
+	13	->	31;
+	30	->	30;
+	30	->	4;
+	30	->	20;
+	30	->	31;
+	{ rank=same; 4; 9; 13; 16; 20; 21; }
+	{ rank=same; }
+	{ rank=same; 30; 31; }
+}
