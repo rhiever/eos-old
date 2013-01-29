@@ -1,4 +1,4 @@
-All of the data and the IPython Notebook we used to generate figures for for our paper, "Predator confusion is sufficient to evolve swarming behavior" are contained in the included eso-predator-confusion directory.
+All of the data and the IPython Notebook we used to generate figures for for our paper, "Predator confusion is sufficient to evolve swarming behavior" are contained in the included `coevolution-of-swarming` directory.
 
 ------------------------------------------------------------------------------------------
 
