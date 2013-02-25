@@ -91,8 +91,8 @@ string tGame::executeGame(tAgent* swarmAgent, tAgent* predatorAgent, FILE *data_
     double preyDists[swarmSize][swarmSize];
     
     // predator X, Y, and angle
-    double predX = (double)(randDouble * gridX * 2.0) - gridX;
-    double predY = (double)(randDouble * gridY * 2.0) - gridY;
+    double predX = 0.0; //(double)(randDouble * gridX * 2.0) - gridX;
+    double predY = 0.0; //(double)(randDouble * gridY * 2.0) - gridY;
     double predA = (int)(randDouble * 360.0);
     
     int delay = 0;
